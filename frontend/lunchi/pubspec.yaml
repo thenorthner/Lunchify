@@ -1,0 +1,64 @@
+name: lunchi
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  intl: ^0.20.2
+  qr_flutter: ^4.1.0
+  http: ^1.6.0
+  url_launcher: ^6.3.0
+  shared_preferences: ^2.2.2
+
+  mobile_scanner: ^4.0.1
+  pretty_qr_code: ^3.0.0
+
+  cupertino_icons: ^1.0.8
+  uuid: ^4.2.2
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0 # ✅ Match Flutter 3.22+ lints
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/8BAE09D1-7DE6-42A7-BD6E-D33305007554.jpeg
+    - assets/images/59E2A272-EC93-46B6-9E2A-23ED771642FD.jpeg
+    - assets/images/B05B1052-49AE-412B-822C-32F833771C6D.jpeg
+    - assets/images/58A3E0E5-B525-4978-9A9E-C2CF92D69F49.jpeg
+    - assets/images/31DB40D3-CC18-4D9E-91A1-66E85584D37D.jpeg
+    - assets/images/95C08E87-A882-4416-84DE-23B0B662DB11.jpeg
+    - assets/images/1CB1CEE7-C785-4583-9A80-318B1A58DE47.jpeg
+    - assets/images/ED5F7C42-0E50-4FEC-A19B-C4602C51FE57.jpeg
+    - assets/images/F5AA3692-4C45-4377-A990-9A981EED30BE.jpeg
+    - assets/images/D2EDA299-4234-4E5D-8207-600A8E7685DA.png
+    # Demo branded assets
+    - assets/images/lunchify_logo.png
+    - assets/images/sjvn_scene.png
+    - assets/images/sjvn_bg.png
+    - assets/images/food_tray_bg.png
+    - assets/images/logo.png
+    - assets/images/w_logo.png
+
+  fonts:
+    - family: EBGaramond
+      fonts:
+        - asset: assets/fonts/EBGaramond/EBGaramond-VariableFont_wght.ttf
+        - asset: assets/fonts/EBGaramond/EBGaramond-Italic-VariableFont_wght.ttf
+          style: italic
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-ExtraBold.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Playfair_Display/Roboto-VariableFont_wdth,wght.ttf

@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "110044757938",
+    "project_id": "lunch-app-e2b56",
+    "storage_bucket": "lunch-app-e2b56.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:110044757938:android:acd4632cd68987927baeab",
+        "android_client_info": {
+          "package_name": "com.example.lunchi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "110044757938-acp3lsfgtot4fdv25mrop18i20p47oq3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lunchi",
+            "certificate_hash": "731a37f1a052daf964fe1a81b0993e43fd00943a"
+          }
+        },
+        {
+          "client_id": "110044757938-hj45n284o99uu550pei8l8ph3aj5p4jr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBN-8iTwB_c5AGQFqdI6JoBFHPRY0Q-wa0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "110044757938-hj45n284o99uu550pei8l8ph3aj5p4jr.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "110044757938-9o6tabg4tc6kvn9setc37jb6j6s1q6rh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.lunchi"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

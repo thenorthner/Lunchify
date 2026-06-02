@@ -1,0 +1,60 @@
+const express = require('express');
+const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
+const { mysqlPool } = require('../db');
+
+/**
+ * POST /api/qr/generate-qr
+ * Body:
+ * {
+ *   employeeId: "EMP001",
+ *   type: "food" | "fruit",
+ *   date: "YYYY-MM-DD"
+ * }
+ */
+router.post('/generate-qr', async (req, res) => {
+  const { employeeId, type, date } = req.body;
+
+  // 🔎 Validation
+  if (!employeeId || !type || !date) {
+    return res.status(400).json({
+      success: false,
+      message: 'employeeId, type and date are required'
+    });
+  }
+
+  // 🔁 Flutter → DB enum mapping
+  const dbType = type === 'food' ? 'normal' : 'fruit';
+
+  try {
+    // 🔑 Generate QR ID & token
+    const qrId = uuidv4();
+    const token = `QR_${qrId}|${employeeId}|${dbType}|${date}`;
+
+    // 💾 Insert into qr_codes table
+    await mysqlPool.query(
+      `
+      INSERT INTO qr_codes
+      (id, employee_id, type, qr_date, used)
+      VALUES (?, ?, ?, ?, 0)
+      `,
+      [qrId, employeeId, dbType, date]
+    );
+
+    // ✅ Success
+    res.status(200).json({
+      success: true,
+      qrData: token,
+      message: 'QR generated successfully'
+    });
+
+  } catch (error) {
+    console.error('❌ QR Generate Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error while generating QR'
+    });
+  }
+});
+
+module.exports = router;

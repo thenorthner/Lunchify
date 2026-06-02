@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# IDE files
+.idea/
+
+# Node
+node_modules/
+.env
+
+# Build folders
+dist/
+build/
+

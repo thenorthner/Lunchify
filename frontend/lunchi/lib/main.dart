@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'app_theme.dart';
+import 'intro_page.dart';
+import 'login_page.dart';
+import 'home_page.dart';
+import 'admin_page.dart';
+import 'auth_service.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AuthService.init();
+  runApp(const LunchifyApp());
+}
+
+class LunchifyApp extends StatelessWidget {
+  const LunchifyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Lunchify SJVN',
+      debugShowCheckedModeBanner: false,
+
+      theme: ThemeData(
+        fontFamily: 'Libre Baskerville',
+        scaffoldBackgroundColor: kBgColor,
+        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: kNavy,
+          brightness: Brightness.light,
+        ),
+        useMaterial3: true,
+        primaryColor: kNavy,
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: kSubtle,
+          contentPadding: const EdgeInsets.symmetric(vertical: 15, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: kBorder, width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: kBorder, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: kBlue, width: 1.5),
+          ),
+        ),
+      ),
+
+      darkTheme: ThemeData.light(),
+      themeMode: ThemeMode.light,
+
+      home: const IntroPage(),
+      routes: {
+        '/login': (context) => const LoginPage(),
+        '/auth': (context) => const AuthWrapper(),
+      },
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (AuthService.token == null || AuthService.user == null) {
+      return const LoginPage();
+    }
+
+    return AuthService.isAdmin
+        ? AdminPage(
+      adminName: AuthService.name,
+      jwtToken: AuthService.token!,
+    )
+        : LunchifyHomePage(
+      employeeName: AuthService.name,
+      employeeId: AuthService.employeeId,
+    );
+  }
+}

@@ -1,0 +1,38 @@
+const express = require('express');
+const cors = require('cors');
+const dotenv = require('dotenv');
+const bodyParser = require('body-parser');
+const morgan = require('morgan');
+
+// Route imports
+const qrRoutes = require('./routes/qr.routes');
+const menuRoutes = require('./routes/menu.routes');
+const fruitMenuRoutes = require('./routes/fruitMenu.routes');
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+// Middlewares
+app.use(cors());
+app.use(morgan('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Routes
+app.use('/api', qrRoutes);
+app.use('/api', menuRoutes);
+app.use('/api', fruitMenuRoutes);
+
+// Catch-all for undefined routes
+app.use((req, res) => {
+  res.status(404).json({ message: 'Not Found' });
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`✅ Server running at http://localhost:${PORT}`);
+});
+

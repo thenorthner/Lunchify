@@ -1,0 +1,44 @@
+.menu-container {
+  margin-top: 20px;
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+}
+
+.menu-form label {
+  display: block;
+  margin-top: 12px;
+  font-weight: bold;
+}
+
+.menu-form input,
+.menu-form select,
+.menu-form textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.menu-form button {
+  margin-top: 15px;
+  padding: 10px;
+  width: 100%;
+  background: #0b5ed7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.menu-form button:hover {
+  background: #094db1;
+}
+
+.status {
+  margin-top: 10px;
+  font-weight: bold;
+}

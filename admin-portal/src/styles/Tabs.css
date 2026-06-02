@@ -1,0 +1,140 @@
+.tabs {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+  margin-top: 25px;
+}
+
+/* TAB CARD */
+.tab-card {
+  flex: 1;                 /* makes tabs stretch full width */
+  min-height: 120px;       /* keeps original height feel */
+
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: 2px solid transparent;
+}
+
+/* HOVER EFFECT */
+.tab-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+}
+
+/* ACTIVE TAB */
+.tab-card.active {
+  border-color: #0b5ed7;
+  background: linear-gradient(135deg, #e8f1ff, #ffffff);
+}
+
+/* ICON */
+.tab-icon {
+  font-size: 34px;
+  margin-bottom: 8px;
+}
+
+/* LABEL */
+.tab-card span {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* TAB CONTENT */
+.tab-content {
+  margin-top: 30px;
+  background: #f9fafc;
+  padding: 25px;
+  border-radius: 14px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* SUBTLE ANIMATION */
+.fade-in {
+  animation: fade 0.3s ease-in;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* CENTER SET MENU SECTION */
+.tab-content {
+  display: flex;
+  justify-content: center;
+}
+/* SET MENU CARD STYLING */
+.tab-content > div {
+  width: 100%;
+  max-width: 720px;   /* perfect admin width */
+}
+/* BILLING */
+.billing-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+}
+
+.billing-card h2 {
+  margin-bottom: 20px;
+}
+
+.billing-dates {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.billing-dates label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.billing-dates input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #dcdcdc;
+}
+
+.billing-summary {
+  display: flex;
+  gap: 20px;
+}
+
+.summary-box {
+  flex: 1;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 14px;
+  text-align: center;
+}
+
+.summary-box span {
+  display: block;
+  font-size: 14px;
+  color: #666;
+}
+
+.summary-box strong {
+  font-size: 24px;
+  margin-top: 6px;
+  display: block;
+}
