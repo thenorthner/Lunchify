@@ -210,7 +210,7 @@ export default function OrdersManager() {
                   return (
                     <tr key={order.id}>
                       <td>#{order.id}</td>
-                      <td><strong>{order.employee_id}</strong></td>
+                      <td>{order.employee_id}</td>
                       <td>{order.employee_name || order.name}</td>
                       <td className="snack-items-col">{parseSnackItems(order.items)}</td>
                       <td><span style={{ textTransform: "capitalize" }}>{order.session || "Morning"}</span></td>
@@ -263,7 +263,7 @@ export default function OrdersManager() {
                   return (
                     <tr key={order.id}>
                       <td>#{order.id}</td>
-                      <td><strong>{order.employee_id}</strong></td>
+                      <td>{order.employee_id}</td>
                       <td>{order.employee_name || order.name}</td>
                       <td>{new Date(order.date).toLocaleDateString()}</td>
                       <td>

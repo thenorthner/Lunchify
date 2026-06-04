@@ -28,9 +28,9 @@ export default function ReportsPanel() {
         setData(historyData);
 
         // Calculate simple summaries
-        const total = historyData.reduce((sum, item) => sum + item.count, 0);
+        const total = historyData.reduce((sum, item) => sum + parseInt(item.count || 0, 10), 0);
         const max = historyData.length > 0 
-          ? Math.max(...historyData.map(item => item.count)) 
+          ? Math.max(...historyData.map(item => parseInt(item.count || 0, 10))) 
           : 0;
 
         setSummaryStats({
@@ -123,16 +123,16 @@ export default function ReportsPanel() {
             <thead>
               <tr>
                 <th>{getRangeLabel()}</th>
-                <th>Delivered Quantity Count</th>
+                <th style={{ textAlign: 'center' }}>Delivered Quantity Count</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {data.map((item, idx) => (
                 <tr key={idx}>
-                  <td><strong>{item.label}</strong></td>
-                  <td>
-                    <span className="stats-qty-badge">{item.count} coupons</span>
+                  <td>{item.label}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="stats-qty-badge">{item.count}</span>
                   </td>
                   <td>
                     <span className="stats-success-badge">✅ Verified Scanned</span>

@@ -12,6 +12,7 @@ import 'snack_order_status_page.dart';
 import 'snack_order_history_page.dart';
 import 'auth_service.dart';
 import 'feedback_page.dart';
+import 'lunch_rating_selection_screen.dart';
 import 'app_theme.dart'; // <-- added import
 
 class LunchifyHomePage extends StatefulWidget {
@@ -125,6 +126,12 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
           title: "Order History",
           subtitle: "View your past snack orders",
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackOrderHistoryPage(employeeId: widget.employeeId))),
+        ),
+        _HomeMenuItem(
+          icon: Icons.star_rate_rounded,
+          title: "Daily Menu Ratings",
+          subtitle: "Rate today's lunch items",
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LunchRatingSelectionScreen())),
         ),
         _HomeMenuItem(
           icon: Icons.headset_mic_rounded,

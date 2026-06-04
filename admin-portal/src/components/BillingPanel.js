@@ -112,7 +112,7 @@ export default function BillingPanel() {
                   <th>Bill ID</th>
                   <th>Canteen Name</th>
                   <th>Month</th>
-                  <th>Coupons Scanned</th>
+                  <th style={{ textAlign: 'center' }}>Coupons Scanned</th>
                   <th>Price/Coupon</th>
                   <th>Total Amount</th>
                   <th>Status</th>
@@ -124,11 +124,11 @@ export default function BillingPanel() {
                 {bills.map((bill) => (
                   <tr key={bill.id}>
                     <td>#{bill.id}</td>
-                    <td><strong>{bill.canteen_name}</strong></td>
+                    <td>{bill.canteen_name}</td>
                     <td><span className="month-badge">{bill.bill_month}</span></td>
-                    <td><span className="coupons-count">{bill.total_coupons_used}</span></td>
+                    <td style={{ textAlign: 'center' }}><span className="coupons-count">{bill.total_coupons_used}</span></td>
                     <td>₹{bill.coupon_price}</td>
-                    <td><strong>₹ {bill.total_amount}</strong></td>
+                    <td>₹ {bill.total_amount}</td>
                     <td>
                       <span className={`status-badge bill-${bill.status}`}>
                         {bill.status.toUpperCase()}

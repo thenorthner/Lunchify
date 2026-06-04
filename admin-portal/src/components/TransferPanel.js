@@ -168,7 +168,7 @@ export default function TransferPanel() {
                 {history.map((log) => (
                   <tr key={log.id}>
                     <td>#{log.id}</td>
-                    <td><strong>{log.employee_id}</strong></td>
+                    <td>{log.employee_id}</td>
                     <td>{log.employee_name}</td>
                     <td><span className="proj-badge proj-from">{log.from_project}</span></td>
                     <td><span className="proj-badge proj-to">{log.to_project}</span></td>

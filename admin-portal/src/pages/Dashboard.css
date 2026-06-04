@@ -83,7 +83,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 25px;
-  background: linear-gradient(135deg, #1e293b, #0f172a);
+  background: #0d47a1; /* Vibrant blue */
   padding: 24px 32px;
   border-radius: 16px;
   color: #ffffff;
@@ -126,7 +126,7 @@
 .role-subtext {
   font-size: 10px;
   font-weight: 700;
-  color: #38bdf8;
+  color: #e0e7ff;
   letter-spacing: 0.5px;
   text-transform: uppercase;
 }

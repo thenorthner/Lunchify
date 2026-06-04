@@ -5,13 +5,6 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
   if (role === "canteen_admin") {
     return (
       <div className="tabs">
-        <div
-          className={`tab-card ${activeTab === "orders" ? "active" : ""}`}
-          onClick={() => setActiveTab("orders")}
-        >
-          <div className="tab-icon">📦</div>
-          <span>Orders Manager</span>
-        </div>
 
         <div
           className={`tab-card ${activeTab === "reports" ? "active" : ""}`}
@@ -27,6 +20,14 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
         >
           <div className="tab-icon">💳</div>
           <span>Generate Bill</span>
+        </div>
+
+        <div
+          className={`tab-card ${activeTab === "item_feedbacks" ? "active" : ""}`}
+          onClick={() => setActiveTab("item_feedbacks")}
+        >
+          <div className="tab-icon">⭐</div>
+          <span>Menu Ratings</span>
         </div>
       </div>
     );
@@ -71,6 +72,14 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
         >
           <div className="tab-icon">💬</div>
           <span>System Feedbacks</span>
+        </div>
+
+        <div
+          className={`tab-card ${activeTab === "item_feedbacks" ? "active" : ""}`}
+          onClick={() => setActiveTab("item_feedbacks")}
+        >
+          <div className="tab-icon">⭐</div>
+          <span>Menu Ratings</span>
         </div>
 
         <div

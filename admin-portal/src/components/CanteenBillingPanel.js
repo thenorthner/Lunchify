@@ -189,10 +189,10 @@ export default function CanteenBillingPanel() {
                   {pastBills.map((b) => (
                     <React.Fragment key={b.id}>
                       <tr style={{ borderBottom: b.comments ? 'none' : '1px solid #eee' }}>
-                        <td style={{ padding: '10px 4px' }}><strong>{b.bill_month}</strong></td>
+                        <td style={{ padding: '10px 4px' }}>{b.bill_month}</td>
                         <td style={{ padding: '10px 4px' }}>{b.total_coupons_used}</td>
                         <td style={{ padding: '10px 4px' }}>₹{b.coupon_price}</td>
-                        <td style={{ padding: '10px 4px' }}><strong>₹{b.total_amount}</strong></td>
+                        <td style={{ padding: '10px 4px' }}>₹{b.total_amount}</td>
                         <td style={{ padding: '10px 4px' }}>
                           <span className={`status-badge bill-${b.status}`} style={{ fontSize: '10px', padding: '2px 6px' }}>
                             {b.status.toUpperCase()}

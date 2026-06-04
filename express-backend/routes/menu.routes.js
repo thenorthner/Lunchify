@@ -215,9 +215,15 @@ router.get("/snacks", async (req, res) => {
         { name: "Biscuits", emoji: "🍪", cost: 10 }
       ];
 
-      const detailedItems = itemNames.map(name => {
-        const match = SNACKS_CATALOG.find(s => s.name === name);
-        return match || { name, emoji: "🍴", cost: 15 };
+      const detailedItems = itemNames.map(item => {
+        let snackName = item;
+        let snackPrice = 15;
+        if (typeof item === 'object' && item !== null) {
+          snackName = item.name || JSON.stringify(item);
+          snackPrice = item.price ? Number(item.price) : (item.cost ? Number(item.cost) : 15);
+        }
+        const match = SNACKS_CATALOG.find(s => s.name === snackName);
+        return match || { name: snackName, emoji: "🍴", cost: snackPrice };
       });
 
       return res.json(detailedItems);
@@ -263,8 +269,16 @@ router.get("/snacks-by-time", async (req, res) => {
       [date, session, canteen_id]
     );
 
+    const normalizeItems = (itemsStr) => {
+      let itemsArr = JSON.parse(itemsStr || "[]");
+      return itemsArr.map(item => {
+        if (typeof item === 'object' && item !== null) return item.name || JSON.stringify(item);
+        return item;
+      });
+    };
+
     if (rows.length && rows[0].items) {
-      return res.json({ items: JSON.parse(rows[0].items) });
+      return res.json({ items: normalizeItems(rows[0].items) });
     }
 
     const dayOfWeek = new Date(date).getDay() || 7;
@@ -274,7 +288,7 @@ router.get("/snacks-by-time", async (req, res) => {
     );
     
     if (weeklyRows.length && weeklyRows[0].items) {
-      return res.json({ items: JSON.parse(weeklyRows[0].items) });
+      return res.json({ items: normalizeItems(weeklyRows[0].items) });
     }
 
     return res.json({ items: [] });

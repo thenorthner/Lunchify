@@ -46,9 +46,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   Future<void> _fetchMenus() async {
     try {
       final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
-      final headers = {
-        'Authorization': 'Bearer ${AuthService.token}',
-      };
+      final headers = {'Authorization': 'Bearer ${AuthService.token}'};
 
       final res = await Future.wait([
         http.get(Uri.parse(AppConfig.foodMenuByDate(date)), headers: headers),
@@ -96,10 +94,16 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
     super.dispose();
   }
 
-  Map<String, dynamic> _decodeJsonOrThrow(http.Response resp, {String? endpointHint}) {
+  Map<String, dynamic> _decodeJsonOrThrow(
+    http.Response resp, {
+    String? endpointHint,
+  }) {
     final ct = (resp.headers['content-type'] ?? '').toLowerCase();
     final bodyText = resp.body;
-    final preview = bodyText.substring(0, bodyText.length > 300 ? 300 : bodyText.length);
+    final preview = bodyText.substring(
+      0,
+      bodyText.length > 300 ? 300 : bodyText.length,
+    );
 
     if (resp.statusCode < 200 || resp.statusCode >= 300) {
       throw Exception('HTTP ${resp.statusCode}: $preview');
@@ -118,22 +122,25 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       final todayDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
       final resp = await http
           .post(
-        Uri.parse(_url('/api/qr/generate-qr')),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Authorization': 'Bearer ${AuthService.token}',
-        },
-        body: jsonEncode({
-          'employeeId': widget.employeeId,
-          'type': 'food',
-          'date': todayDate,
-          if (items != null) 'items': _mapToList(items),
-        }),
-      )
+            Uri.parse(_url('/api/qr/generate-qr')),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': 'Bearer ${AuthService.token}',
+            },
+            body: jsonEncode({
+              'employeeId': widget.employeeId,
+              'type': 'food',
+              'date': todayDate,
+              if (items != null) 'items': _mapToList(items),
+            }),
+          )
           .timeout(const Duration(seconds: 10));
 
-      final body = _decodeJsonOrThrow(resp, endpointHint: '/api/qr/generate-qr');
+      final body = _decodeJsonOrThrow(
+        resp,
+        endpointHint: '/api/qr/generate-qr',
+      );
 
       if (body['success'] == true) {
         setState(() {
@@ -165,7 +172,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Confirm Order'),
-        content: const Text('Kya aap fruit lunch order place karna chahte hai ek coupon ke badle?'),
+        content: const Text('Would You like To place a fruit lunch order 😋 ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -183,8 +190,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
     if (confirm != true) return;
 
     final items = todayFruitMenu.fold<Map<String, int>>({}, (map, item) {
-       map[item] = 1;
-       return map;
+      map[item] = 1;
+      return map;
     });
     await _placeFruitLunchOrder(items);
   }
@@ -193,7 +200,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
     setState(() => isLoading = true);
     try {
       final itemsList = _mapToList(selectedItems);
-      
+
       final resp = await http.post(
         Uri.parse(_url('/api/fruit-lunch-orders/order-fruit-lunch')),
         headers: {
@@ -210,11 +217,15 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         }),
       );
 
-      final body = _decodeJsonOrThrow(resp,
-          endpointHint: '/api/fruit-lunch-orders/order-fruit-lunch');
+      final body = _decodeJsonOrThrow(
+        resp,
+        endpointHint: '/api/fruit-lunch-orders/order-fruit-lunch',
+      );
 
-      _showInfoDialog(body['success'] == true ? 'Success' : 'Failed',
-          body['message']?.toString() ?? 'Fruit Lunch Order Placed.');
+      _showInfoDialog(
+        body['success'] == true ? 'Success' : 'Failed',
+        body['message']?.toString() ?? 'Fruit Lunch Order Placed.',
+      );
     } catch (e) {
       _showInfoDialog('Error', e.toString());
     } finally {
@@ -225,19 +236,24 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   Future<void> _showFoodLunchOrderDialog() async {
     // Skip item selection and generate QR directly
     final items = todayFoodMenu.fold<Map<String, int>>({}, (map, item) {
-       map[item] = 1;
-       return map;
+      map[item] = 1;
+      return map;
     });
     await _generateOrRegenerateQr(items: items);
   }
 
   List<Map<String, dynamic>> _mapToList(Map<String, int> map) {
-    return map.entries.map((e) => {"name": e.key, "quantity": e.value}).toList();
+    return map.entries
+        .map((e) => {"name": e.key, "quantity": e.value})
+        .toList();
   }
 
   void _startStatusPolling() {
     _statusTimer?.cancel();
-    _statusTimer = Timer.periodic(const Duration(seconds: 5), (_) => _checkQrStatus());
+    _statusTimer = Timer.periodic(
+      const Duration(seconds: 5),
+      (_) => _checkQrStatus(),
+    );
   }
 
   Future<void> _checkQrStatus() async {
@@ -253,7 +269,10 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         body: jsonEncode({'qrToken': qrToken}),
       );
 
-      final body = _decodeJsonOrThrow(resp, endpointHint: '/api/lunch/food-qr/status');
+      final body = _decodeJsonOrThrow(
+        resp,
+        endpointHint: '/api/lunch/food-qr/status',
+      );
 
       if (body['scanned'] == true) {
         _statusTimer?.cancel();
@@ -261,7 +280,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
           qrToken = null;
           serverQrImage = null;
         });
-        _showInfoDialog('Scanned', 'Your QR was accepted.');
+        _showSuccessDialog();
       }
     } catch (e) {
       debugPrint('Status check failed: $e');
@@ -305,9 +324,58 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         content: Text(message),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'))
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showSuccessDialog() {
+    return showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.all(24),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.green.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 60),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Lunch Purchased Successfully! 🎉',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kNavy),
+            ),
+            const SizedBox(height: 10),
+            const Text(
+              'Enjoy your meal! Your lunch coupon has been verified and redeemed.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: kSubtext, height: 1.4),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kAccentBlue,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Great!', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -315,15 +383,20 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   String get _formattedExpiry {
     if (qrExpiresAt == null) return '';
     final d = qrExpiresAt!;
-    final hour = d.hour > 12 ? d.hour - 12 : d.hour == 0 ? 12 : d.hour;
+    final hour = d.hour > 12
+        ? d.hour - 12
+        : d.hour == 0
+        ? 12
+        : d.hour;
     final ampm = d.hour >= 12 ? 'PM' : 'AM';
-    final min  = d.minute.toString().padLeft(2, '0');
+    final min = d.minute.toString().padLeft(2, '0');
     return '${d.month}/${d.day}/${d.year} $hour:$min $ampm';
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool expired = qrExpiresAt != null && DateTime.now().isAfter(qrExpiresAt!);
+    final bool expired =
+        qrExpiresAt != null && DateTime.now().isAfter(qrExpiresAt!);
     final bool qrVisible = qrToken != null;
 
     return Scaffold(
@@ -334,13 +407,14 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
             _TopBar(),
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kPrimaryBlue))
+                  ? const Center(
+                      child: CircularProgressIndicator(color: kPrimaryBlue),
+                    )
                   : SingleChildScrollView(
                       padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-
                           // ── Fruit Lunch row card ──────────────────────────────────
                           _ActionCard(
                             icon: Icons.set_meal_rounded,
@@ -373,7 +447,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                             // ── Info banner ───────────────────────────────────────────
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 14, vertical: 12,
+                                horizontal: 14,
+                                vertical: 12,
                               ),
                               decoration: BoxDecoration(
                                 color: kPillBg,
@@ -391,7 +466,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         const Text(
                                           'Show this QR to admin. It is valid for one scan only.',
@@ -457,7 +533,11 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                     ],
                                   ),
                                   child: serverQrImage != null
-                                      ? Image.memory(serverQrImage!, width: 200, height: 200)
+                                      ? Image.memory(
+                                          serverQrImage!,
+                                          width: 200,
+                                          height: 200,
+                                        )
                                       : QrImageView(
                                           data: qrToken ?? '',
                                           version: QrVersions.auto,
@@ -466,10 +546,12 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                             eyeShape: QrEyeShape.square,
                                             color: kNavy,
                                           ),
-                                          dataModuleStyle: const QrDataModuleStyle(
-                                            dataModuleShape: QrDataModuleShape.square,
-                                            color: kNavy,
-                                          ),
+                                          dataModuleStyle:
+                                              const QrDataModuleStyle(
+                                                dataModuleShape:
+                                                    QrDataModuleShape.square,
+                                                color: kNavy,
+                                              ),
                                         ),
                                 ),
                               ),
@@ -490,7 +572,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                             // ── Important Note banner ─────────────────────────────────
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14,
+                                horizontal: 16,
+                                vertical: 14,
                               ),
                               decoration: BoxDecoration(
                                 color: kCardWhite,
@@ -523,7 +606,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                   const SizedBox(width: 12),
                                   const Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           'Important Note',
@@ -581,7 +665,8 @@ class _TopBar extends StatelessWidget {
               'assets/images/food_tray_bg.png',
               fit: BoxFit.cover,
               alignment: Alignment.centerRight,
-              errorBuilder: (_, __, ___) => Container(color: const Color(0xFFD0DCF0)),
+              errorBuilder: (_, __, ___) =>
+                  Container(color: const Color(0xFFD0DCF0)),
             ),
           ),
           // Gradient overlay
@@ -646,22 +731,27 @@ class _BackButtonState extends State<_BackButton>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
-    _slide = Tween<double>(begin: 0, end: -4).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
-    );
-    _scale = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack),
-    );
+    _slide = Tween<double>(
+      begin: 0,
+      end: -4,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
+    _scale = Tween<double>(
+      begin: 1.0,
+      end: 1.1,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOutBack));
   }
 
   @override
-  void dispose() { _ctrl.dispose(); super.dispose(); }
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return MouseRegion(
       onEnter: (_) => _ctrl.forward(),
-      onExit:  (_) => _ctrl.reverse(),
+      onExit: (_) => _ctrl.reverse(),
       child: GestureDetector(
         onTap: () => Navigator.of(context).maybePop(),
         child: AnimatedBuilder(
@@ -718,8 +808,11 @@ class _ActionCardState extends State<_ActionCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown:  (_) => setState(() => _pressed = true),
-      onTapUp:    (_) { setState(() => _pressed = false); widget.onTap(); },
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.97 : 1.0,
@@ -764,15 +857,16 @@ class _ActionCardState extends State<_ActionCard> {
                     const SizedBox(height: 3),
                     Text(
                       widget.subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: kSubtext,
-                      ),
+                      style: const TextStyle(fontSize: 13, color: kSubtext),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: kAccentBlue, size: 24),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: kAccentBlue,
+                size: 24,
+              ),
             ],
           ),
         ),
@@ -803,8 +897,11 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown:   (_) => setState(() => _pressed = true),
-      onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1.0,
@@ -812,9 +909,7 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
         child: Container(
           height: 52,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [kNavy, kAccentBlue],
-            ),
+            gradient: const LinearGradient(colors: [kNavy, kAccentBlue]),
             borderRadius: BorderRadius.circular(30),
             boxShadow: [
               BoxShadow(
@@ -862,8 +957,11 @@ class _OutlineButtonState extends State<_OutlineButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown:   (_) => setState(() => _pressed = true),
-      onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) {
+        setState(() => _pressed = false);
+        widget.onTap();
+      },
       onTapCancel: () => setState(() => _pressed = false),
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1.0,

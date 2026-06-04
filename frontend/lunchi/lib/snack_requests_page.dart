@@ -43,6 +43,7 @@ class SnackOrder {
   final String pickupType;
   final List<SnackItem> items;
   final SnackStatus status;
+  final DateTime? createdAt;
 
   const SnackOrder({
     required this.id,
@@ -51,6 +52,7 @@ class SnackOrder {
     required this.pickupType,
     required this.items,
     required this.status,
+    this.createdAt,
   });
 
   int get grandTotal => items.fold(0, (sum, i) => sum + i.total);
@@ -70,6 +72,10 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
   bool _isLoading = false;
   List<SnackOrder> _orders = [];
   String? _error;
+
+  DateTime? selectedMonth;
+  int? selectedYear;
+  bool _sortNewest = true;
 
   @override
   void initState() {
@@ -140,6 +146,12 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
             }
           }
 
+          final createdAtStr = req['created_at'];
+          DateTime? createdAtDate;
+          if (createdAtStr != null) {
+            createdAtDate = DateTime.tryParse(createdAtStr);
+          }
+
           return SnackOrder(
             id: id,
             employeeName: employeeName,
@@ -147,6 +159,7 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
             pickupType: room,
             items: parsedItems,
             status: _parseStatus(statusStr),
+            createdAt: createdAtDate,
           );
         }).toList();
 
@@ -233,8 +246,32 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
     }
   }
 
+  List<SnackOrder> get _filteredOrders {
+    var filtered = _orders.where((o) {
+      bool matchDate = true;
+      if (o.createdAt != null) {
+        final date = o.createdAt!;
+        if (selectedMonth != null) {
+          matchDate = date.year == selectedMonth!.year && date.month == selectedMonth!.month;
+        } else if (selectedYear != null) {
+          matchDate = date.year == selectedYear;
+        }
+      }
+      return matchDate;
+    }).toList();
+    
+    filtered.sort((a, b) {
+      if (a.createdAt == null || b.createdAt == null) return 0;
+      return _sortNewest ? b.createdAt!.compareTo(a.createdAt!) : a.createdAt!.compareTo(b.createdAt!);
+    });
+    
+    return filtered;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filteredOrders = _filteredOrders;
+
     return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
@@ -242,6 +279,58 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
           children: [
             // ── Top Bar ──────────────────────────────────────────────────
             _TopBar(),
+
+            // ── Filters ──────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  DropdownButton<String>(
+                    value: _sortNewest ? 'newest' : 'oldest',
+                    items: const [
+                      DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
+                      DropdownMenuItem(value: 'oldest', child: Text('Sort: Oldest')),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => _sortNewest = v == 'newest');
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      value: selectedYear,
+                      hint: const Text('Year'),
+                      items: [
+                        const DropdownMenuItem<int?>(value: null, child: Text('All Years')),
+                        ...List.generate(5, (i) => DateTime.now().year - i)
+                            .map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))),
+                      ],
+                      onChanged: (v) => setState(() => selectedYear = v),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      value: selectedMonth?.month,
+                      hint: const Text('Month'),
+                      items: [
+                        const DropdownMenuItem<int?>(value: null, child: Text('All Months')),
+                        ...List.generate(12, (i) => i + 1)
+                            .map((m) => DropdownMenuItem(value: m, child: Text(m.toString().padLeft(2, '0')))),
+                      ],
+                      onChanged: (v) {
+                         setState(() {
+                           if (v == null) selectedMonth = null;
+                           else selectedMonth = DateTime(DateTime.now().year, v);
+                         });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             // ── Orders List ───────────────────────────────────────────────
             Expanded(
@@ -255,24 +344,24 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
                             textAlign: TextAlign.center,
                           ),
                         )
-                      : _orders.isEmpty
+                      : filteredOrders.isEmpty
                           ? const _EmptyState()
                           : ListView.separated(
                               physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
-                              itemCount: _orders.length,
+                              padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+                              itemCount: filteredOrders.length,
                               separatorBuilder: (_, __) =>
                                   const SizedBox(height: 14),
                               itemBuilder: (context, index) => _OrderCard(
-                                order: _orders[index],
-                                onAccept: _orders[index].status == SnackStatus.pending
-                                    ? () => _updateStatus(_orders[index].id, 'accepted')
+                                order: filteredOrders[index],
+                                onAccept: filteredOrders[index].status == SnackStatus.pending
+                                    ? () => _updateStatus(filteredOrders[index].id, 'accepted')
                                     : null,
-                                onDecline: _orders[index].status == SnackStatus.pending
-                                    ? () => _updateStatus(_orders[index].id, 'declined')
+                                onDecline: filteredOrders[index].status == SnackStatus.pending
+                                    ? () => _updateStatus(filteredOrders[index].id, 'declined')
                                     : null,
-                                onDelete: _orders[index].status == SnackStatus.declined
-                                    ? () => _deleteRequest(_orders[index].id)
+                                onDelete: filteredOrders[index].status == SnackStatus.declined
+                                    ? () => _deleteRequest(filteredOrders[index].id)
                                     : null,
                               ),
                             ),
@@ -545,14 +634,28 @@ class _OrderCard extends StatelessWidget {
           const Divider(color: _kDivider, height: 1),
           const SizedBox(height: 12),
 
-          // ── Total ─────────────────────────────────────────────────────
-          Text(
-            'Total:  ₹${order.grandTotal}',
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: _kNavy,
-            ),
+          // ── Total & Date ──────────────────────────────────────────────
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total:  ₹${order.grandTotal}',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  color: _kNavy,
+                ),
+              ),
+              if (order.createdAt != null)
+                Text(
+                  '${order.createdAt!.year}-${order.createdAt!.month.toString().padLeft(2, '0')}-${order.createdAt!.day.toString().padLeft(2, '0')}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: _kSubtext,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+            ],
           ),
 
           const SizedBox(height: 12),

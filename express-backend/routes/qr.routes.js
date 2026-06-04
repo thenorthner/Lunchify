@@ -32,8 +32,8 @@ router.post('/generate-qr', async (req, res) => {
     const qrData = `QR_${qrId}|${employeeId}|${type}|${date}`;
 
     await mysqlPool.query(
-      `INSERT INTO qr_codes (id, type, used, items) VALUES (?, ?, 0, ?)`,
-      [qrId, type, items ? JSON.stringify(items) : null]
+      `INSERT INTO qr_codes (id, type, used, employee_id, items) VALUES (?, ?, 0, ?, ?)`,
+      [qrId, type, employeeId, items ? JSON.stringify(items) : null]
     );
 
     return res.status(200).json({
@@ -191,26 +191,53 @@ router.get('/scanned-history', requireCanteenAdmin, async (req, res) => {
 
     if (selectedRange === 'daily') {
       query = `
-        SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as label, COUNT(*) as count 
-        FROM qr_scan_logs 
-        WHERE canteen_id = ? 
-        GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d') 
+        SELECT label, SUM(count) as count FROM (
+          SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as label, COUNT(*) as count 
+          FROM qr_scan_logs 
+          WHERE canteen_id = ? 
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as label, SUM(quantity) as count 
+          FROM fruit_lunch_orders 
+          WHERE canteen_id = ? 
+          GROUP BY label
+        ) t
+        GROUP BY label
         ORDER BY label DESC 
         LIMIT 30`;
+      params.push(canteenId);
     } else if (selectedRange === 'monthly') {
       query = `
-        SELECT DATE_FORMAT(created_at, '%Y-%m') as label, COUNT(*) as count 
-        FROM qr_scan_logs 
-        WHERE canteen_id = ? 
-        GROUP BY DATE_FORMAT(created_at, '%Y-%m') 
+        SELECT label, SUM(count) as count FROM (
+          SELECT DATE_FORMAT(created_at, '%Y-%m') as label, COUNT(*) as count 
+          FROM qr_scan_logs 
+          WHERE canteen_id = ? 
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y-%m') as label, SUM(quantity) as count 
+          FROM fruit_lunch_orders 
+          WHERE canteen_id = ? 
+          GROUP BY label
+        ) t
+        GROUP BY label
         ORDER BY label DESC`;
+      params.push(canteenId);
     } else if (selectedRange === 'yearly') {
       query = `
-        SELECT DATE_FORMAT(created_at, '%Y') as label, COUNT(*) as count 
-        FROM qr_scan_logs 
-        WHERE canteen_id = ? 
-        GROUP BY DATE_FORMAT(created_at, '%Y') 
+        SELECT label, SUM(count) as count FROM (
+          SELECT DATE_FORMAT(created_at, '%Y') as label, COUNT(*) as count 
+          FROM qr_scan_logs 
+          WHERE canteen_id = ? 
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y') as label, SUM(quantity) as count 
+          FROM fruit_lunch_orders 
+          WHERE canteen_id = ? 
+          GROUP BY label
+        ) t
+        GROUP BY label
         ORDER BY label DESC`;
+      params.push(canteenId);
     } else {
       return res.status(400).json({ error: 'Invalid range parameter. Use daily, monthly, or yearly.' });
     }
@@ -223,6 +250,37 @@ router.get('/scanned-history', requireCanteenAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Error fetching scan history:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ✅ GET /api/qr/my-status-today - Returns if employee has scanned food or fruit today
+router.get('/my-status-today', async (req, res) => {
+  const employeeId = req.user.id;
+  try {
+    const [rows] = await mysqlPool.query(
+      `SELECT type FROM qr_codes WHERE employee_id = ? AND used = 1 AND DATE(used_at) = CURDATE()`,
+      [employeeId]
+    );
+    let foodScanned = false;
+    let fruitScanned = false;
+    rows.forEach(r => {
+      if (r.type === 'food') foodScanned = true;
+      if (r.type === 'fruit') fruitScanned = true;
+    });
+
+    // Check fruit_lunch_orders for fruit lunch
+    const [fruitRows] = await mysqlPool.query(
+      `SELECT id FROM fruit_lunch_orders WHERE employee_id = ? AND DATE(created_at) = CURDATE() LIMIT 1`,
+      [employeeId]
+    );
+    if (fruitRows.length > 0) {
+      fruitScanned = true;
+    }
+
+    res.json({ success: true, foodScanned, fruitScanned });
+  } catch (err) {
+    console.error('❌ Error fetching today status:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

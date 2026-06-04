@@ -98,7 +98,11 @@ class AdminPage extends StatelessWidget {
             return Column(
               children: [
                 // ── Hero Header ───────────────────────────────────────────
-                _HeroHeader(adminName: adminName),
+                const _Header(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                  child: _WelcomeCard(adminName: adminName),
+                ),
 
                 // ── Scrollable Content ────────────────────────────────────
                 Expanded(
@@ -144,90 +148,168 @@ class AdminPage extends StatelessWidget {
   }
 }
 
-// ─── Hero Header ──────────────────────────────────────────────────────────────
-class _HeroHeader extends StatelessWidget {
+// ─── Header ───────────────────────────────────────────────────────────────────
+class _Header extends StatelessWidget {
+  const _Header();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 130,
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.08),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(30),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/sjvn_bg.png',
+                fit: BoxFit.fill,
+                errorBuilder: (_, __, ___) => Container(
+                  color: const Color(0xFFD0DCF0),
+                ),
+              ),
+            ),
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: [
+                      Colors.white.withOpacity(0.95),
+                      Colors.white.withOpacity(0.78),
+                      Colors.white.withOpacity(0.15),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 20),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/logo.png',
+                        width: 60,
+                        height: 50,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.lunch_dining,
+                          size: 40,
+                          color: _kAccent,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Image.asset(
+                        'assets/images/w_logo.png',
+                        width: 120,
+                        height: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Text(
+                          'Lunchify',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            color: _kAccent,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Welcome Card ─────────────────────────────────────────────────────────────
+class _WelcomeCard extends StatelessWidget {
   final String adminName;
-  const _HeroHeader({required this.adminName});
+  const _WelcomeCard({required this.adminName});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: double.infinity,
-      height: 200,
-      clipBehavior: Clip.hardEdge,
-      decoration: const BoxDecoration(
-        color: Color(0xFFD0DCF0),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      decoration: BoxDecoration(
+        color: _kCard,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: _kAccent.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: Stack(
+      child: Row(
         children: [
-          // ── Background image ───────────────────────────────────────────
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/sjvn_scene.png',
-              fit: BoxFit.cover,
-              alignment: Alignment.centerRight,
-              errorBuilder: (_, __, ___) => Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFFD0DCF0), Color(0xFFBFD3EA)],
-                  ),
-                ),
-              ),
+          Container(
+            width: 58,
+            height: 58,
+            decoration: const BoxDecoration(
+              color: _kLight,
+              shape: BoxShape.circle,
             ),
+            child: const Icon(Icons.admin_panel_settings_rounded, color: _kAccent, size: 32),
           ),
-
-          // ── Left-fade gradient so text stays readable ──────────────────
-          Positioned.fill(
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  stops: [0.0, 0.45, 0.72, 1.0],
-                  colors: [
-                    Color(0xFFEAF2FF),
-                    Color(0xD0EAF2FF),
-                    Color(0x88EAF2FF),
-                    Color(0x10EAF2FF),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // ── Text ──────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(22, 36, 22, 24),
+          const SizedBox(width: 16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  'Hi, $adminName',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: _kNavy,
-                    letterSpacing: -0.5,
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: 'Hi, ',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: _kNavy,
+                          fontFamily: 'EBGaramond',
+                        ),
+                      ),
+                      TextSpan(
+                        text: adminName,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: _kAccent,
+                          fontFamily: 'EBGaramond',
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: const [
-                    Text(
-                      'Welcome to Lunchify! ',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: _kSubtext,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    Text('👋', style: TextStyle(fontSize: 16)),
-                  ],
+                const SizedBox(height: 4),
+                const Text(
+                  'Welcome to Lunchify Admin!',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: _kSubtext,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

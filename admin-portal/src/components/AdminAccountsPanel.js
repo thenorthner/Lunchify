@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./MenuManager.css"; // Reuse card and form classes for consistency, with custom overrides
+import "./MenuManager.css";
+import "./AdminAccountsPanel.css";
 import "../styles/Tabs.css";
 
 export default function AdminAccountsPanel() {
@@ -116,160 +117,195 @@ export default function AdminAccountsPanel() {
   };
 
   return (
-    <div className="menu-card fade-in" style={{ maxWidth: "600px", margin: "0 auto" }}>
-      <div className="menu-header">
-        <h2>🔑 Administrative Accounts & Role elevation</h2>
-        <p style={{ fontSize: "14px", color: "#666", marginTop: "4px" }}>
-          IT Admin tool to register new users or elevate existing users to Canteen Admin, HR Admin, or IT Admin roles.
-        </p>
+    <div className="admin-accounts-container fade-in">
+      <div className="admin-accounts-header">
+        <div className="header-icon-box">🔑</div>
+        <div className="header-text">
+          <h2>Administrative Accounts & Role elevation</h2>
+          <p>
+            IT Admins tool to register new users or elevate existing users to Canteen Admin, HR Admin, or IT Admin roles.
+          </p>
+        </div>
       </div>
 
-      <form className="menu-form" onSubmit={handleUpsert} style={{ marginTop: "20px" }}>
-        
+      <form onSubmit={handleUpsert}>
         {message && (
           <div style={{
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "16px",
+            padding: "16px",
+            borderRadius: "10px",
+            marginBottom: "20px",
             fontSize: "14px",
             fontWeight: "500",
-            backgroundColor: message.type === "success" ? "#d1e7dd" : message.type === "info" ? "#cff4fc" : "#f8d7da",
-            color: message.type === "success" ? "#0f5132" : message.type === "info" ? "#055160" : "#842029",
-            border: `1px solid ${message.type === "success" ? "#badbcc" : message.type === "info" ? "#b6effb" : "#f5c2c7"}`
+            backgroundColor: message.type === "success" ? "#dcfce7" : message.type === "info" ? "#e0f2fe" : "#fee2e2",
+            color: message.type === "success" ? "#166534" : message.type === "info" ? "#075985" : "#991b1b",
+            border: `1px solid ${message.type === "success" ? "#bbf7d0" : message.type === "info" ? "#bae6fd" : "#fecaca"}`
           }}>
             {message.text}
           </div>
         )}
 
-        <label style={{ fontWeight: "bold" }}>
-          Employee ID *
-          <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-            <input
-              type="text"
-              value={employeeId}
-              onChange={(e) => setEmployeeId(e.target.value)}
-              placeholder="e.g. EMP001"
-              required
-              style={{ flex: 1, margin: "8px 0" }}
-            />
-            <button 
-              type="button" 
-              onClick={handleSearchOrCheck}
-              style={{
-                margin: "8px 0",
-                padding: "0 16px",
-                background: "#6c757d",
-                fontSize: "14px"
-              }}
-            >
-              Verify
-            </button>
+        <div className="admin-form-grid">
+          {/* Employee ID */}
+          <div className="admin-form-group">
+            <div className="field-icon">👤</div>
+            <div className="field-content">
+              <label>Employee ID <span className="required-asterisk">*</span></label>
+              <div className="input-with-button">
+                <input
+                  type="text"
+                  className="admin-input"
+                  value={employeeId}
+                  onChange={(e) => setEmployeeId(e.target.value)}
+                  placeholder="e.g. EMP001"
+                  required
+                />
+                <button 
+                  type="button" 
+                  className="admin-verify-btn"
+                  onClick={handleSearchOrCheck}
+                >
+                  Verify
+                </button>
+              </div>
+            </div>
           </div>
-        </label>
 
-        <label style={{ fontWeight: "bold" }}>
-          Admin User ID (For Portal Login)
-          <input
-            type="text"
-            value={adminUserId}
-            onChange={(e) => setAdminUserId(e.target.value)}
-            placeholder="e.g. admin123 (Optional)"
-            style={{ width: "100%", boxSizing: "border-box", margin: "8px 0" }}
-          />
-        </label>
+          {/* Admin User ID */}
+          <div className="admin-form-group">
+            <div className="field-icon">👤</div>
+            <div className="field-content">
+              <label>Admin User ID (For Portal Login)</label>
+              <input
+                type="text"
+                className="admin-input"
+                value={adminUserId}
+                onChange={(e) => setAdminUserId(e.target.value)}
+                placeholder="e.g. admin123 (Optional)"
+              />
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          Full Name *
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. John Doe"
-            required
-            style={{ width: "100%", boxSizing: "border-box", margin: "8px 0" }}
-          />
-        </label>
+          {/* Full Name */}
+          <div className="admin-form-group">
+            <div className="field-icon">👤</div>
+            <div className="field-content">
+              <label>Full Name <span className="required-asterisk">*</span></label>
+              <input
+                type="text"
+                className="admin-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. John Doe"
+                required
+              />
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          Department *
-          <input
-            type="text"
-            value={department}
-            onChange={(e) => setDepartment(e.target.value)}
-            placeholder="e.g. IT, HR, Finance"
-            required
-            style={{ width: "100%", boxSizing: "border-box", margin: "8px 0" }}
-          />
-        </label>
+          {/* Department */}
+          <div className="admin-form-group">
+            <div className="field-icon">🏢</div>
+            <div className="field-content">
+              <label>Department <span className="required-asterisk">*</span></label>
+              <input
+                type="text"
+                className="admin-input"
+                value={department}
+                onChange={(e) => setDepartment(e.target.value)}
+                placeholder="e.g. IT, HR, Finance"
+                required
+              />
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          Phone Number *
-          <input
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="e.g. 9876543210"
-            required
-            style={{ width: "100%", boxSizing: "border-box", margin: "8px 0" }}
-          />
-        </label>
+          {/* Phone Number */}
+          <div className="admin-form-group">
+            <div className="field-icon">📞</div>
+            <div className="field-content">
+              <label>Phone Number <span className="required-asterisk">*</span></label>
+              <input
+                type="text"
+                className="admin-input"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 9876543210"
+                required
+              />
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          Password {password ? "" : "(Optional for existing users)"}
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-            style={{ width: "100%", boxSizing: "border-box", margin: "8px 0" }}
-          />
-          <small style={{ color: "#666", fontSize: "11px", display: "block", marginTop: "-4px", marginBottom: "8px" }}>
-            Mandatory for new accounts. Leave blank for existing accounts to keep the old password.
-          </small>
-        </label>
+          {/* Password */}
+          <div className="admin-form-group">
+            <div className="field-icon">🔒</div>
+            <div className="field-content">
+              <label>Password (Optional for existing users)</label>
+              <input
+                type="password"
+                className="admin-input"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+              />
+              <span className="field-help-text">Mandatory for new accounts. Leave blank for existing accounts to keep the old password.</span>
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          Assigned Project & Canteen
-          {loading ? (
-            <span style={{ fontSize: "12px", color: "#888", marginLeft: "10px" }}>Loading locations...</span>
-          ) : (
-            <select
-              value={selectedProject}
-              onChange={(e) => setSelectedProject(e.target.value)}
-              style={{ width: "100%", margin: "8px 0" }}
-            >
-              {projects.map((proj) => (
-                <option key={proj.project_id} value={proj.project_id}>
-                  {proj.project_name} ({proj.canteen_name})
-                </option>
-              ))}
-            </select>
-          )}
-        </label>
+          {/* Assigned Project & Canteen */}
+          <div className="admin-form-group">
+            <div className="field-icon">🏪</div>
+            <div className="field-content">
+              <label>Assigned Project & Canteen</label>
+              {loading ? (
+                <span style={{ fontSize: "12px", color: "#888" }}>Loading locations...</span>
+              ) : (
+                <select
+                  className="admin-select"
+                  value={selectedProject}
+                  onChange={(e) => setSelectedProject(e.target.value)}
+                >
+                  {projects.map((proj) => (
+                    <option key={proj.project_id} value={proj.project_id}>
+                      {proj.project_name} ({proj.canteen_name})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
 
-        <label style={{ fontWeight: "bold" }}>
-          System Role *
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            style={{ width: "100%", margin: "8px 0" }}
-          >
-            <option value="employee">Employee (View-Only / Order Access)</option>
-            <option value="canteen_admin">Canteen Admin (Menu & Order Acceptance)</option>
-            <option value="hr_admin">HR Admin (Billing & Transfers)</option>
-            <option value="it_admin">IT Admin (Central Settings & Account Upsert)</option>
-          </select>
-        </label>
+          {/* System Role */}
+          <div className="admin-form-group">
+            <div className="field-icon">🛡️</div>
+            <div className="field-content">
+              <label>System Role <span className="required-asterisk">*</span></label>
+              <select
+                className="admin-select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <option value="employee">Employee (View-Only / Order Access)</option>
+                <option value="canteen_admin">Canteen Admin (Menu & Order Acceptance)</option>
+                <option value="hr_admin">HR Admin (Billing & Transfers)</option>
+                <option value="it_admin">IT Admin (Central Settings & Account Upsert)</option>
+              </select>
+            </div>
+          </div>
+        </div>
 
         <button
           type="submit"
           disabled={submitting}
-          className="save-btn"
-          style={{ width: "100%", marginTop: "16px", padding: "12px" }}
+          className="admin-save-btn"
         >
-          {submitting ? "Saving user details..." : "Save Account & Apply Permissions"}
+          💾 {submitting ? "Saving user details..." : "Save Account & Apply Permissions"}
         </button>
       </form>
+
+      <div className="admin-info-box">
+        <div className="info-icon">ℹ️</div>
+        <div className="info-content">
+          <p>Ensure the details are correct before saving. You can update role and permissions anytime.</p>
+        </div>
+      </div>
     </div>
   );
 }

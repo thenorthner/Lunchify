@@ -21,6 +21,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   uuid: ^4.2.2
+  audioplayers: ^6.4.0
 
 
 dev_dependencies:
@@ -49,6 +50,7 @@ flutter:
     - assets/images/food_tray_bg.png
     - assets/images/logo.png
     - assets/images/w_logo.png
+    - assets/audio/applepay.mp3
 
   fonts:
     - family: EBGaramond

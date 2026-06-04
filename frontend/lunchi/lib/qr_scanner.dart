@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -39,11 +40,13 @@ class _QRScannerPageState extends State<QRScannerPage>
   bool isProcessing = false;
   
   final _manualCtrl  = TextEditingController();
+  late final AudioPlayer _audioPlayer;
   final MobileScannerController _cameraController = MobileScannerController(facing: CameraFacing.back);
 
   @override
   void initState() {
     super.initState();
+    _audioPlayer = AudioPlayer();
 
     // Scanning line — moves top to bottom and repeats
     _scanCtrl = AnimationController(
@@ -66,9 +69,11 @@ class _QRScannerPageState extends State<QRScannerPage>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this as WidgetsBindingObserver);
     _scanCtrl.dispose();
     _pulseCtrl.dispose();
     _manualCtrl.dispose();
+    _audioPlayer.dispose();
     _cameraController.dispose();
     super.dispose();
   }
@@ -133,11 +138,17 @@ class _QRScannerPageState extends State<QRScannerPage>
     }
   }
 
-  void _showSuccessDialog(Map<String, dynamic> body) {
+  void _showSuccessDialog(Map<String, dynamic> body) async {
     final employee = body['employee'] ?? {};
     final items = body['items'] as List<dynamic>? ?? [];
     final employeeName = employee['name'] ?? 'Unknown';
     final employeeIdDisplay = employee['employee_id'] ?? '';
+
+    try {
+      await _audioPlayer.play(AssetSource('audio/applepay.mp3'));
+    } catch (e) {
+      debugPrint('Audio play failed: $e');
+    }
 
     showDialog(
       context: context,
@@ -219,130 +230,7 @@ class _QRScannerPageState extends State<QRScannerPage>
     );
   }
 
-  void _submitManualCode() {
-    final code = _manualCtrl.text.trim();
-    if (code.isEmpty) return;
-    Navigator.pop(context); // close bottom sheet
-    setState(() => isProcessing = true);
-    _processQR(code);
-  }
 
-  void _showManualEntrySheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(28),
-              topRight: Radius.circular(28),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDCE8F5),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Enter Code Manually',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: _kNavy,
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Enter the QR code printed on the lunch coupon.',
-                style: TextStyle(fontSize: 13, color: Color(0xFF5A7CC9)),
-              ),
-              const SizedBox(height: 18),
-              TextField(
-                controller: _manualCtrl,
-                autofocus: true,
-                style: const TextStyle(fontSize: 15, color: Color(0xFF1A2340)),
-                decoration: InputDecoration(
-                  hintText: 'e.g. QR_123|...',
-                  hintStyle: const TextStyle(
-                    color: Color(0xFFB0BFCC), fontSize: 14,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.qr_code_rounded, color: Color(0xFF9BB0CC), size: 20,
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFF0F5FB),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16, horizontal: 16,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFDCE8F5), width: 1.5,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                      color: Color(0xFFDCE8F5), width: 1.5,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(
-                      color: _kAccent, width: 1.8,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _submitManualCode,
-                  icon: const Icon(
-                    Icons.check_circle_outline_rounded,
-                    color: Colors.white, size: 20,
-                  ),
-                  label: const Text(
-                    'Verify & Record',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _kAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 
   void showSnack(String message) {
     if (!mounted) return;
@@ -482,13 +370,7 @@ class _QRScannerPageState extends State<QRScannerPage>
                         color: Color(0xFF8A96A8),
                       ),
                     ),
-                    const SizedBox(height: 20),
-
-                    // Enter Code Manually button
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: _ManualButton(onTap: _showManualEntrySheet),
-                    ),
+                    const SizedBox(height: 10),
                   ],
                 ),
                 ),
@@ -779,60 +661,3 @@ class _CornerBracketsPainter extends CustomPainter {
   bool shouldRepaint(_) => false;
 }
 
-// ─── Enter Code Manually Button ───────────────────────────────────────────────
-class _ManualButton extends StatefulWidget {
-  final VoidCallback onTap;
-  const _ManualButton({required this.onTap});
-
-  @override
-  State<_ManualButton> createState() => _ManualButtonState();
-}
-
-class _ManualButtonState extends State<_ManualButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown:   (_) => setState(() => _pressed = true),
-      onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          width: double.infinity,
-          height: 54,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1A2E6E), Color(0xFF2563EB)],
-            ),
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF1A2E6E).withOpacity(0.3),
-                blurRadius: 16, offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 22),
-              SizedBox(width: 10),
-              Text(
-                'Enter Code Manually',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
