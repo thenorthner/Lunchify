@@ -156,14 +156,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
     }
   }
 
-  // ── Send code via email ───────────────────────────────────────────────────
-  void _sendEmail() {
-    if (_empIdCtrl.text.trim().isEmpty) {
-      _showSnack('Please enter your Employee ID first.', isError: true);
-      return;
-    }
-    _showSnack('Verification code sent to your registered email!');
-  }
 
   void _showSnack(String msg, {bool isError = false}) {
     if (!mounted) return;
@@ -240,33 +232,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
         ),
         const SizedBox(height: 20),
         
-        // ── OR divider ────────────────────────────
-        Row(
-          children: const [
-            Expanded(child: Divider(color: Color(0xFFE0EAF5))),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14),
-              child: Text(
-                'OR',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: _kSubtext,
-                ),
-              ),
-            ),
-            Expanded(child: Divider(color: Color(0xFFE0EAF5))),
-          ],
-        ),
-        const SizedBox(height: 20),
-        
-        // ── Send Code via Email button ────────────
-        _OutlineButton(
-          label: 'Send Code via Email',
-          icon: Icons.email_outlined,
-          onTap: _sendEmail,
-        ),
-        const SizedBox(height: 20),
+
         
         // ── Back to Login link ────────────────────
         GestureDetector(

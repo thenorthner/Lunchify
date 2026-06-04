@@ -45,6 +45,33 @@ export default function CanteenProjectsPanel() {
     }
   };
 
+  const handleDeleteProject = async (projectId, projectName) => {
+    if (projectId === 5) {
+      alert("Cannot delete the default Corporate Headquarters (CHQ) Canteen.");
+      return;
+    }
+    
+    const userInput = window.prompt(
+      `SECURITY CHECK:\nTo prevent accidental deletion, please type the exact project name to confirm.\n\nProject Name: "${projectName}"\n\nAll associated employees will be mapped to CHQ (Corporate Headquarters) by default.`
+    );
+    
+    if (userInput !== projectName) {
+      if (userInput !== null) {
+        alert("Project name did not match. Deletion cancelled.");
+      }
+      return;
+    }
+
+    try {
+      const res = await axios.delete(`http://localhost:3001/api/transfer/projects/${projectId}`, axiosConfig);
+      alert(res.data.message || "Project and Canteen deleted successfully. Users moved to CHQ.");
+      fetchMappings();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || err.response?.data?.error || "Error deleting project");
+    }
+  };
+
   useEffect(() => {
     fetchMappings();
   }, []);
@@ -117,6 +144,25 @@ export default function CanteenProjectsPanel() {
                   <span className="detail-label">Project Database ID</span>
                   <span className="detail-val font-code">#{item.project_id}</span>
                 </div>
+                
+                {item.project_id !== 5 && (
+                  <div style={{ marginTop: '10px', textAlign: 'right' }}>
+                    <button 
+                      onClick={() => handleDeleteProject(item.project_id, item.project_name)}
+                      style={{
+                        background: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.85rem'
+                      }}
+                    >
+                      🗑️ Delete Entire Project
+                    </button>
+                  </div>
+                )}
 
                 <hr className="divider" />
 

@@ -50,6 +50,43 @@ router.post('/generate-qr', async (req, res) => {
   }
 });
 
+// ✅ POST /api/qr/status - Checks if a generated QR code was scanned
+router.post('/status', async (req, res) => {
+  const { qrToken } = req.body;
+  if (!qrToken) return res.status(400).json({ error: 'Missing qrToken' });
+
+  try {
+    // qrToken format: QR_1234abcd-56ef...|EMP123|Food Lunch|2023-10-25
+    const qrId = qrToken.split('|')[0].replace('QR_', '');
+    const [rows] = await mysqlPool.query('SELECT used FROM qr_codes WHERE id = ?', [qrId]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'QR not found' });
+    }
+    
+    return res.json({ scanned: rows[0].used === 1 });
+  } catch (err) {
+    console.error('QR Status Check Error:', err);
+    return res.status(500).json({ error: 'Failed to check status' });
+  }
+});
+
+// ✅ POST /api/qr/cancel - Cancels an unscanned QR code
+router.post('/cancel', async (req, res) => {
+  const { qrToken } = req.body;
+  if (!qrToken) return res.status(400).json({ error: 'Missing qrToken' });
+
+  try {
+    const qrId = qrToken.split('|')[0].replace('QR_', '');
+    // Only delete if it hasn't been used yet
+    await mysqlPool.query('DELETE FROM qr_codes WHERE id = ? AND used = 0', [qrId]);
+    return res.json({ success: true, message: 'QR canceled' });
+  } catch (err) {
+    console.error('QR Cancel Error:', err);
+    return res.status(500).json({ error: 'Failed to cancel QR' });
+  }
+});
+
 // ✅ POST /api/qr/scan - Scanned by Canteen Admin, records scan at their canteen
 router.post('/scan', requireCanteenAdmin, async (req, res) => {
   const { qrData } = req.body;

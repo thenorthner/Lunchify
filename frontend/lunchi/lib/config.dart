@@ -1,5 +1,5 @@
 class AppConfig {
-  static const String apiBaseUrl = 'http://localhost:3001';
+  static const String apiBaseUrl = 'http://172.16.16.210:3001';
 
   // ---------- AUTH ----------
   static String get login => '$apiBaseUrl/api/auth/login';
@@ -48,4 +48,7 @@ class AppConfig {
 
   // ---------- SNACK ITEMS ----------
   static String get activeSnacksItems => '$apiBaseUrl/api/snacks/active';
+
+  // ---------- COUPONS ----------
+  static String get shareCoupons => '$apiBaseUrl/api/coupons/share';
 }

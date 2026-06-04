@@ -18,7 +18,8 @@
 }
 
 .header-icon-box {
-  background: #fffbeb;
+  background: #eef2ff;
+  color: #3730a3;
   width: 60px;
   height: 60px;
   display: flex;
@@ -61,14 +62,14 @@
 }
 
 .field-icon {
-  background: #f1f5f9;
+  background: #eef2ff;
   width: 45px;
   height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 12px;
-  color: #3b82f6;
+  color: #3730a3;
   font-size: 20px;
   flex-shrink: 0;
 }

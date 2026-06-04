@@ -1,4 +1,11 @@
 import React from "react";
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import StarIcon from '@mui/icons-material/Star';
+import SyncIcon from '@mui/icons-material/Sync';
+import BusinessIcon from '@mui/icons-material/Business';
+import ChatIcon from '@mui/icons-material/Chat';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import "../styles/Tabs.css";
 
 export default function DashboardTabs({ activeTab, setActiveTab, role }) {
@@ -10,7 +17,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "reports" ? "active" : ""}`}
           onClick={() => setActiveTab("reports")}
         >
-          <div className="tab-icon">📈</div>
+          <div className="tab-icon"><TrendingUpIcon fontSize="large" /></div>
           <span>Scan Reports</span>
         </div>
 
@@ -18,7 +25,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "canteen_billing" ? "active" : ""}`}
           onClick={() => setActiveTab("canteen_billing")}
         >
-          <div className="tab-icon">💳</div>
+          <div className="tab-icon"><CreditCardIcon fontSize="large" /></div>
           <span>Generate Bill</span>
         </div>
 
@@ -26,7 +33,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "item_feedbacks" ? "active" : ""}`}
           onClick={() => setActiveTab("item_feedbacks")}
         >
-          <div className="tab-icon">⭐</div>
+          <div className="tab-icon"><StarIcon fontSize="large" /></div>
           <span>Menu Ratings</span>
         </div>
       </div>
@@ -40,7 +47,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "billing" ? "active" : ""}`}
           onClick={() => setActiveTab("billing")}
         >
-          <div className="tab-icon">💳</div>
+          <div className="tab-icon"><CreditCardIcon fontSize="large" /></div>
           <span>Billing Management</span>
         </div>
 
@@ -48,7 +55,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "transfers" ? "active" : ""}`}
           onClick={() => setActiveTab("transfers")}
         >
-          <div className="tab-icon">🔄</div>
+          <div className="tab-icon"><SyncIcon fontSize="large" /></div>
           <span>Employee Transfers</span>
         </div>
       </div>
@@ -62,7 +69,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "canteen_projects" ? "active" : ""}`}
           onClick={() => setActiveTab("canteen_projects")}
         >
-          <div className="tab-icon">🏢</div>
+          <div className="tab-icon"><BusinessIcon fontSize="large" /></div>
           <span>Projects & Canteens</span>
         </div>
 
@@ -70,7 +77,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "feedbacks" ? "active" : ""}`}
           onClick={() => setActiveTab("feedbacks")}
         >
-          <div className="tab-icon">💬</div>
+          <div className="tab-icon"><ChatIcon fontSize="large" /></div>
           <span>System Feedbacks</span>
         </div>
 
@@ -78,7 +85,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "item_feedbacks" ? "active" : ""}`}
           onClick={() => setActiveTab("item_feedbacks")}
         >
-          <div className="tab-icon">⭐</div>
+          <div className="tab-icon"><StarIcon fontSize="large" /></div>
           <span>Menu Ratings</span>
         </div>
 
@@ -86,7 +93,7 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
           className={`tab-card ${activeTab === "admin_accounts" ? "active" : ""}`}
           onClick={() => setActiveTab("admin_accounts")}
         >
-          <div className="tab-icon">🔑</div>
+          <div className="tab-icon"><VpnKeyIcon fontSize="large" /></div>
           <span>Admin Accounts</span>
         </div>
       </div>

@@ -110,7 +110,16 @@
 }
 
 .profile-icon {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+}
+.profile-icon svg {
+  font-size: 20px;
 }
 
 .profile-text {

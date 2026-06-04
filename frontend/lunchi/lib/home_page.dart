@@ -14,6 +14,8 @@ import 'auth_service.dart';
 import 'feedback_page.dart';
 import 'lunch_rating_selection_screen.dart';
 import 'app_theme.dart'; // <-- added import
+import 'support_ratings_hub.dart';
+import 'share_coupons_page.dart';
 
 class LunchifyHomePage extends StatefulWidget {
   final String employeeName;
@@ -83,7 +85,10 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
           icon: Icons.confirmation_number_rounded,
           title: "Coupons Status",
           subtitle: "$_couponCount coupons used",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CouponStatusPage(employeeId: widget.employeeId))),
+          onTap: () async {
+            await Navigator.push(context, MaterialPageRoute(builder: (_) => CouponStatusPage(employeeId: widget.employeeId)));
+            _fetchCouponCount();
+          },
           badge: Container(
             width: 30,
             height: 30,
@@ -107,7 +112,10 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
           icon: Icons.qr_code_2_rounded,
           title: "Buy Lunch & Show QR",
           subtitle: "Buy your lunch & show QR at canteen",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => BuyLunchQrPage(employeeId: widget.employeeId, employeeName: widget.employeeName))),
+          onTap: () async {
+            await Navigator.push(context, MaterialPageRoute(builder: (_) => BuyLunchQrPage(employeeId: widget.employeeId, employeeName: widget.employeeName)));
+            _fetchCouponCount();
+          },
         ),
         _HomeMenuItem(
           icon: Icons.room_service_rounded,
@@ -128,16 +136,19 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackOrderHistoryPage(employeeId: widget.employeeId))),
         ),
         _HomeMenuItem(
-          icon: Icons.star_rate_rounded,
-          title: "Daily Menu Ratings",
-          subtitle: "Rate today's lunch items",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LunchRatingSelectionScreen())),
+          icon: Icons.card_giftcard_rounded,
+          title: "Share Coupons",
+          subtitle: "Send coupons to others",
+          onTap: () async {
+            await Navigator.push(context, MaterialPageRoute(builder: (_) => const ShareCouponsPage()));
+            _fetchCouponCount();
+          },
         ),
         _HomeMenuItem(
           icon: Icons.headset_mic_rounded,
-          title: "Support & Feedback",
-          subtitle: "Reach out for help",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FeedbackPage())),
+          title: "Support & Ratings",
+          subtitle: "Help & daily feedback",
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportRatingsHub())),
         ),
       ];
 

@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import PersonIcon from '@mui/icons-material/Person';
+import BusinessIcon from '@mui/icons-material/Business';
+import PhoneIcon from '@mui/icons-material/Phone';
+import LockIcon from '@mui/icons-material/Lock';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+import SecurityIcon from '@mui/icons-material/Security';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import InfoIcon from '@mui/icons-material/Info';
 import "./MenuManager.css";
 import "./AdminAccountsPanel.css";
 import "../styles/Tabs.css";
@@ -119,7 +127,7 @@ export default function AdminAccountsPanel() {
   return (
     <div className="admin-accounts-container fade-in">
       <div className="admin-accounts-header">
-        <div className="header-icon-box">🔑</div>
+        <div className="header-icon-box"><VpnKeyIcon fontSize="large" /></div>
         <div className="header-text">
           <h2>Administrative Accounts & Role elevation</h2>
           <p>
@@ -147,7 +155,7 @@ export default function AdminAccountsPanel() {
         <div className="admin-form-grid">
           {/* Employee ID */}
           <div className="admin-form-group">
-            <div className="field-icon">👤</div>
+            <div className="field-icon"><PersonIcon /></div>
             <div className="field-content">
               <label>Employee ID <span className="required-asterisk">*</span></label>
               <div className="input-with-button">
@@ -172,7 +180,7 @@ export default function AdminAccountsPanel() {
 
           {/* Admin User ID */}
           <div className="admin-form-group">
-            <div className="field-icon">👤</div>
+            <div className="field-icon"><PersonIcon /></div>
             <div className="field-content">
               <label>Admin User ID (For Portal Login)</label>
               <input
@@ -187,7 +195,7 @@ export default function AdminAccountsPanel() {
 
           {/* Full Name */}
           <div className="admin-form-group">
-            <div className="field-icon">👤</div>
+            <div className="field-icon"><PersonIcon /></div>
             <div className="field-content">
               <label>Full Name <span className="required-asterisk">*</span></label>
               <input
@@ -203,7 +211,7 @@ export default function AdminAccountsPanel() {
 
           {/* Department */}
           <div className="admin-form-group">
-            <div className="field-icon">🏢</div>
+            <div className="field-icon"><BusinessIcon /></div>
             <div className="field-content">
               <label>Department <span className="required-asterisk">*</span></label>
               <input
@@ -219,7 +227,7 @@ export default function AdminAccountsPanel() {
 
           {/* Phone Number */}
           <div className="admin-form-group">
-            <div className="field-icon">📞</div>
+            <div className="field-icon"><PhoneIcon /></div>
             <div className="field-content">
               <label>Phone Number <span className="required-asterisk">*</span></label>
               <input
@@ -235,7 +243,7 @@ export default function AdminAccountsPanel() {
 
           {/* Password */}
           <div className="admin-form-group">
-            <div className="field-icon">🔒</div>
+            <div className="field-icon"><LockIcon /></div>
             <div className="field-content">
               <label>Password (Optional for existing users)</label>
               <input
@@ -251,7 +259,7 @@ export default function AdminAccountsPanel() {
 
           {/* Assigned Project & Canteen */}
           <div className="admin-form-group">
-            <div className="field-icon">🏪</div>
+            <div className="field-icon"><StorefrontIcon /></div>
             <div className="field-content">
               <label>Assigned Project & Canteen</label>
               {loading ? (
@@ -274,7 +282,7 @@ export default function AdminAccountsPanel() {
 
           {/* System Role */}
           <div className="admin-form-group">
-            <div className="field-icon">🛡️</div>
+            <div className="field-icon"><SecurityIcon /></div>
             <div className="field-content">
               <label>System Role <span className="required-asterisk">*</span></label>
               <select
@@ -283,7 +291,7 @@ export default function AdminAccountsPanel() {
                 onChange={(e) => setRole(e.target.value)}
               >
                 <option value="employee">Employee (View-Only / Order Access)</option>
-                <option value="canteen_admin">Canteen Admin (Menu & Order Acceptance)</option>
+                <option value="canteen_admin">Canteen Admin (Generate Bill & View Rating)</option>
                 <option value="hr_admin">HR Admin (Billing & Transfers)</option>
                 <option value="it_admin">IT Admin (Central Settings & Account Upsert)</option>
               </select>
@@ -301,7 +309,7 @@ export default function AdminAccountsPanel() {
       </form>
 
       <div className="admin-info-box">
-        <div className="info-icon">ℹ️</div>
+        <div className="info-icon"><InfoIcon /></div>
         <div className="info-content">
           <p>Ensure the details are correct before saving. You can update role and permissions anytime.</p>
         </div>

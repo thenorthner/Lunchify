@@ -260,7 +260,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
     if (qrToken == null) return;
     try {
       final resp = await http.post(
-        Uri.parse(_url('/api/lunch/food-qr/status')),
+        Uri.parse(_url('/api/qr/status')),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -271,7 +271,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
 
       final body = _decodeJsonOrThrow(
         resp,
-        endpointHint: '/api/lunch/food-qr/status',
+        endpointHint: '/api/qr/status',
       );
 
       if (body['scanned'] == true) {
@@ -283,15 +283,16 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         _showSuccessDialog();
       }
     } catch (e) {
-      debugPrint('Status check failed: $e');
+      debugPrint('QR poll error: $e');
     }
   }
 
   Future<void> _cancelQr() async {
-    setState(() => isLoading = true);
+    if (qrToken == null) return;
     try {
+      setState(() => isLoading = true);
       final resp = await http.post(
-        Uri.parse(_url('/api/lunch/food-qr/cancel')),
+        Uri.parse(_url('/api/qr/cancel')),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -301,7 +302,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       );
 
       try {
-        _decodeJsonOrThrow(resp, endpointHint: '/api/lunch/food-qr/cancel');
+        _decodeJsonOrThrow(resp, endpointHint: '/api/qr/cancel');
       } catch (e) {
         debugPrint('Cancel QR response issue: $e');
       }

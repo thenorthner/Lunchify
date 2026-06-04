@@ -39,8 +39,15 @@
 
 /* ICON */
 .tab-icon {
-  font-size: 34px;
-  margin-bottom: 8px;
+  background: #eef2ff;
+  color: #3730a3;
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  margin-bottom: 12px;
 }
 
 /* LABEL */

@@ -9,6 +9,9 @@ import CanteenProjectsPanel from "../components/CanteenProjectsPanel";
 import FeedbackViewer from "../components/FeedbackViewer";
 import ItemFeedbackViewer from "../components/ItemFeedbackViewer";
 import AdminAccountsPanel from "../components/AdminAccountsPanel";
+import BusinessIcon from '@mui/icons-material/Business';
+import PersonIcon from '@mui/icons-material/Person';
+import LogoutIcon from '@mui/icons-material/Logout';
 import "./Dashboard.css";
 
 export default function Dashboard() {
@@ -34,10 +37,10 @@ export default function Dashboard() {
     <>
       <div className="dashboard-container" style={{ paddingTop: '20px' }}>
         <div className="dashboard-banner">
-          <h1>🏢 SJVN Lunchify Admin Panel</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><BusinessIcon fontSize="large" /> SJVN Lunchify Admin Panel</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <div className="admin-profile-badge">
-              <span className="profile-icon">👤</span>
+              <span className="profile-icon"><PersonIcon /></span>
               <div className="profile-text">
                 <strong>{user.name || "Administrator"}</strong>
                 <span className="role-subtext">{role.replace("_", " ").toUpperCase()}</span>
@@ -60,7 +63,7 @@ export default function Dashboard() {
               onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
               onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
             >
-              🚪 Logout
+              <LogoutIcon fontSize="small" /> Logout
             </button>
           </div>
         </div>

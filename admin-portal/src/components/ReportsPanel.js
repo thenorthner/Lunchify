@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
+import BoltIcon from '@mui/icons-material/Bolt';
 import "../styles/ReportsPanel.css";
 
 export default function ReportsPanel() {
@@ -89,7 +91,7 @@ export default function ReportsPanel() {
       {/* AGGREGATED CARDS SUMMARY */}
       <div className="reports-summary-cards">
         <div className="rep-card rep-total">
-          <div className="rep-icon">🎟️</div>
+          <div className="rep-icon"><ConfirmationNumberIcon fontSize="large" style={{ color: '#3730a3' }} /></div>
           <div className="rep-meta">
             <h3>Total Scanned Coupons</h3>
             <p>{summaryStats.totalScanned}</p>
@@ -97,7 +99,7 @@ export default function ReportsPanel() {
         </div>
 
         <div className="rep-card rep-peak">
-          <div className="rep-icon">⚡</div>
+          <div className="rep-icon"><BoltIcon fontSize="large" style={{ color: '#b45309' }} /></div>
           <div className="rep-meta">
             <h3>Peak Activity Count</h3>
             <p>{summaryStats.highestCount}</p>

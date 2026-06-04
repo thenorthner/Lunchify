@@ -46,6 +46,7 @@ router.get('/check-id/:employeeId', async (req, res) => {
     res.json({
       name: rows[0].name,
       department: rows[0].department,
+      phone: rows[0].phone
     });
   } catch (err) {
     console.error('❌ check-id error:', err);

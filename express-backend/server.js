@@ -22,6 +22,7 @@ const transferRoutes = require('./routes/transfer.routes.js');
 const feedbackRoutes = require('./routes/feedback.routes.js');
 const couponRoutes = require('./routes/coupon.routes.js');
 const itemFeedbackRoutes = require('./routes/item_feedback.routes.js');
+const canteenRoutes = require('./routes/canteen.routes.js');
 
 /* ===== USE ROUTES ===== */
 app.use('/api/auth', loginRoutes);
@@ -40,6 +41,7 @@ app.use('/api/feedbacks', feedbackRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/item-feedbacks', itemFeedbackRoutes);
 app.use('/api/snack-catalog', snackRoutes);
+app.use('/api/canteens', canteenRoutes);
 
 /* ===== HEALTH CHECK ===== */
 app.get('/', (req, res) => {

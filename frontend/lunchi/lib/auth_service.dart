@@ -14,6 +14,9 @@ class AuthService {
   static bool get isAdmin =>
       user != null && (user!['is_admin'] == 1 || user!['is_admin'] == true || user!['role'] == 'it_admin' || user!['role'] == 'hr_admin' || user!['role'] == 'canteen_admin');
 
+  static bool get isITAdmin =>
+      user != null && user!['role'] == 'it_admin';
+
   static String get name => user?['name'] ?? '';
   static String get employeeId => user?['id'] ?? user?['employee_id'] ?? '';
 
