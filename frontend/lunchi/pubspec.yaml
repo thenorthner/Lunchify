@@ -71,3 +71,6 @@ flutter:
     - family: Roboto
       fonts:
         - asset: assets/fonts/Playfair_Display/Roboto-VariableFont_wdth,wght.ttf
+
+dependency_overrides:
+  path_provider_android: ^2.2.14
