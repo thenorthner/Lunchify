@@ -46,8 +46,11 @@ router.post('/share', requireAuth, async (req, res) => {
     }
 
     // Perform updates
-    await connection.query('UPDATE users SET coupons_left = coupons_left - ? WHERE id = ?', [amount, senderId]);
+    await connection.query('UPDATE users SET coupons_left = coupons_left - ?, coupons_used = coupons_used + ? WHERE id = ?', [amount, amount, senderId]);
     await connection.query('UPDATE users SET coupons_left = coupons_left + ? WHERE id = ?', [amount, receiverId]);
+
+    // Log the share
+    await connection.query('INSERT INTO coupon_shares (sender_id, receiver_id, amount) VALUES (?, ?, ?)', [senderId, receiverId, amount]);
 
     await connection.commit();
     res.json({ message: 'Coupons shared successfully', sharedAmount: amount });
@@ -85,6 +88,37 @@ router.get('/:employeeId', async (req, res) => {
   } catch (err) {
     console.error('❌ Error fetching coupon data:', err);
     return res.status(500).json({ message: 'Internal Server Error', error: err.message });
+  }
+});
+
+// ✅ GET combined coupon usage history
+router.get('/history/:employeeId', async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const monthStr = new Date().toLocaleDateString('en-CA').slice(0, 7); // YYYY-MM
+    const query = `
+      SELECT 'lunch' as usage_type, quantity as amount, created_at as used_at, CONCAT('Pre-ordered Food: ', name) as description 
+      FROM food_lunch_orders WHERE employee_id = ? AND created_at LIKE ?
+      UNION ALL
+      SELECT 'fruit' as usage_type, quantity as amount, created_at as used_at, CONCAT('Pre-ordered Fruit: ', name) as description 
+      FROM fruit_lunch_orders WHERE employee_id = ? AND created_at LIKE ?
+      UNION ALL
+      SELECT 'sharing' as usage_type, amount, shared_at as used_at, CONCAT('Shared with: ', u.name) as description 
+      FROM coupon_shares c JOIN users u ON c.receiver_id = u.id WHERE sender_id = ? AND shared_at LIKE ?
+      UNION ALL
+      SELECT 'lunch' as usage_type, 1 as amount, qsl.created_at as used_at, 'Instant QR Scan at Canteen' as description 
+      FROM qr_scan_logs qsl 
+      JOIN qr_codes q ON qsl.qr_id = q.id 
+      WHERE q.employee_id = ? AND q.type = 'instant' AND qsl.created_at LIKE ?
+      ORDER BY used_at DESC
+    `;
+    
+    const likeMonth = `${monthStr}%`;
+    const [rows] = await mysqlPool.query(query, [employeeId, likeMonth, employeeId, likeMonth, employeeId, likeMonth, employeeId, likeMonth]);
+    res.json(rows);
+  } catch (err) {
+    console.error('❌ Error fetching coupon history:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 

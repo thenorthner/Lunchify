@@ -287,10 +287,15 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Order Date: $date",
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF8A96A8)),
+                Expanded(
+                  child: Text(
+                    "Order Date: $date",
+                    style: const TextStyle(fontSize: 13, color: Color(0xFF8A96A8)),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
+                const SizedBox(width: 8),
                 _buildStatusBadge(status),
               ],
             ),
@@ -525,22 +530,22 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
             
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              children: [
-                DropdownButton<String>(
-                  value: _sortNewest ? 'newest' : 'oldest',
-                  items: const [
-                    DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
-                    DropdownMenuItem(value: 'oldest', child: Text('Sort: Oldest')),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _sortNewest = v == 'newest');
-                  },
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<int?>(
-                    isExpanded: true,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  DropdownButton<String>(
+                    value: _sortNewest ? 'newest' : 'oldest',
+                    items: const [
+                      DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
+                      DropdownMenuItem(value: 'oldest', child: Text('Sort: Oldest')),
+                    ],
+                    onChanged: (v) {
+                      if (v != null) setState(() => _sortNewest = v == 'newest');
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  DropdownButton<int?>(
                     value: selectedYear,
                     hint: const Text('Year'),
                     items: [
@@ -550,11 +555,8 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
                     ],
                     onChanged: (v) => setState(() => selectedYear = v),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<int?>(
-                    isExpanded: true,
+                  const SizedBox(width: 10),
+                  DropdownButton<int?>(
                     value: selectedMonth?.month,
                     hint: const Text('Month'),
                     items: [
@@ -569,8 +571,8 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
                        });
                     },
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
           // Tab Views

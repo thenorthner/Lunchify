@@ -457,7 +457,7 @@ class _FormSection extends StatelessWidget {
                               Icon(
                                 success
                                     ? Icons.check_rounded
-                                    : Icons.arrow_forward_rounded,
+                                    : Icons.lock_rounded,
                                 color: Colors.white,
                                 size: 18,
                               ),

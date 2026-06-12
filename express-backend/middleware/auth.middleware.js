@@ -74,15 +74,15 @@ exports.requireHRAdmin = (req, res, next) => {
 
 // Canteen Admin check
 exports.requireCanteenAdmin = (req, res, next) => {
-  if (req.user?.role !== "canteen_admin" && req.user?.role !== "it_admin") {
-    return res.status(403).json({ message: "Access denied. Canteen Admin role required." });
+  if (req.user?.role !== "canteen_admin" && req.user?.role !== "it_admin" && req.user?.role !== "scanner") {
+    return res.status(403).json({ message: "Access denied. Canteen Admin or Scanner role required." });
   }
   next();
 };
 
 // Legacy support: requireAdmin mapped to Canteen Admin or above
 exports.requireAdmin = (req, res, next) => {
-  if (req.user?.role !== "canteen_admin" && req.user?.role !== "hr_admin" && req.user?.role !== "it_admin") {
+  if (req.user?.role !== "canteen_admin" && req.user?.role !== "hr_admin" && req.user?.role !== "it_admin" && req.user?.role !== "scanner") {
     return res.status(403).json({ message: "Admin access only" });
   }
   next();

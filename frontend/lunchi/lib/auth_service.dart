@@ -12,7 +12,7 @@ class AuthService {
   static bool get isLoggedIn => token != null && user != null;
 
   static bool get isAdmin =>
-      user != null && (user!['is_admin'] == 1 || user!['is_admin'] == true || user!['role'] == 'it_admin' || user!['role'] == 'hr_admin' || user!['role'] == 'canteen_admin');
+      user != null && (user!['is_admin'] == 1 || user!['is_admin'] == true || user!['role'] == 'it_admin' || user!['role'] == 'hr_admin' || user!['role'] == 'canteen_admin' || user!['role'] == 'scanner');
 
   static bool get isITAdmin =>
       user != null && user!['role'] == 'it_admin';

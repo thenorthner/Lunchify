@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'config.dart';
 import 'auth_service.dart';
 import 'app_theme.dart';
+import 'coupon_history_page.dart';
 
 class CouponStatusPage extends StatefulWidget {
   final String employeeId;
@@ -128,7 +129,15 @@ class _CouponStatusPageState extends State<CouponStatusPage> {
                                         icon: Icons.remove_circle_outline_rounded,
                                         count: couponsUsed.toString(),
                                         label: 'Coupons Used',
-                                        description: 'Total coupons you have used.',
+                                        description: 'Click to view coupon usage history.',
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => CouponHistoryPage(employeeId: widget.employeeId),
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ),
                                     const SizedBox(width: 14),
@@ -305,12 +314,14 @@ class _CouponCard extends StatefulWidget {
   final String count;
   final String label;
   final String description;
+  final VoidCallback? onTap;
 
   const _CouponCard({
     required this.icon,
     required this.count,
     required this.label,
     required this.description,
+    this.onTap,
   });
 
   @override
@@ -323,6 +334,7 @@ class _CouponCardState extends State<_CouponCard> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: widget.onTap,
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),

@@ -9,6 +9,8 @@ import CanteenProjectsPanel from "../components/CanteenProjectsPanel";
 import FeedbackViewer from "../components/FeedbackViewer";
 import ItemFeedbackViewer from "../components/ItemFeedbackViewer";
 import AdminAccountsPanel from "../components/AdminAccountsPanel";
+import OrdersManager from "../components/OrdersManager";
+import ScanHistoryPanel from "../components/ScanHistoryPanel";
 import BusinessIcon from '@mui/icons-material/Business';
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
@@ -85,6 +87,8 @@ export default function Dashboard() {
           {activeTab === "feedbacks" && <FeedbackViewer />}
           {activeTab === "item_feedbacks" && <ItemFeedbackViewer />}
           {activeTab === "admin_accounts" && <AdminAccountsPanel />}
+          {activeTab === "orders" && <OrdersManager />}
+          {activeTab === "scan_history" && <ScanHistoryPanel />}
         </div>
       </div>
     </>

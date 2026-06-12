@@ -38,11 +38,17 @@ router.post('/order-fruit-lunch', async (req, res) => {
       return res.status(400).json({ error: `Insufficient coupons. You have only ${couponsLeft} left.` });
     }
 
-    // Insert order with employee's canteen_id and project_id
+    // Deduct coupons immediately (auto-accept)
+    await conn.query(
+      "UPDATE users SET coupons_left = coupons_left - ?, coupons_used = coupons_used + ? WHERE id = ?",
+      [quantity, quantity, employee_id]
+    );
+
+    // Insert order with employee's canteen_id and project_id, status = 'accepted'
     const [result] = await conn.query(
       `INSERT INTO fruit_lunch_orders 
        (employee_id, name, quantity, order_type, room_number, delivery_time, date, status, canteen_id, project_id, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, NOW())`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'accepted', ?, ?, NOW())`,
       [employee_id, name, quantity, order_type || null, room_number || null, delivery_time || null, today, req.user.canteen_id, req.user.project_id]
     );
 

@@ -631,25 +631,7 @@ class _ArcPainter extends CustomPainter {
       paint,
     );
 
-    // Arrowhead at the end of the arc
-    final arrowPaint = Paint()
-      ..color = _kAccent
-      ..strokeWidth = 3
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    final cx = size.width / 2;
-    final cy = size.height;
-    canvas.drawLine(
-      Offset(cx, cy - 6),
-      Offset(cx + 6, cy),
-      arrowPaint,
-    );
-    canvas.drawLine(
-      Offset(cx + 6, cy),
-      Offset(cx + 12, cy - 6),
-      arrowPaint,
-    );
+    // Arrowhead removed to keep normal circle animation
   }
 
   @override

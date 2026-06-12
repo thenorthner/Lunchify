@@ -160,10 +160,87 @@ router.patch("/:id/status", requireHRAdmin, async (req, res) => {
 });
 
 /**
+ * 3.5 GET /api/billing/fruit-lunch-pdf
+ * Canteen Admin downloads the PDF for fruit lunch orders of the current month
+ */
+router.get("/fruit-lunch-pdf", async (req, res) => {
+  if (req.user.role !== 'canteen_admin') {
+    return res.status(403).json({ error: "Only Canteen Admin can access this" });
+  }
+
+  try {
+    const today = new Date();
+    const monthStr = today.toLocaleDateString('en-CA').slice(0, 7); // YYYY-MM
+    
+    // Get all fruit lunch orders for this canteen in current month
+    const [orders] = await mysqlPool.query(
+      `SELECT o.*, u.name as employee_name, u.id as emp_id 
+       FROM fruit_lunch_orders o
+       JOIN users u ON o.employee_id = u.id
+       WHERE o.canteen_id = ? 
+       AND o.date LIKE ?
+       ORDER BY o.date DESC, o.created_at DESC`,
+      [req.user.canteen_id, `${monthStr}%`]
+    );
+
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    res.setHeader('Content-disposition', `attachment; filename=Fruit_Lunch_Orders_${monthStr}.pdf`);
+    res.setHeader('Content-type', 'application/pdf');
+    doc.pipe(res);
+
+    // --- Header ---
+    doc.rect(0, 0, 600, 100).fill('#f4f8fc');
+    doc.moveTo(0, 100).lineTo(600, 100).strokeColor('#c0d6f2').lineWidth(2).stroke();
+    
+    doc.font('Helvetica-Bold').fontSize(24).fillColor('#1a365d').text('SJVN Lunchify', 50, 25);
+    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1e3a8a').text(`Fruit Lunch Orders - ${monthStr}`, 50, 60);
+
+    // --- Table Header ---
+    const startY = 130;
+    doc.font('Helvetica-Bold').fontSize(10).fillColor('#000');
+    doc.text('Date', 50, startY);
+    doc.text('Employee Name', 150, startY);
+    doc.text('Emp ID', 350, startY);
+    doc.text('Item', 430, startY);
+    doc.text('Qty', 530, startY);
+    doc.moveTo(50, startY + 15).lineTo(550, startY + 15).strokeColor('#ccc').lineWidth(1).stroke();
+
+    // --- Table Rows ---
+    let y = startY + 25;
+    doc.font('Helvetica').fontSize(9).fillColor('#333');
+    for (let i = 0; i < orders.length; i++) {
+      if (y > 750) {
+        doc.addPage();
+        y = 50;
+      }
+      const o = orders[i];
+      doc.text(o.date, 50, y);
+      doc.text(o.employee_name, 150, y);
+      doc.text(o.emp_id, 350, y);
+      doc.text(o.name || '-', 430, y);
+      doc.text(o.quantity.toString(), 530, y);
+      
+      doc.moveTo(50, y + 15).lineTo(550, y + 15).strokeColor('#eee').lineWidth(1).stroke();
+      y += 25;
+    }
+
+    if (orders.length === 0) {
+      doc.font('Helvetica-Oblique').text('No fruit lunch orders found for this month.', 50, y + 20);
+    }
+
+    doc.end();
+
+  } catch (err) {
+    console.error("❌ Error generating fruit lunch PDF:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
  * 4. GET /api/billing/:id/pdf
  * HR Admin downloads the PDF for an approved bill
  */
-router.get("/:id/pdf", requireHRAdmin, async (req, res) => {
+router.get("/:id/pdf", async (req, res) => {
   const billId = req.params.id;
 
   try {
@@ -181,6 +258,17 @@ router.get("/:id/pdf", requireHRAdmin, async (req, res) => {
     }
 
     const bill = billRows[0];
+
+    // Access control
+    if (req.user.role === 'hr_admin' && bill.project_id !== req.user.project_id) {
+      return res.status(403).json({ error: "Access denied. Bill belongs to another project." });
+    }
+    if (req.user.role === 'canteen_admin' && bill.canteen_id !== req.user.canteen_id) {
+      return res.status(403).json({ error: "Access denied. Bill belongs to another canteen." });
+    }
+    if (req.user.role === 'employee') {
+      return res.status(403).json({ error: "Access denied." });
+    }
 
     // Create a PDF document
     const doc = new PDFDocument({ margin: 0, size: 'A4' });

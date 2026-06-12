@@ -43,7 +43,7 @@ router.post("/login", async (req, res) => {
     }
 
     const [rows] = await db.query(
-      `SELECT id, name, password, is_admin, is_registered
+      `SELECT id, name, password, is_admin, is_registered, role
        FROM users
        WHERE id = ? AND is_active = 1`,
       [employeeId.trim()]
@@ -77,6 +77,7 @@ router.post("/login", async (req, res) => {
         id: user.id,
         name: user.name,
         is_admin: user.is_admin,
+        role: user.role,
       },
     });
   } catch (err) {
@@ -97,7 +98,7 @@ router.post("/admin/login", async (req, res) => {
     }
 
     const [rows] = await db.query(
-      `SELECT id, name, password, is_admin
+      `SELECT id, name, password, is_admin, role
        FROM users
        WHERE id = ? AND is_active = 1`,
       [employeeId.trim()]
@@ -129,6 +130,7 @@ router.post("/admin/login", async (req, res) => {
       admin: {
         id: admin.id,
         name: admin.name,
+        role: admin.role,
       },
     });
   } catch (err) {

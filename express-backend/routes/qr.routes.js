@@ -115,13 +115,7 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
     const type = parts[2];
     const qrDate = parts[3];
 
-    const today = new Date().toLocaleDateString('en-CA');
-    if (qrDate !== today) {
-      return res.status(400).json({
-        success: false,
-        message: 'QR is expired or not for today',
-      });
-    }
+    // Removed date check to allow non-expiring QRs
 
     await conn.beginTransaction();
 
@@ -208,6 +202,32 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
     });
   } finally {
     conn.release();
+  }
+});
+
+// ✅ GET /api/qr/scan-logs - Returns scan logs for the current month for a canteen
+router.get('/scan-logs', requireCanteenAdmin, async (req, res) => {
+  try {
+    let canteenId = req.user.canteen_id;
+    if (req.user.role === 'it_admin' && req.query.canteen_id) {
+      canteenId = req.query.canteen_id;
+    }
+
+    const monthStr = new Date().toLocaleDateString('en-CA').slice(0, 7); // YYYY-MM
+    const [rows] = await mysqlPool.query(
+      `SELECT ql.id, ql.created_at, u.name as employee_name, u.id as employee_id, q.type, q.items
+       FROM qr_scan_logs ql
+       JOIN qr_codes q ON ql.qr_id = q.id
+       JOIN users u ON q.employee_id = u.id
+       WHERE ql.canteen_id = ? 
+       AND ql.created_at LIKE ?
+       ORDER BY ql.created_at DESC`,
+      [canteenId, `${monthStr}%`]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Scan logs Error:', err);
+    res.status(500).json({ error: 'Failed to fetch scan logs' });
   }
 });
 

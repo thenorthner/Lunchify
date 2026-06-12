@@ -6,6 +6,9 @@ import SyncIcon from '@mui/icons-material/Sync';
 import BusinessIcon from '@mui/icons-material/Business';
 import ChatIcon from '@mui/icons-material/Chat';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import HistoryIcon from '@mui/icons-material/History';
 import "../styles/Tabs.css";
 
 export default function DashboardTabs({ activeTab, setActiveTab, role }) {
@@ -35,6 +38,30 @@ export default function DashboardTabs({ activeTab, setActiveTab, role }) {
         >
           <div className="tab-icon"><StarIcon fontSize="large" /></div>
           <span>Menu Ratings</span>
+        </div>
+
+        <div
+          className={`tab-card ${activeTab === "menu" ? "active" : ""}`}
+          onClick={() => setActiveTab("menu")}
+        >
+          <div className="tab-icon"><RestaurantMenuIcon fontSize="large" /></div>
+          <span>Menu Management</span>
+        </div>
+
+        <div
+          className={`tab-card ${activeTab === "orders" ? "active" : ""}`}
+          onClick={() => setActiveTab("orders")}
+        >
+          <div className="tab-icon"><ShoppingCartIcon fontSize="large" /></div>
+          <span>Canteen Orders</span>
+        </div>
+
+        <div
+          className={`tab-card ${activeTab === "scan_history" ? "active" : ""}`}
+          onClick={() => setActiveTab("scan_history")}
+        >
+          <div className="tab-icon"><HistoryIcon fontSize="large" /></div>
+          <span>Scan History</span>
         </div>
       </div>
     );

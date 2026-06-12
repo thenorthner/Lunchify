@@ -59,6 +59,40 @@ export default function CanteenBillingPanel() {
     }
   };
 
+  const handleDownloadPDF = async (billId) => {
+    try {
+      const res = await axios.get(`http://localhost:3001/api/billing/${billId}/pdf`, {
+        ...axiosConfig,
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Bill_${billId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      alert("Failed to download PDF");
+    }
+  };
+
+  const handleDownloadFruitLunchPDF = async () => {
+    try {
+      const res = await axios.get(`http://localhost:3001/api/billing/fruit-lunch-pdf`, {
+        ...axiosConfig,
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Fruit_Lunch_Orders.pdf`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (err) {
+      alert("Failed to download Fruit Lunch PDF");
+    }
+  };
+
   const handleEditRevertedBill = (b) => {
     setBillMonth(b.bill_month);
     setCouponPrice(b.coupon_price);
@@ -166,6 +200,19 @@ export default function CanteenBillingPanel() {
               {submitting ? "Consolidating Bill..." : "🚀 Generate & Submit Bill to HR"}
             </button>
           </form>
+
+          <div style={{ marginTop: '20px', borderTop: '1px solid #eee', paddingTop: '16px' }}>
+            <h4 style={{ marginBottom: '10px', color: '#555', fontSize: '14px' }}>Fruit Lunch Report</h4>
+            <p style={{ fontSize: '12px', color: '#777', marginBottom: '12px' }}>Download the current month's fruit lunch orders for this canteen.</p>
+            <button 
+              type="button" 
+              className="btn-action" 
+              onClick={handleDownloadFruitLunchPDF}
+              style={{ width: '100%', padding: '10px', fontSize: '14px', borderRadius: '8px', background: '#0d6efd', color: '#fff', cursor: 'pointer', border: 'none' }}
+            >
+              📥 Download Fruit Lunch PDF
+            </button>
+          </div>
         </div>
 
         {/* BILL SUBMISSION STATUS LIST */}
@@ -183,6 +230,7 @@ export default function CanteenBillingPanel() {
                     <th style={{ padding: '8px 4px' }}>Rate</th>
                     <th style={{ padding: '8px 4px' }}>Total</th>
                     <th style={{ padding: '8px 4px' }}>Status</th>
+                    <th style={{ padding: '8px 4px' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -198,10 +246,21 @@ export default function CanteenBillingPanel() {
                             {b.status.toUpperCase()}
                           </span>
                         </td>
+                        <td style={{ padding: '10px 4px' }}>
+                          {b.status === "approved" && (
+                            <button 
+                              className="btn-action" 
+                              style={{background: '#0d6efd', padding: '4px 8px', fontSize: '11px', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer'}}
+                              onClick={() => handleDownloadPDF(b.id)}
+                            >
+                              PDF
+                            </button>
+                          )}
+                        </td>
                       </tr>
                       {b.comments && (
                         <tr style={{ borderBottom: '1px solid #eee', backgroundColor: b.status === 'review' ? '#fffaf0' : '#f8f9fa' }}>
-                          <td colSpan="5" style={{ padding: '8px 10px', fontSize: '12px', color: '#555', borderLeft: b.status === 'review' ? '3px solid #ff9800' : '3px solid #ccc' }}>
+                          <td colSpan="6" style={{ padding: '8px 10px', fontSize: '12px', color: '#555', borderLeft: b.status === 'review' ? '3px solid #ff9800' : '3px solid #ccc' }}>
                             <strong>HR Feedback:</strong> {b.comments}
                             {b.status === 'review' && (
                               <button onClick={() => handleEditRevertedBill(b)} style={{ float: 'right', padding: '4px 10px', background: '#ff9800', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold' }}>

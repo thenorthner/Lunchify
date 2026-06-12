@@ -91,7 +91,7 @@ router.post('/login-request', async (req, res) => {
     );
 
     // Send actual SMS text message using our integrated SMS service
-    const smsMessage = `Your SJVN Lunchify signup OTP is ${otp}. Valid for 5 minutes. Please do not share this with anyone.`;
+    const smsMessage = `OTP for Login in portal is ${otp} - SJVN Limited`;
     await sendSMS(phone, smsMessage);
 
     res.json({ message: 'OTP sent successfully' });
@@ -325,7 +325,7 @@ router.post('/forgot-password', async (req, res) => {
       [phone, otp, expiresAt]
     );
 
-    const smsMessage = `Your SJVN Lunchify password reset OTP is ${otp}. Valid for 5 minutes. Please do not share this with anyone.`;
+    const smsMessage = `OTP for Login in portal is ${otp} - SJVN Limited`;
     await sendSMS(phone, smsMessage);
 
     res.json({ success: true, message: 'Reset OTP sent successfully' });

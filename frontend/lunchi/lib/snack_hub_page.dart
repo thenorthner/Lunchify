@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:lunchi/lunch_rating_selection_screen.dart';
-import 'package:lunchi/feedback_page.dart';
-import 'widgets/top_bar.dart'; // Ensure you have this or just use an AppBar
+import 'snack_order_employee.dart';
+import 'snack_order_history_page.dart';
+import 'snack_order_status_page.dart';
+import 'widgets/top_bar.dart';
 
-class SupportRatingsHub extends StatelessWidget {
-  const SupportRatingsHub({Key? key}) : super(key: key);
+class SnackHubPage extends StatelessWidget {
+  final String employeeId;
+
+  const SnackHubPage({Key? key, required this.employeeId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +19,7 @@ class SupportRatingsHub extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            const TopBar(title: "Rating & Feedback"),
+            const TopBar(title: "Snack Hub"),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -24,22 +27,32 @@ class SupportRatingsHub extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _HubCard(
-                      icon: Icons.star_rate_rounded,
-                      title: "Menu Rating",
-                      subtitle: "Rate today's lunch menu",
+                      icon: Icons.room_service_rounded,
+                      title: "Order Snacks",
+                      subtitle: "Order your favorite snacks",
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const LunchRatingSelectionScreen()),
+                        MaterialPageRoute(builder: (_) => EmployeeSnackOrderPage(employeeId: employeeId)),
                       ),
                     ),
                     const SizedBox(height: 20),
                     _HubCard(
-                      icon: Icons.bug_report_rounded,
-                      title: "App Feedback",
-                      subtitle: "Report any bugs or issues to the IT admin",
+                      icon: Icons.assignment_rounded,
+                      title: "Order Status",
+                      subtitle: "Track your snack orders",
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const FeedbackPage()),
+                        MaterialPageRoute(builder: (_) => SnackOrderStatusPage(employeeId: employeeId)),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _HubCard(
+                      icon: Icons.history_rounded,
+                      title: "Order History",
+                      subtitle: "View your past snack orders",
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => SnackOrderHistoryPage(employeeId: employeeId)),
                       ),
                     ),
                   ],

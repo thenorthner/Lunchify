@@ -3,6 +3,7 @@ import 'update_full_menu_page.dart';
 import 'admin_orders_page.dart';
 import 'qr_scanner.dart';
 import 'snack_requests_page.dart';
+import 'admin_scan_history_page.dart';
 import 'admin_pending_requests_page.dart';
 import 'login_page.dart';
 import 'auth_service.dart';
@@ -80,6 +81,14 @@ class AdminPage extends StatelessWidget {
         },
       ),
       _AdminMenuItem(
+        icon: Icons.history_rounded,
+        title: "Scan History",
+        subtitle: "View QR scan history for this month",
+        onTap: () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScanHistoryPage()));
+        },
+      ),
+      _AdminMenuItem(
         icon: Icons.pending_actions_rounded,
         title: "Pending Approvals",
         subtitle: "Review and approve pending requests",
@@ -89,32 +98,32 @@ class AdminPage extends StatelessWidget {
       ),
     ];
 
+    final role = AuthService.user?['role'];
+    if (role == 'scanner') {
+      menuItems.removeWhere((item) => item.title != "Scan QR" && item.title != "Scan History");
+    }
+
     return Scaffold(
       backgroundColor: _kBg,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
             final isWide = constraints.maxWidth > 600;
-            return Column(
-              children: [
-                // ── Hero Header ───────────────────────────────────────────
-                const _Header(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
-                  child: _WelcomeCard(adminName: adminName),
+            return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.symmetric(
+                  horizontal: isWide ? 40 : 16,
+                  vertical: 24,
                 ),
-
-                // ── Scrollable Content ────────────────────────────────────
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isWide ? 40 : 16,
-                      vertical: 24,
+                child: Column(
+                  children: [
+                    // ── Hero Header ───────────────────────────────────────────
+                    const _Header(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: _WelcomeCard(adminName: adminName),
                     ),
-                    child: Column(
-                      children: [
-                        // Menu cards
+                    // Menu cards
                         ...menuItems.map(
                           (item) => Padding(
                             padding: const EdgeInsets.only(bottom: 14),
@@ -135,11 +144,8 @@ class AdminPage extends StatelessWidget {
                             );
                           },
                         ),
-                      ],
-                    ),
-                  ),
+                  ],
                 ),
-              ],
             );
           },
         ),
@@ -441,7 +447,9 @@ class _LogoutButtonState extends State<_LogoutButton> {
           width: double.infinity,
           height: 58,
           decoration: BoxDecoration(
-            color: _kAccent,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(

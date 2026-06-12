@@ -333,154 +333,156 @@ class _EmployeeSnackOrderPageState extends State<EmployeeSnackOrderPage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF0F5FB), // kSubtle
-      body: Column(
-        children: [
-          const TopBar(title: "Order Snacks"),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Column(
-                children: [
-                  _sessionToggle(),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: _isLoading
-                        ? const Center(child: CircularProgressIndicator(color: Color(0xFF1A3A8F)))
-                        : _availableSnacks.isEmpty
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.restaurant_menu,
-                                      size: 70,
-                                      color: const Color(0xFF1A3A8F).withOpacity(0.3),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Text(
-                                      "No snacks menu set for this session today.",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        color: Color(0xFF1A2E6E), // kNavy
+      body: SafeArea(
+        child: Column(
+          children: [
+            const TopBar(title: "Order Snacks"),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: Column(
+                  children: [
+                    _sessionToggle(),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: _isLoading
+                          ? const Center(child: CircularProgressIndicator(color: Color(0xFF1A3A8F)))
+                          : _availableSnacks.isEmpty
+                              ? Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.restaurant_menu,
+                                        size: 70,
+                                        color: const Color(0xFF1A3A8F).withOpacity(0.3),
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 6),
-                                    const Text(
-                                      "Please check back later or contact canteen admin.",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Color(0xFF8A96A8), // kGray
+                                      const SizedBox(height: 16),
+                                      const Text(
+                                        "No snacks menu set for this session today.",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Color(0xFF1A2E6E), // kNavy
+                                        ),
+                                        textAlign: TextAlign.center,
                                       ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ],
+                                      const SizedBox(height: 6),
+                                      const Text(
+                                        "Please check back later or contact canteen admin.",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xFF8A96A8), // kGray
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              : ListView(
+                                  children: _availableSnacks.map(_buildSnackCard).toList(),
                                 ),
-                              )
-                            : ListView(
-                                children: _availableSnacks.map(_buildSnackCard).toList(),
-                              ),
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Total & Note Section
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF1A3A8F).withOpacity(0.06), // kPrimaryBlue
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              "Total Amount:",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF1A2E6E), // kNavy
-                              ),
-                            ),
-                            Text(
-                              "₹$total",
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF2563EB), // kAccentBlue
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Divider(color: Color(0xFFDCE8F5)), // kBorder
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Icon(Icons.info_outline, size: 18, color: Color(0xFF5A7CC9)), // kSubtext
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                "Note: Snacks are pickup only. Pay directly at the counter. Order details are saved to history.",
-                                style: TextStyle(
-                                  color: const Color(0xFF5A7CC9), // kSubtext
-                                  fontStyle: FontStyle.italic,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton(
-                      onPressed: (_isLoading || _availableSnacks.isEmpty || _isSubmitting) ? null : _submitOrder,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1A3A8F), // kPrimaryBlue
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
+                    const SizedBox(height: 16),
+  
+                    // Total & Note Section
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1A3A8F).withOpacity(0.06), // kPrimaryBlue
+                            blurRadius: 16,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      child: _isSubmitting
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-                            )
-                          : const Text(
-                              "Submit Order",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                "Total Amount:",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF1A2E6E), // kNavy
+                                ),
                               ),
-                            ),
+                              Text(
+                                "₹$total",
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF2563EB), // kAccentBlue
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(color: Color(0xFFDCE8F5)), // kBorder
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.info_outline, size: 18, color: Color(0xFF5A7CC9)), // kSubtext
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Note: Snacks are pickup only. Pay directly at the counter. Order details are saved to history.",
+                                  style: TextStyle(
+                                    color: const Color(0xFF5A7CC9), // kSubtext
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                ],
+                    const SizedBox(height: 20),
+  
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 54,
+                      child: ElevatedButton(
+                        onPressed: (_isLoading || _availableSnacks.isEmpty || _isSubmitting) ? null : _submitOrder,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1A3A8F), // kPrimaryBlue
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isSubmitting
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                              )
+                            : const Text(
+                                "Submit Order",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

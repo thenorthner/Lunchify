@@ -4,6 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'config.dart';
 import 'auth_service.dart';
+import 'package:intl/intl.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 
 class QrGeneratorPage extends StatefulWidget {
   final String type; // food / fruit / snack
@@ -16,10 +22,33 @@ class QrGeneratorPage extends StatefulWidget {
 
 class _QrGeneratorPageState extends State<QrGeneratorPage> {
   final TextEditingController employeeIdController = TextEditingController();
+  final GlobalKey _qrKey = GlobalKey();
 
   bool isLoading = false;
   String? qrData;
   String? errorMessage;
+
+  Future<void> _shareQrCode() async {
+    try {
+      if (_qrKey.currentContext == null) return;
+      RenderRepaintBoundary boundary =
+          _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      await Share.shareXFiles(
+        [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'qr_code.png')],
+        text: '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing QR Code: $e')),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -155,7 +184,25 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
               Text(errorMessage!, style: const TextStyle(color: Colors.red)),
             if (qrData != null) ...[
               const SizedBox(height: 20),
-              QrImageView(data: qrData!, size: 220),
+              RepaintBoundary(
+                key: _qrKey,
+                child: Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.all(16.0),
+                  child: QrImageView(data: qrData!, size: 220),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                onPressed: _shareQrCode,
+                icon: const Icon(Icons.share),
+                label: const Text('Share QR'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3730A3),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                ),
+              ),
             ],
           ],
         ),

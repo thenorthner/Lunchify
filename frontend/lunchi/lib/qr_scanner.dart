@@ -140,9 +140,20 @@ class _QRScannerPageState extends State<QRScannerPage>
 
   void _showSuccessDialog(Map<String, dynamic> body) async {
     final employee = body['employee'] ?? {};
-    final items = body['items'] as List<dynamic>? ?? [];
+    
+    List<dynamic> items = [];
+    if (body['items'] != null) {
+      if (body['items'] is String) {
+        try {
+          items = jsonDecode(body['items']);
+        } catch (_) {}
+      } else if (body['items'] is List) {
+        items = body['items'];
+      }
+    }
+    
     final employeeName = employee['name'] ?? 'Unknown';
-    final employeeIdDisplay = employee['employee_id'] ?? '';
+    final employeeIdDisplay = employee['id'] ?? employee['employee_id'] ?? '';
 
     try {
       await _audioPlayer.play(AssetSource('audio/applepay.mp3'));

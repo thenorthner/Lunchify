@@ -8,8 +8,12 @@ import 'package:lunchi/config.dart';
 import 'package:lunchi/auth_service.dart';
 import 'dart:async';
 import 'widgets/item_selection_sheet.dart';
-import 'app_theme.dart';
-
+import 'package:lunchi/app_theme.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 class BuyLunchQrPage extends StatefulWidget {
   final String employeeId;
   final String employeeName;
@@ -31,7 +35,33 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   Uint8List? serverQrImage;
   DateTime? qrExpiresAt;
   Timer? _statusTimer;
+  final GlobalKey _qrKey = GlobalKey();
 
+  Future<void> _shareQrCode() async {
+    try {
+      if (_qrKey.currentContext == null) return;
+      RenderRepaintBoundary boundary =
+          _qrKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = byteData!.buffer.asUint8List();
+
+      final tempDir = await getTemporaryDirectory();
+      final file = await File('${tempDir.path}/qr_code.png').create();
+      await file.writeAsBytes(pngBytes);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error sharing QR Code: $e')),
+        );
+      }
+    }
+  }
   List<String> todayFoodMenu = [];
   List<String> todayFruitMenu = [];
 
@@ -168,6 +198,12 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   }
 
   Future<void> _showFruitLunchOrderDialog() async {
+    final now = DateTime.now();
+    if (now.hour >= 19) {
+      _showInfoDialog('Orders Closed', 'Fruit lunch orders must be placed before 7:00 PM.');
+      return;
+    }
+
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -396,8 +432,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
 
   @override
   Widget build(BuildContext context) {
-    final bool expired =
-        qrExpiresAt != null && DateTime.now().isAfter(qrExpiresAt!);
+    final bool expired = false; // Expiration removed
     final bool qrVisible = qrToken != null;
 
     return Scaffold(
@@ -417,14 +452,15 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           // ── Fruit Lunch row card ──────────────────────────────────
-                          _ActionCard(
-                            icon: Icons.set_meal_rounded,
-                            title: 'Fruit Lunch',
-                            subtitle: 'Choose healthy & fresh options',
-                            onTap: _showFruitLunchOrderDialog,
-                          ),
+                          if (!qrVisible)
+                            _ActionCard(
+                              icon: Icons.set_meal_rounded,
+                              title: 'Fruit Lunch',
+                              subtitle: 'Choose healthy & fresh options',
+                              onTap: _showFruitLunchOrderDialog,
+                            ),
 
-                          const SizedBox(height: 14),
+                          if (!qrVisible) const SizedBox(height: 14),
 
                           // ── Food Lunch / Regenerate QR row card ────────────────────
                           if (!qrVisible)
@@ -479,31 +515,6 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                             height: 1.4,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
-                                        if (qrExpiresAt != null)
-                                          RichText(
-                                            text: TextSpan(
-                                              children: [
-                                                const TextSpan(
-                                                  text: 'Expires at: ',
-                                                  style: TextStyle(
-                                                    fontSize: 12.5,
-                                                    color: kSubtext,
-                                                    fontFamily: 'EBGaramond',
-                                                  ),
-                                                ),
-                                                TextSpan(
-                                                  text: _formattedExpiry,
-                                                  style: const TextStyle(
-                                                    fontSize: 12.5,
-                                                    fontWeight: FontWeight.w700,
-                                                    color: kAccentBlue,
-                                                    fontFamily: 'EBGaramond',
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
                                       ],
                                     ),
                                   ),
@@ -518,54 +529,76 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                               opacity: expired ? 0.3 : 1.0,
                               duration: const Duration(milliseconds: 300),
                               child: Center(
-                                child: Container(
-                                  width: 220,
-                                  height: 220,
-                                  padding: const EdgeInsets.all(16),
-                                  decoration: BoxDecoration(
-                                    color: kCardWhite,
-                                    borderRadius: BorderRadius.circular(20),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: kBlue.withOpacity(0.1),
-                                        blurRadius: 20,
-                                        offset: const Offset(0, 6),
-                                      ),
-                                    ],
-                                  ),
-                                  child: serverQrImage != null
-                                      ? Image.memory(
-                                          serverQrImage!,
-                                          width: 200,
-                                          height: 200,
-                                        )
-                                      : QrImageView(
-                                          data: qrToken ?? '',
-                                          version: QrVersions.auto,
-                                          size: 200,
-                                          eyeStyle: const QrEyeStyle(
-                                            eyeShape: QrEyeShape.square,
-                                            color: kNavy,
-                                          ),
-                                          dataModuleStyle:
-                                              const QrDataModuleStyle(
-                                                dataModuleShape:
-                                                    QrDataModuleShape.square,
-                                                color: kNavy,
-                                              ),
+                                child: RepaintBoundary(
+                                  key: _qrKey,
+                                  child: Container(
+                                    width: 220,
+                                    height: 220,
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: kCardWhite,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: kBlue.withOpacity(0.1),
+                                          blurRadius: 20,
+                                          offset: const Offset(0, 6),
                                         ),
+                                      ],
+                                    ),
+                                    child: serverQrImage != null
+                                        ? Image.memory(
+                                            serverQrImage!,
+                                            width: 200,
+                                            height: 200,
+                                          )
+                                        : QrImageView(
+                                            data: qrToken ?? '',
+                                            version: QrVersions.auto,
+                                            size: 200,
+                                            eyeStyle: const QrEyeStyle(
+                                              eyeShape: QrEyeShape.square,
+                                              color: kNavy,
+                                            ),
+                                            dataModuleStyle:
+                                                const QrDataModuleStyle(
+                                                  dataModuleShape:
+                                                      QrDataModuleShape.square,
+                                                  color: kNavy,
+                                                ),
+                                          ),
+                                  ),
                                 ),
                               ),
                             ),
 
                             const SizedBox(height: 24),
 
-                            SizedBox(
-                              width: double.infinity,
-                              child: _OutlineButton(
-                                label: 'Cancel QR',
-                                onTap: _cancelQr,
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _OutlineButton(
+                                    label: 'Cancel QR',
+                                    onTap: _cancelQr,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: _shareQrCode,
+                                    icon: const Icon(Icons.share, size: 20),
+                                    label: const Text('Share QR', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: kAccentBlue,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
 
                             const SizedBox(height: 20),

@@ -631,27 +631,28 @@ class _AnimatedMenuCardState extends State<_AnimatedMenuCard>
                                     ],
                                   ),
                                 ),
-                                // Chevron — slides right
-                                Transform.translate(
-                                  offset: Offset(_chevronSlide.value, 0),
-                                  child: Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: Color.lerp(
-                                        const Color(0xFFE8EEF9),
-                                        const Color(0xFFBDD2EE),
-                                        _ctrl.value,
+                                // Chevron / Edit icon — slides right
+                                if (widget.onTap != null)
+                                  Transform.translate(
+                                    offset: Offset(_chevronSlide.value, 0),
+                                    child: Container(
+                                      width: 28,
+                                      height: 28,
+                                      decoration: BoxDecoration(
+                                        color: Color.lerp(
+                                          const Color(0xFFE8EEF9),
+                                          const Color(0xFFBDD2EE),
+                                          _ctrl.value,
+                                        ),
+                                        shape: BoxShape.circle,
                                       ),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      widget.onTap != null ? Icons.edit : Icons.chevron_right,
-                                      color: const Color(0xFF4A7AC7),
-                                      size: 20,
+                                      child: const Icon(
+                                        Icons.edit,
+                                        color: Color(0xFF4A7AC7),
+                                        size: 20,
+                                      ),
                                     ),
                                   ),
-                                ),
                               ],
                             ),
                             const SizedBox(height: 12),

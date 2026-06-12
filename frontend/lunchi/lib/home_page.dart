@@ -14,6 +14,7 @@ import 'auth_service.dart';
 import 'feedback_page.dart';
 import 'lunch_rating_selection_screen.dart';
 import 'app_theme.dart'; // <-- added import
+import 'snack_hub_page.dart';
 import 'support_ratings_hub.dart';
 import 'share_coupons_page.dart';
 
@@ -118,22 +119,10 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
           },
         ),
         _HomeMenuItem(
-          icon: Icons.room_service_rounded,
-          title: "Order Snacks",
-          subtitle: "Order your favorite snacks",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => EmployeeSnackOrderPage(employeeId: widget.employeeId))),
-        ),
-        _HomeMenuItem(
-          icon: Icons.assignment_rounded,
-          title: "Order Status",
-          subtitle: "Track your snack orders",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackOrderStatusPage(employeeId: widget.employeeId))),
-        ),
-        _HomeMenuItem(
-          icon: Icons.history_rounded,
-          title: "Order History",
-          subtitle: "View your past snack orders",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackOrderHistoryPage(employeeId: widget.employeeId))),
+          icon: Icons.fastfood_rounded,
+          title: "Snacks Hub",
+          subtitle: "Order snacks & track history",
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackHubPage(employeeId: widget.employeeId))),
         ),
         _HomeMenuItem(
           icon: Icons.card_giftcard_rounded,
@@ -146,8 +135,8 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
         ),
         _HomeMenuItem(
           icon: Icons.headset_mic_rounded,
-          title: "Support & Ratings",
-          subtitle: "Help & daily feedback",
+          title: "Rating & Feedback",
+          subtitle: "Rate menu or report bugs",
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportRatingsHub())),
         ),
       ];
@@ -566,7 +555,9 @@ class _LogoutButtonState extends State<_LogoutButton> {
         child: Container(
           height: 58,
           decoration: BoxDecoration(
-            color: kPrimaryBlue,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+            ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
@@ -653,7 +644,7 @@ class _FooterBadge extends StatelessWidget {
                       ),
                     ),
                     TextSpan(
-                      text: 'SJVN',
+                      text: 'SJVN Limited',
                       style: TextStyle(
                         fontSize: 13,
                         color: kAccentBlue,
