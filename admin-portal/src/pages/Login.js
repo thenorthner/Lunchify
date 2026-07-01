@@ -50,32 +50,25 @@ export default function Login() {
         </div>
 
         <div className="login-z-10 login-hero-container">
-          <div className="login-eyebrow-container">
-            <span className="login-eyebrow-line" />
-            <span className="eyebrow" style={{ color: "var(--on-dark-accent)" }}>Vol. IV · No. 26</span>
-          </div>
           <h1 className="login-heading font-display">
-            The art of
+            Every meal.
             <br />
-            <span style={{ fontStyle: "italic", fontWeight: 300, color: "var(--on-dark-accent)" }}>mindful canteen</span>
+            <span style={{ fontStyle: "italic", fontWeight: 300, color: "var(--on-dark-accent)" }}>Every coupon.</span>
             <br />
-            administration.
+            One platform.
           </h1>
           <p className="login-subtext">
-            A console crafted for the ones who tend to lunch with the rigour of a Michelin pass — where menus, coupons and ledgers find their quiet equilibrium.
+            A unified system for managing canteen operations across the organization.
           </p>
 
           <div className="hairline my-9" style={{ margin: "36px 0", background: "linear-gradient(90deg, transparent, rgba(84,189,245,.5), transparent)" }} />
 
           <div className="login-stats-grid">
-            {[
-              { v: "5", l: "Canteens" },
-              { v: "1,284", l: "Coupons / mo" },
-              { v: "₹76k", l: "Settled" },
-            ].map((s, i) => (
+            {["ONBOARD", "MANAGE", "MONITOR"].map((label, i) => (
               <div key={i} data-testid={`cover-stat-${i}`}>
-                <div className="tnum font-display" style={{ fontSize: 32, fontWeight: 400, color: "var(--on-dark)" }}>{s.v}</div>
-                <div className="eyebrow" style={{ marginTop: 4, color: "var(--on-dark-muted)" }}>{s.l}</div>
+                <div className="eyebrow" style={{ color: "var(--on-dark)", fontSize: 14, letterSpacing: "0.15em" }}>
+                  {label}
+                </div>
               </div>
             ))}
           </div>

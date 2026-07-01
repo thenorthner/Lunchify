@@ -11,17 +11,6 @@ export default function Brand({ size = "md", on = "light" }) {
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }} data-testid="brand">
-      <img 
-        src="/lunchify_logo.png" 
-        alt="SJVN Lunchify Logo" 
-        style={{ 
-          width: 42 * scale, 
-          height: 42 * scale, 
-          objectFit: 'contain',
-          borderRadius: '8px'
-        }} 
-      />
-
       <div style={{ lineHeight: 1 }}>
         <div
           style={{
