@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
@@ -26,6 +26,39 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
       return;
     }
 
+    final myId = AuthService.user?['id']?.toString();
+    if (recipientId == myId) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Hey!"),
+          content: const Text(
+            "You already own this coupon, genius.🫠",
+            style: TextStyle(fontSize: 16),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1A3A8F),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                "My bad 😅",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     final amount = int.tryParse(amountStr);
     if (amount == null || amount <= 0) {
       _showSnackBar("Please enter a valid number of coupons.", Colors.red);
@@ -35,26 +68,91 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
     setState(() => _isLoading = true);
 
     try {
+      final userInfo = await AuthService.checkId(recipientId);
+      final recipientName = userInfo['name'];
+
+      if (recipientName == null) {
+        setState(() => _isLoading = false);
+        _showSnackBar(
+          userInfo['message'] ?? "Invalid or inactive employee ID.",
+          Colors.red,
+        );
+        return;
+      }
+
+      setState(() => _isLoading = false);
+
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Confirm Transfer"),
+          content: Text(
+            "Really wanna give shiny coupons to $recipientName?",
+            style: const TextStyle(fontSize: 16),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text(
+                "Maybe Not",
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1A3A8F),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text(
+                "Bless The Homie ✨",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirm == true) {
+        setState(() => _isLoading = true);
+        await _executeShare(recipientId, amount);
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showSnackBar(e.toString().replaceAll("Exception: ", ""), Colors.red);
+    }
+  }
+
+  Future<void> _executeShare(String recipientId, int amount) async {
+    try {
       final response = await http.post(
         Uri.parse(AppConfig.shareCoupons),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${AuthService.token}',
         },
-        body: jsonEncode({
-          'receiverId': recipientId,
-          'amount': amount,
-        }),
+        body: jsonEncode({'receiverId': recipientId, 'amount': amount}),
       );
 
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        _showSnackBar(data['message'] ?? "Coupons shared successfully!", Colors.green);
+        _showSnackBar(
+          data['message'] ?? "Coupons shared successfully!",
+          Colors.green,
+        );
         _recipientController.clear();
         _amountController.clear();
       } else {
-        _showSnackBar(data['message'] ?? "Failed to share coupons.", Colors.red);
+        _showSnackBar(
+          data['message'] ?? "Failed to share coupons.",
+          Colors.red,
+        );
       }
     } catch (e) {
       _showSnackBar("Network error: $e", Colors.red);
@@ -66,7 +164,10 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
   void _showSnackBar(String message, Color color) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message, style: const TextStyle(fontWeight: FontWeight.w600)),
+        content: Text(
+          message,
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
       ),
@@ -90,12 +191,20 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Icon(Icons.card_giftcard, size: 80, color: kPrimaryBlue),
+                    const Icon(
+                      Icons.card_giftcard,
+                      size: 80,
+                      color: kPrimaryBlue,
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       "Share Your Coupons",
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: kPrimaryBlue),
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: kPrimaryBlue,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -118,17 +227,60 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
                       keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 40),
-                    SizedBox(
+                    Container(
+                      width: double.infinity,
                       height: 55,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF1A2E6E), Color(0xFF2563EB)],
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF1A2E6E).withOpacity(0.35),
+                            blurRadius: 18,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _shareCoupons,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryBlue,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
                         ),
                         child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text("Share Coupons", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: const [
+                                  Icon(
+                                    Icons.share_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Share Coupons",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_forward_rounded,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                   ],

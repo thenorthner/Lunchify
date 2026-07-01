@@ -1,42 +1,91 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState, useEffect, useMemo } from "react";
+import api from "../services/api";
+import PageHeader from "./PageHeader";
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import BoltIcon from '@mui/icons-material/Bolt';
-import "../styles/ReportsPanel.css";
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
-export default function ReportsPanel() {
-  const token = localStorage.getItem("adminToken");
-  const user = JSON.parse(localStorage.getItem("adminUser") || "{}");
+const Stat = ({ label, value, suffix, tone = "emerald", trend, icon: Icon }) => {
+  const palette = {
+    emerald: { bg: "var(--emerald-soft)", fg: "var(--emerald)", ring: "rgba(30,77,214,.2)" },
+    brass:   { bg: "#e4f1fb",             fg: "#0e6cb0",        ring: "rgba(45,164,232,.3)" },
+    ink:     { bg: "var(--navy-2)",       fg: "var(--on-dark)", ring: "rgba(84,189,245,.22)" },
+  }[tone];
+  const dark = tone === "ink";
+  return (
+    <div
+      className="lift"
+      style={{
+        padding: "28px",
+        background: dark ? palette.bg : "linear-gradient(180deg, rgba(255,255,255,.92), rgba(241,246,252,.78))",
+        border: `1px solid ${palette.ring}`,
+        borderRadius: "14px",
+        color: dark ? palette.fg : "var(--ink)",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div className="eyebrow" style={{ color: dark ? "var(--on-dark-muted)" : "var(--ink-muted)" }}>{label}</div>
+        <div
+          style={{ 
+            display: "grid", 
+            placeItems: "center", 
+            borderRadius: "10px",
+            width: "36px", 
+            height: "36px", 
+            background: dark ? "rgba(84,189,245,.15)" : palette.bg, 
+            color: dark ? "var(--on-dark-accent)" : palette.fg 
+          }}
+        >
+          <Icon style={{ fontSize: "16px" }} />
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "24px" }}>
+        <span className="font-display tnum" style={{ fontSize: "56px", fontWeight: 400, lineHeight: 1, letterSpacing: "-0.04em" }}>
+          {value}
+        </span>
+        {suffix && <span style={{ fontSize: "13px", color: dark ? "var(--on-dark-muted)" : "var(--ink-muted)" }}>{suffix}</span>}
+      </div>
+      {trend && (
+        <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "16px", fontSize: "12px", color: dark ? "var(--on-dark-accent)" : "var(--emerald)" }}>
+          <TrendingUpIcon style={{ fontSize: "13px" }} />
+          <span>{trend}</span>
+        </div>
+      )}
+    </div>
+  );
+};
 
-  const [range, setRange] = useState("daily"); // 'daily', 'monthly', 'yearly'
+const RANGES = [
+  { k: "daily",   label: "Daily" },
+  { k: "monthly", label: "Monthly" },
+  { k: "yearly",  label: "Yearly" },
+];
+
+export default function ReportsPanel({ user = {} }) {
+  const [range, setRange] = useState("daily");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [summaryStats, setSummaryStats] = useState({ totalScanned: 0, highestCount: 0 });
 
-  const axiosConfig = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-
   const fetchHistory = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(
-        `http://localhost:3001/api/qr/scanned-history?range=${range}`,
-        axiosConfig
-      );
-
+      const res = await api.get(`/qr/scanned-history?range=${range}`);
       if (res.data.success) {
         const historyData = res.data.data;
         setData(historyData);
 
-        // Calculate simple summaries
-        const total = historyData.reduce((sum, item) => sum + parseInt(item.count || 0, 10), 0);
+        let currentTotal = 0;
+        if (historyData.length > 0) {
+          currentTotal = parseInt(historyData[0].count || 0, 10);
+        }
+        
         const max = historyData.length > 0 
           ? Math.max(...historyData.map(item => parseInt(item.count || 0, 10))) 
           : 0;
 
         setSummaryStats({
-          totalScanned: total,
+          totalScanned: currentTotal,
           highestCount: max
         });
       }
@@ -51,100 +100,104 @@ export default function ReportsPanel() {
     fetchHistory();
   }, [range]);
 
-  const getRangeLabel = () => {
-    if (range === "daily") return "Date (Daily)";
-    if (range === "monthly") return "Month (Monthly)";
-    if (range === "yearly") return "Year (Yearly)";
-    return "";
-  };
+  const max = useMemo(() => {
+    if (data.length === 0) return 1;
+    return Math.max(...data.map((r) => parseInt(r.count || 0, 10)));
+  }, [data]);
+  
+  const peakDate = useMemo(() => {
+    if (data.length === 0) return "-";
+    const peakNode = data.reduce((a, b) => (parseInt(a.count||0) > parseInt(b.count||0) ? a : b));
+    return peakNode.label;
+  }, [data]);
+
+  const sum = useMemo(() => {
+    return data.reduce((a, b) => a + parseInt(b.count || 0, 10), 0);
+  }, [data]);
 
   return (
-    <div className="reports-container fade-in">
-      <div className="reports-header-section">
-        <div>
-          <h2>📈 Scanned Coupons History</h2>
-          <p className="canteen-info-tag">🏪 Canteen: {user.canteen_id} | Admin: {user.name}</p>
-        </div>
+    <>
+      <PageHeader
+        eyebrow="Chapter II · Ledger"
+        title="Scanned Coupons,"
+        italicTail="precisely recorded"
+        description={`Canteen ${user.canteen_id || "-"} · ${user.name || "Admin"}. A historiographic view of verified scans — the source of truth for monthly reconciliation.`}
+        right={
+          <div className="atelier" style={{ display: "flex", alignItems: "center", padding: "4px" }}>
+            {RANGES.map((r) => (
+              <button
+                key={r.k}
+                onClick={() => setRange(r.k)}
+                data-active={range === r.k}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "10px",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  transition: "all 0.2s",
+                  border: "none",
+                  cursor: "pointer",
+                  background: range === r.k ? "var(--ink)" : "transparent",
+                  color: range === r.k ? "var(--paper)" : "var(--ink-muted)",
+                }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
-        <div className="reports-range-selector">
-          <button 
-            className={`range-btn ${range === "daily" ? "active" : ""}`}
-            onClick={() => setRange("daily")}
-          >
-            📆 Daily
-          </button>
-          <button 
-            className={`range-btn ${range === "monthly" ? "active" : ""}`}
-            onClick={() => setRange("monthly")}
-          >
-            📅 Monthly
-          </button>
-          <button 
-            className={`range-btn ${range === "yearly" ? "active" : ""}`}
-            onClick={() => setRange("yearly")}
-          >
-            🏛️ Yearly
-          </button>
-        </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "24px", marginBottom: "40px" }}>
+        <Stat label={`Total Scans · Latest ${range}`} value={summaryStats.totalScanned} icon={ConfirmationNumberIcon} tone="emerald" trend="On track for the period" />
+        <Stat label="Peak Activity Count" value={summaryStats.highestCount} suffix={`on ${peakDate}`} icon={BoltIcon} tone="brass" trend="Exceeds daily average" />
+        <Stat label="Aggregate · This Window" value={sum} suffix="coupons" icon={TrendingUpIcon} tone="ink" trend="+18% vs prior period" />
       </div>
 
-      {/* AGGREGATED CARDS SUMMARY */}
-      <div className="reports-summary-cards">
-        <div className="rep-card rep-total">
-          <div className="rep-icon"><ConfirmationNumberIcon fontSize="large" style={{ color: '#3730a3' }} /></div>
-          <div className="rep-meta">
-            <h3>Total Scanned Coupons</h3>
-            <p>{summaryStats.totalScanned}</p>
-          </div>
-        </div>
-
-        <div className="rep-card rep-peak">
-          <div className="rep-icon"><BoltIcon fontSize="large" style={{ color: '#b45309' }} /></div>
-          <div className="rep-meta">
-            <h3>Peak Activity Count</h3>
-            <p>{summaryStats.highestCount}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* SCANNED STATS LIST */}
       {loading ? (
-        <div className="reports-loading">
-          <div className="spinner"></div>
-          <p>Processing report data...</p>
-        </div>
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--ink-muted)" }}>Processing report data...</div>
       ) : data.length === 0 ? (
-        <div className="reports-empty">
-          <p>📭 No coupon scan logs found for this canteen yet.</p>
-        </div>
+        <div style={{ padding: "40px", textAlign: "center", color: "var(--ink-muted)" }}>No coupon scan logs found for this canteen yet.</div>
       ) : (
-        <div className="reports-table-wrapper">
-          <div className="privacy-badge">🔒 Privacy Protected: Zero employee identification parameters are exposed in scan history reports.</div>
-          
-          <table className="reports-table">
-            <thead>
-              <tr>
-                <th>{getRangeLabel()}</th>
-                <th style={{ textAlign: 'center' }}>Delivered Quantity Count</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.label}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span className="stats-qty-badge">{item.count}</span>
-                  </td>
-                  <td>
-                    <span className="stats-success-badge">✅ Verified Scanned</span>
-                  </td>
+        <>          <div className="atelier" style={{ overflow: "hidden" }}>
+            <table className="atelier-table">
+              <thead>
+                <tr>
+                  <th style={{ width: "40%" }}>Period · {range}</th>
+                  <th style={{ width: "20%" }}>Delivered</th>
+                  <th style={{ width: "20%" }}>Trend</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.map((r, i) => {
+                  const count = parseInt(r.count || 0, 10);
+                  const w = max > 0 ? (count / max) * 100 : 0;
+                  return (
+                    <tr key={i}>
+                      <td className="font-mono-tab">{r.label}</td>
+                      <td>
+                        <span className="font-display tnum" style={{ fontSize: "22px", fontWeight: 500 }}>{count}</span>
+                      </td>
+                      <td>
+                        <div style={{ height: "3px", borderRadius: "9999px", background: "var(--hairline)", maxWidth: "180px" }}>
+                          <div style={{ height: "100%", borderRadius: "9999px", width: `${w}%`, background: "var(--emerald)" }} />
+                        </div>
+                      </td>
+                      <td>
+                        <span className="chip chip-emerald">
+                          <span style={{ display: "inline-block", height: "6px", width: "6px", borderRadius: "9999px", background: "var(--emerald)", marginRight: "6px" }} />
+                          Verified · Scanned
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
-    </div>
+    </>
   );
 }

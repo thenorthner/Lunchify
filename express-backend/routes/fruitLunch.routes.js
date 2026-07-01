@@ -11,10 +11,14 @@ router.post('/order-fruit-lunch', async (req, res) => {
   const conn = await mysqlPool.getConnection();
   try {
     const employee_id = req.user.id;
-    const { name, quantity, order_type, room_number, delivery_time } = req.body;
+    const { name, quantity, items, order_type, room_number, delivery_time } = req.body;
 
     if (!name || !quantity) {
       return res.status(400).json({ error: 'name and quantity are required' });
+    }
+    const qty = Number(quantity);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 16) {
+      return res.status(400).json({ error: 'quantity must be an integer between 1 and 16' });
     }
 
     const today = new Date().toLocaleDateString('en-CA');
@@ -33,23 +37,24 @@ router.post('/order-fruit-lunch', async (req, res) => {
     }
 
     const couponsLeft = userRows[0].coupons_left;
-    if (couponsLeft < quantity) {
+    if (couponsLeft < qty) {
       await conn.rollback();
       return res.status(400).json({ error: `Insufficient coupons. You have only ${couponsLeft} left.` });
     }
 
-    // Deduct coupons immediately (auto-accept)
-    await conn.query(
-      "UPDATE users SET coupons_left = coupons_left - ?, coupons_used = coupons_used + ? WHERE id = ?",
-      [quantity, quantity, employee_id]
-    );
-
-    // Insert order with employee's canteen_id and project_id, status = 'accepted'
+    // Insert order with status 'accepted' (auto-accepted like food orders)
+    const itemsJson = items ? JSON.stringify(items) : null;
     const [result] = await conn.query(
       `INSERT INTO fruit_lunch_orders 
-       (employee_id, name, quantity, order_type, room_number, delivery_time, date, status, canteen_id, project_id, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'accepted', ?, ?, NOW())`,
-      [employee_id, name, quantity, order_type || null, room_number || null, delivery_time || null, today, req.user.canteen_id, req.user.project_id]
+       (employee_id, name, quantity, order_type, room_number, delivery_time, date, status, canteen_id, project_id, items, created_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'accepted', ?, ?, ?, NOW())`,
+      [employee_id, name, qty, order_type || null, room_number || null, delivery_time || null, today, req.user.canteen_id, req.user.project_id, itemsJson]
+    );
+
+    // Deduct coupons immediately
+    await conn.query(
+      "UPDATE users SET coupons_left = coupons_left - ?, coupons_used = coupons_used + ? WHERE id = ?",
+      [qty, qty, employee_id]
     );
 
     await conn.commit();
@@ -64,7 +69,7 @@ router.post('/order-fruit-lunch', async (req, res) => {
 });
 
 // ✅ GET: admin/details -> all fruit lunch orders for their canteen
-router.get('/details', async (req, res) => {
+router.get('/details', requireCanteenAdmin, async (req, res) => {
   try {
     let query = `
       SELECT o.id, o.employee_id, u.name AS employee_name, o.name AS item_name, o.quantity, o.order_type, o.room_number, 
@@ -74,16 +79,20 @@ router.get('/details', async (req, res) => {
     `;
     const params = [];
 
-    // Canteen admin is isolated to their own canteen, IT admin can see all
-    if (req.user.role === 'canteen_admin') {
-      query += " WHERE o.canteen_id = ?";
+    if (req.user.role === 'canteen_admin' || req.user.role === 'scanner') {
+      query += ' WHERE o.canteen_id = ?';
       params.push(req.user.canteen_id);
-    } else if (req.user.role === 'it_admin' && req.query.canteen_id) {
-      query += " WHERE o.canteen_id = ?";
+    } else if (req.user.role === 'it_admin') {
+      if (!req.query.canteen_id) {
+        return res.status(400).json({ error: 'canteen_id is required' });
+      }
+      query += ' WHERE o.canteen_id = ?';
       params.push(req.query.canteen_id);
+    } else {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
-    query += " ORDER BY o.created_at DESC";
+    query += " ORDER BY o.created_at DESC LIMIT 1000";
 
     const [rows] = await mysqlPool.query(query, params);
     res.json(rows);
@@ -103,7 +112,7 @@ router.get('/requests', requireCanteenAdmin, async (req, res) => {
        FROM fruit_lunch_orders o
        LEFT JOIN users u ON o.employee_id = u.id
        WHERE o.date = ? AND o.status = 'pending' AND o.canteen_id = ?
-       ORDER BY o.created_at ASC`,
+       ORDER BY o.created_at ASC LIMIT 1000`,
       [today, req.user.canteen_id]
     );
     res.json(rows);
@@ -139,30 +148,8 @@ router.patch('/:id/status', requireCanteenAdmin, async (req, res) => {
     const order = rows[0];
     const prevStatus = order.status;
 
-    // Deduct coupons if transitioning to accepted from pending
-    if (status === 'accepted' && prevStatus === 'pending') {
-      const [userRows] = await conn.query(
-        "SELECT coupons_left FROM users WHERE id = ? FOR UPDATE",
-        [order.employee_id]
-      );
-      if (userRows.length === 0) {
-        await conn.rollback();
-        return res.status(404).json({ error: 'Employee not found' });
-      }
-      const couponsLeft = userRows[0].coupons_left;
-      if (couponsLeft < order.quantity) {
-        await conn.rollback();
-        return res.status(400).json({ error: `Insufficient coupons. User has only ${couponsLeft} left.` });
-      }
-
-      await conn.query(
-        "UPDATE users SET coupons_left = coupons_left - ?, coupons_used = coupons_used + ? WHERE id = ?",
-        [order.quantity, order.quantity, order.employee_id]
-      );
-    }
-
-    // Refund coupons only if rejecting/cancelling an ALREADY ACCEPTED order
-    if (['rejected', 'cancelled'].includes(status) && prevStatus === 'accepted') {
+    // Refund coupons if rejecting/cancelling (and it wasn't already cancelled/rejected)
+    if (['rejected', 'cancelled'].includes(status) && !['rejected', 'cancelled'].includes(prevStatus)) {
       await conn.query(
         "UPDATE users SET coupons_left = coupons_left + ?, coupons_used = coupons_used - ? WHERE id = ?",
         [order.quantity, order.quantity, order.employee_id]
@@ -208,13 +195,18 @@ router.patch('/:id/employee-cancel', async (req, res) => {
       return res.status(403).json({ error: 'Access denied. This is not your order.' });
     }
 
-    if (order.status !== 'pending') {
+    if (order.status !== 'pending' && order.status !== 'accepted') {
       await conn.rollback();
       return res.status(400).json({ error: `Cannot cancel order at this stage. Current status is: ${order.status}` });
     }
 
-    // Cancel order - since it's pending, no coupons were deducted, so no refund is performed!
+    // Cancel order and refund coupons
     await conn.query("UPDATE fruit_lunch_orders SET status = 'cancelled' WHERE id = ?", [orderId]);
+    
+    await conn.query(
+      "UPDATE users SET coupons_left = coupons_left + ?, coupons_used = coupons_used - ? WHERE id = ?",
+      [order.quantity, order.quantity, employee_id]
+    );
 
     await conn.commit();
     res.json({ success: true, message: 'Order cancelled successfully.' });
@@ -232,12 +224,19 @@ router.post('/:id/mark-delivered', async (req, res) => {
   try {
     const orderId = req.params.id;
 
-    const [rows] = await mysqlPool.query('SELECT status, employee_id FROM fruit_lunch_orders WHERE id = ?', [orderId]);
+    const [rows] = await mysqlPool.query('SELECT status, employee_id, canteen_id FROM fruit_lunch_orders WHERE id = ?', [orderId]);
     if (rows.length === 0) return res.status(404).json({ error: 'Order not found' });
 
-    // Ensure only the owner or canteen admin can mark delivered
-    if (rows[0].employee_id !== req.user.id && req.user.role !== 'canteen_admin' && req.user.role !== 'it_admin') {
-      return res.status(403).json({ error: 'Access denied' });
+    const order = rows[0];
+
+    // Ensure only the owner, the correct canteen admin, scanner, or it admin can mark delivered
+    if (order.employee_id !== req.user.id) {
+      if ((req.user.role === 'canteen_admin' || req.user.role === 'scanner') && order.canteen_id !== req.user.canteen_id) {
+        return res.status(403).json({ error: 'Access denied: wrong canteen' });
+      }
+      if (req.user.role !== 'canteen_admin' && req.user.role !== 'it_admin' && req.user.role !== 'scanner') {
+        return res.status(403).json({ error: 'Access denied' });
+      }
     }
 
     const current = rows[0].status;

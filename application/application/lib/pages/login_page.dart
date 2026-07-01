@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
+import 'dart:convert';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../network/secure_client.dart';
+
+const storage = FlutterSecureStorage();
+// Use the production backend URL here
+const String _baseUrl = 'https://your-backend-api.com/api';
 
 // ─── Colors ───────────────────────────────────────────────────────────────────
 const kNavy   = Color(0xFF1A2E6E);
@@ -57,12 +64,49 @@ class _LoginScreenState extends State<LoginScreen>
 
   Future<void> _handleLogin() async {
     setState(() { _loading = true; _success = false; });
-    await Future.delayed(const Duration(milliseconds: 1200));
-    setState(() { _loading = false; _success = true; });
-    await Future.delayed(const Duration(milliseconds: 1000));
-    // ✅ Navigate to home and remove login from back stack
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/home');
+    
+    try {
+      final client = SecureClient.getClient();
+      
+      // Step 1: Login Request
+      final reqRes = await client.post(
+        Uri.parse('$_baseUrl/auth/login-request'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'employee_id': _empCtrl.text.trim()}),
+      );
+      
+      if (reqRes.statusCode != 200) {
+        throw Exception('Login request failed');
+      }
+
+      // Step 2: Verify OTP (using password field as OTP for now)
+      final verRes = await client.post(
+        Uri.parse('$_baseUrl/auth/verify-otp'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'employee_id': _empCtrl.text.trim(),
+          'otp': _passCtrl.text.trim(),
+        }),
+      );
+
+      if (verRes.statusCode == 200) {
+        final data = jsonDecode(verRes.body);
+        // ✅ Store the token securely
+        await storage.write(key: 'jwt_token', value: data['token']);
+        
+        setState(() { _loading = false; _success = true; });
+        await Future.delayed(const Duration(milliseconds: 1000));
+        
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } else {
+        throw Exception('OTP verification failed');
+      }
+    } catch (e) {
+      setState(() { _loading = false; _success = false; });
+      // In a real app, show a SnackBar or AlertDialog here with the error
+      print('Login error: $e');
     }
   }
 
@@ -160,6 +204,7 @@ class _HeroSection extends StatelessWidget {
               child: Image.asset(
                 'assets/images/sjvn_scene.png',
                 fit: BoxFit.fill,
+                semanticLabel: 'SJVN scenic background',
                 errorBuilder: (_, __, ___) => const SizedBox(),
               ),
             ),
@@ -177,6 +222,7 @@ class _HeroSection extends StatelessWidget {
                       width: 200,
                       height: 200,
                       fit: BoxFit.fill,
+                      semanticLabel: 'Lunchify application logo',
                       errorBuilder: (_, __, ___) => const Icon(
                         Icons.lunch_dining,
                         size: 100,
@@ -270,6 +316,7 @@ class _FormSection extends StatelessWidget {
                     color: kGray,
                     size: 20,
                   ),
+                  tooltip: obscure ? 'Show password' : 'Hide password',
                   onPressed: onToggle,
                 ),
               ),
@@ -278,8 +325,13 @@ class _FormSection extends StatelessWidget {
 
               Align(
                 alignment: Alignment.centerRight,
-                child: GestureDetector(
-                  onTap: () {},
+                child: TextButton(
+                  onPressed: () {},
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: const Size(48, 48),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(
@@ -412,7 +464,10 @@ class _FormSection extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.shield_outlined, color: kBlue.withOpacity(0.7), size: 20),
+                    Semantics(
+                      hidden: true,
+                      child: Icon(Icons.shield_outlined, color: kBlue.withOpacity(0.7), size: 20),
+                    ),
                     const SizedBox(width: 10),
                     const Expanded(
                       child: Text(
@@ -454,6 +509,9 @@ class _InputField extends StatelessWidget {
       obscureText: obscure,
       style: const TextStyle(fontSize: 14.5, color: Color(0xFF1A2340)),
       decoration: InputDecoration(
+        labelText: hint,
+        labelStyle: const TextStyle(color: Color(0xFFB0BFCC), fontSize: 14.5),
+        floatingLabelBehavior: FloatingLabelBehavior.never,
         hintText: hint,
         hintStyle: const TextStyle(color: Color(0xFFB0BFCC), fontSize: 14.5),
         prefixIcon: Icon(icon, color: const Color(0xFF9BB0CC), size: 20),

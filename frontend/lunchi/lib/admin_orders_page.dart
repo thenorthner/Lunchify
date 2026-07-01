@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'config.dart';
 import 'auth_service.dart';
 
 class AdminOrdersPage extends StatefulWidget {
-  const AdminOrdersPage({super.key});
+  final int initialIndex;
+  const AdminOrdersPage({super.key, this.initialIndex = 0});
 
   @override
   State<AdminOrdersPage> createState() => _AdminOrdersPageState();
@@ -30,7 +32,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: widget.initialIndex);
     _fetchOrders();
   }
 
@@ -133,7 +135,11 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
         }
       } catch (_) { }
 
-      return matchSearch && matchDate;
+      // 3. Status Filter (Hide pending and cancelled)
+      final status = (o['status'] ?? '').toString().toLowerCase();
+      final matchStatus = status != 'pending' && status != 'cancelled';
+
+      return matchSearch && matchDate && matchStatus;
     }).toList();
     
     filtered.sort((a, b) {
@@ -193,7 +199,14 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
     final itemName = o['item_name'] ?? o['name'] ?? (type == 'food' ? 'Food Lunch' : 'Fruit Lunch');
     final qty = o['quantity']?.toString() ?? '1';
     final status = o['status'] ?? 'pending';
-    final date = o['date'] ?? 'N/A';
+    
+    String date = o['date'] ?? 'N/A';
+    try {
+      if (date != 'N/A') {
+        final parsedDate = DateTime.parse(date).toLocal();
+        date = DateFormat('MMM dd, yyyy').format(parsedDate);
+      }
+    } catch (_) {}
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -301,7 +314,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
             ),
 
             // Actions row
-            if (status == 'accepted' && type == 'fruit') ...[
+            if (status == 'accepted' && type == 'food') ...[
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,

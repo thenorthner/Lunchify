@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 
 import 'otp_verification_page.dart';
 import 'login_page.dart';
@@ -102,6 +102,12 @@ class _SignupPageState extends State<SignupPage>
         return;
       }
 
+      if (decoded['eligible'] == false) {
+        _show(decoded['message'] ?? 'Unable to proceed with registration');
+        _clearEmployee();
+        return;
+      }
+
       String? name;
       String? department;
       String? phone;
@@ -128,7 +134,8 @@ class _SignupPageState extends State<SignupPage>
       } else {
         _clearEmployee();
       }
-    } catch (_) {
+    } catch (e) {
+      _show("Cannot reach server to fetch details");
       _clearEmployee();
     }
   }
@@ -153,13 +160,13 @@ class _SignupPageState extends State<SignupPage>
       return;
     }
 
-    if (phone.length != 10) {
-      _show("Enter valid 10-digit phone number");
+    if (phone.length < 10) {
+      _show("Enter valid phone number");
       return;
     }
 
-    if (password.length < 4) {
-      _show("Password must be at least 4 characters long");
+    if (password.length < 6) {
+      _show("Password must be at least 6 characters long");
       return;
     }
 
@@ -242,18 +249,22 @@ class _SignupPageState extends State<SignupPage>
                       child: Column(
                         children: [
 
-                          // -- Avatar icon -------------------------------
+                          // -- Lunchify Logo -------------------------------
                           Container(
-                            width: 72,
-                            height: 72,
+                            width: 100,
+                            height: 100,
                             decoration: const BoxDecoration(
-                              color: _kLight,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(
-                              Icons.person_add_rounded,
-                              color: _kAccent,
-                              size: 38,
+                            clipBehavior: Clip.antiAlias,
+                            child: Image.asset(
+                              'assets/images/lunchify_logo.png',
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.lunch_dining,
+                                color: _kAccent,
+                                size: 48,
+                              ),
                             ),
                           ),
 
@@ -322,8 +333,8 @@ class _SignupPageState extends State<SignupPage>
                             icon: Icons.phone_outlined,
                             inputType: TextInputType.phone,
                             inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
+                              FilteringTextInputFormatter.allow(RegExp(r'[0-9\*]')),
+                              LengthLimitingTextInputFormatter(14),
                             ],
                           ),
                           const SizedBox(height: 12),

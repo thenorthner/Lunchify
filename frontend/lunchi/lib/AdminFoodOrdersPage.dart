@@ -1,6 +1,6 @@
 //AdminFoodOrdersPage.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'package:lunchi/config.dart';
 import 'package:lunchi/auth_service.dart';

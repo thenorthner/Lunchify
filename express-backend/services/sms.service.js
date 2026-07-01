@@ -51,7 +51,7 @@ async function sendSMS(phoneNumber, message) {
   console.log(`\n======================================================`);
   console.log(`⚠️  SMS SERVICE LOG (API not configured or failed)`);
   console.log(`📱 TO: ${formattedPhone}`);
-  console.log(`💬 MESSAGE: "${message}"`);
+  console.log(`💬 MESSAGE: SMS dispatch attempted to ending ${formattedPhone.slice(-4)}`);
   console.log(`======================================================\n`);
   return false;
 }

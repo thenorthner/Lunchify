@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'config.dart';
 import 'app_theme.dart';
@@ -117,8 +117,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage>
       _showSnack("Please enter a valid 6-digit OTP.", isError: true);
       return;
     }
-    if (newPass.isEmpty || newPass.length < 4) {
-      _showSnack("Password must be at least 4 characters.", isError: true);
+    if (newPass.isEmpty || newPass.length < 6) {
+      _showSnack("Password must be at least 6 characters.", isError: true);
       return;
     }
     if (newPass != confirmPass) {

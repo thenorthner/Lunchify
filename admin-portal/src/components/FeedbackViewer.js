@@ -1,23 +1,118 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useEffect, useState, useMemo } from "react";
+import api from "../services/api";
+import PageHeader from "./PageHeader";
+import { CircularProgress } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SyncIcon from '@mui/icons-material/Sync';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+import BoltIcon from '@mui/icons-material/Bolt';
+import ReportProblemIcon from '@mui/icons-material/ReportProblem';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import "../styles/FeedbackViewer.css";
 
-export default function FeedbackViewer() {
-  const token = localStorage.getItem("adminToken");
-  const user = JSON.parse(localStorage.getItem("adminUser") || "{}");
+const PRIORITY = {
+  HIGH:   { cls: "chip-spark",   icon: BoltIcon,           dot: "var(--spark)" },
+  MEDIUM: { cls: "chip-amber",   icon: ReportProblemIcon,  dot: "#b07a16" },
+  LOW:    { cls: "chip-sky",     icon: InfoOutlinedIcon,   dot: "#2da4e8" },
+};
 
+const Initials = (name) => {
+  if (!name) return "?";
+  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+};
+
+const TicketCard = ({ t }) => {
+  const p = PRIORITY[t.priority?.toUpperCase()] || PRIORITY.LOW;
+  const Icon = p.icon;
+  
+  return (
+    <div className="atelier lift" style={{ padding: '24px', marginBottom: '16px' }}>
+      {/* Top row */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span
+            style={{
+              padding: '4px 12px',
+              borderRadius: '9999px',
+              fontSize: '10px',
+              background: 'var(--emerald-soft)',
+              color: 'var(--emerald)',
+              border: '1px solid rgba(30,77,214,.22)',
+              letterSpacing: '0.18em',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+            }}
+          >
+            {t.canteen_name} {t.project_name ? `(${t.project_name})` : ''}
+          </span>
+          <span className={`chip ${p.cls}`}>
+            <Icon style={{ fontSize: 14, marginRight: 4 }} />
+            {t.priority || "LOW"}
+          </span>
+        </div>
+        <div className="font-mono-tab" style={{ fontSize: '11.5px', color: 'var(--ink-muted)' }}>
+          {new Date(t.created_at).toLocaleString()}
+        </div>
+      </div>
+
+      <h3 className="font-display" style={{ fontSize: 24, fontWeight: 500, letterSpacing: '-0.02em', margin: 0 }}>
+        {t.subject}
+      </h3>
+      <p style={{ fontSize: '14px', marginTop: '8px', lineHeight: 1.6, color: 'var(--ink-2)', marginBottom: 0 }}>
+        {t.message}
+      </p>
+
+      <div className="hairline" style={{ margin: '20px 0' }} />
+
+      {/* Submitter */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div
+            className="font-display"
+            style={{
+              display: 'grid',
+              placeItems: 'center',
+              borderRadius: '50%',
+              fontSize: '13px',
+              width: 36, height: 36,
+              background: 'linear-gradient(140deg, #54bdf5, #1e4dd6)',
+              color: '#fff',
+              fontWeight: 500,
+            }}
+          >
+            {Initials(t.employee_name)}
+          </div>
+          <div>
+            <div style={{ fontSize: '14px', fontWeight: 500 }}>{t.employee_name || 'Unknown User'}</div>
+            <div style={{ fontSize: '11px', color: 'var(--ink-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="font-mono-tab">ID · {t.employee_id}</span>
+              <span style={{ width: 12, height: 1, background: 'var(--hairline-strong)' }} />
+              <span className="eyebrow" style={{ fontSize: 9.5 }}>{t.employee_department || "General"}</span>
+            </div>
+          </div>
+        </div>
+        <button
+          className="btn-ghost"
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}
+        >
+          <ChatBubbleOutlineIcon style={{ fontSize: 14 }} />
+          Respond
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default function FeedbackViewer({ user = {} }) {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const axiosConfig = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
-
   const fetchFeedbacks = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3001/api/feedbacks", axiosConfig);
+      const res = await api.get("/feedbacks");
       setFeedbacks(res.data);
     } catch (err) {
       console.error("Error fetching feedbacks:", err);
@@ -30,94 +125,125 @@ export default function FeedbackViewer() {
     fetchFeedbacks();
   }, []);
 
-  const renderStars = (rating) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <span key={i} className={i <= rating ? "star gold-star" : "star grey-star"}>
-          ★
-        </span>
-      );
-    }
-    return <div className="stars-wrapper">{stars}</div>;
+  const filteredFeedbacks = useMemo(() => {
+    return feedbacks.filter((f) => {
+      const text = `${f.subject || ''} ${f.message || ''} ${f.employee_name || ''} ${f.employee_id || ''} ${f.canteen_name || ''}`.toLowerCase();
+      return !searchTerm || text.includes(searchTerm.toLowerCase());
+    });
+  }, [feedbacks, searchTerm]);
+
+  const counts = {
+    high: feedbacks.filter((t) => (t.priority || "").toUpperCase() === "HIGH").length,
+    medium: feedbacks.filter((t) => (t.priority || "").toUpperCase() === "MEDIUM").length,
+    low: feedbacks.filter((t) => !(t.priority || "").toUpperCase().match(/^(HIGH|MEDIUM)$/)).length,
   };
 
-  const filteredFeedbacks = feedbacks.filter(f => 
-    f.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    f.employee_id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="feedback-viewer-container fade-in">
-      <div className="fb-header">
-        <div>
-          <h2>💬 System Problems & Feedbacks</h2>
-          <p className="fb-subheader">IT Admin Centralized Portal to audit system tickets and employee reports.</p>
-        </div>
-        <button className="fb-refresh-btn" onClick={fetchFeedbacks}>🔄 Refresh Tickets</button>
-      </div>
+    <div style={{ paddingBottom: '40px' }} className="fade-in">
+      <PageHeader
+        eyebrow="Chapter VII · Voices"
+        title="System problems,"
+        italicTail="attended to"
+        description="A centralised portal where IT Admin audits system tickets and employee reports — each voice heard, every issue traced."
+        right={
+          <button 
+            onClick={fetchFeedbacks} 
+            disabled={loading}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '6px', 
+              fontSize: '13px', fontWeight: 500, color: '#0f172a',
+              background: '#fff', border: '1px solid #cbd5e1', borderRadius: '9999px',
+              padding: '6px 16px', cursor: 'pointer', transition: 'all 0.2s ease',
+              fontFamily: 'inherit'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+            onFocus={(e) => e.currentTarget.style.background = '#f8fafc'}
+            onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+            onBlur={(e) => e.currentTarget.style.background = '#fff'}
+          >
+            {loading ? <CircularProgress size={16} style={{ color: "inherit" }} /> : <SyncIcon style={{ fontSize: 16, color: '#475569' }} />}
+            Refresh
+          </button>
+        }
+      />
 
-      {/* FILTER SEARCH BAR */}
-      <div className="search-filter-bar">
-        <input 
-          type="text" 
-          placeholder="🔍 Search tickets by Employee ID, Name, Subject, or Message content..." 
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
-        <div className="ticket-count-badge">
-          🎟️ Active Tickets: <strong>{filteredFeedbacks.length}</strong>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="fb-loading">
-          <div className="spinner"></div>
-          <p>Downloading support logs...</p>
-        </div>
-      ) : filteredFeedbacks.length === 0 ? (
-        <div className="fb-empty">
-          <p>📭 No active feedback reports found matching the search criteria.</p>
-        </div>
-      ) : (
-        <div className="tickets-grid">
-          {filteredFeedbacks.map((ticket) => (
-            <div className="ticket-card" key={ticket.id}>
-              {/* Card Top Information */}
-              <div className="ticket-top-row">
-                <span className="canteen-assoc-tag">🏪 {ticket.canteen_name} ({ticket.project_name})</span>
-                <span className="ticket-date-txt">{new Date(ticket.created_at).toLocaleString()}</span>
-              </div>
-
-              {/* Subject & Message */}
-              <div className="ticket-body">
-                <h3 className="ticket-subject">{ticket.subject}</h3>
-                <p className="ticket-message">{ticket.message}</p>
-              </div>
-
-              {/* Rating stars if rating exists */}
-              <div className="rating-row">
-                <span className="rating-label">Employee Satisfaction Rating:</span>
-                {renderStars(ticket.rating)}
-              </div>
-
-              {/* Card Footer Details */}
-              <div className="ticket-footer">
-                <div className="employee-info-block">
-                  <div className="emp-avatar">{ticket.employee_name.charAt(0).toUpperCase()}</div>
-                  <div className="emp-meta-txt">
-                    <strong>{ticket.employee_name}</strong>
-                    <span>ID: {ticket.employee_id} | {ticket.employee_department || "General"}</span>
-                  </div>
-                </div>
-              </div>
+      {/* Triage stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        {[
+          { k: "high",   label: "High priority",   v: counts.high,   color: "var(--spark)",   bg: "var(--spark-soft)", Icon: BoltIcon },
+          { k: "medium", label: "Medium",          v: counts.medium, color: "#8a6018",        bg: "var(--amber-soft)", Icon: ReportProblemIcon },
+          { k: "low",    label: "Low / general",   v: counts.low,    color: "#0e6cb0",        bg: "#e4f1fb", Icon: InfoOutlinedIcon },
+        ].map((s) => (
+          <div
+            key={s.k}
+            className="atelier"
+            style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+          >
+            <div>
+              <div className="eyebrow">{s.label}</div>
+              <div className="font-display tnum" style={{ fontSize: 38, fontWeight: 400, color: s.color, marginTop: '4px' }}>{s.v}</div>
             </div>
-          ))}
+            <div
+              style={{
+                display: 'grid',
+                placeItems: 'center',
+                borderRadius: '12px',
+                width: 44,
+                height: 44,
+                background: s.bg,
+                color: s.color,
+                border: `1px solid ${s.color}30`
+              }}
+            >
+              <s.Icon style={{ fontSize: 20 }} />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="atelier-dark" style={{ padding: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ position: 'relative', flex: 1, display: 'flex', alignItems: 'center' }}>
+          <SearchIcon style={{ position: 'absolute', left: '16px', color: 'var(--on-dark-muted)', fontSize: 18 }} />
+          <input
+            placeholder="Search tickets by Employee ID, Name, Subject or Message…"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '12px 16px 12px 44px',
+              borderRadius: '10px',
+              outline: 'none',
+              fontSize: '14px',
+              background: 'rgba(84,189,245,.06)',
+              border: '1px solid rgba(84,189,245,.22)',
+              color: 'var(--on-dark)',
+              boxSizing: 'border-box'
+            }}
+          />
         </div>
-      )}
+        <span className="eyebrow" style={{ color: 'var(--on-dark-accent)' }}>
+          {filteredFeedbacks.length} ticket{filteredFeedbacks.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {loading ? (
+          <div style={{ padding: '48px', textAlign: 'center', background: 'var(--paper)', borderRadius: '8px', border: '1px solid var(--hairline)' }}>
+            <CircularProgress size={24} style={{ color: "var(--ink)", marginBottom: 12 }} />
+            <div style={{ color: 'var(--ink-2)' }}>Downloading support logs...</div>
+          </div>
+        ) : filteredFeedbacks.length === 0 ? (
+          <div className="atelier" style={{ padding: '48px', textAlign: 'center' }}>
+            <div className="eyebrow" style={{ marginBottom: '8px' }}>All quiet</div>
+            <div className="font-display" style={{ fontSize: '22px', fontWeight: 500 }}>No tickets match those filters.</div>
+          </div>
+        ) : (
+          filteredFeedbacks.map((ticket, index) => (
+            <TicketCard key={ticket.id || index} t={ticket} />
+          ))
+        )}
+      </div>
     </div>
   );
 }

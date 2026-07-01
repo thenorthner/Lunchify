@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'auth_service.dart'; // To get employeeId
 import 'config.dart';  // For backend URL
+import 'widgets/top_bar.dart';
 
 class MenuItem {
   final String name;
@@ -167,6 +168,14 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
       };
     }).toList();
 
+    final hasAnyInput = feedbackItems.any((item) => (item['rating'] as int) > 0 || (item['remarks'] as String).isNotEmpty);
+    if (!hasAnyInput) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please provide a rating or remarks for at least one item.')),
+      );
+      return;
+    }
+
     try {
       // Use current date format YYYY-MM-DD
       final now = DateTime.now();
@@ -181,7 +190,7 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
         },
         body: json.encode({
           'employee_id': AuthService.employeeId,
-          'canteen_id': 1,
+          'canteen_id': AuthService.user?['canteen_id'] ?? 1,
           'date': dateStr,
           'items': feedbackItems
         }),
@@ -196,14 +205,14 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
               Icon(Icons.check_circle_rounded, color: _C.accent),
               SizedBox(width: 8),
               Flexible(
-                child: Text('Feedback Submitted',
+                child: Text("Chef's Notes Updated",
                     style: TextStyle(
                         color: _C.primary,
                         fontWeight: FontWeight.bold,
                         fontSize: 17)),
               ),
             ]),
-            content: const Text("Thank you for your valuable feedback! It helps us improve.",
+            content: const Text("Thanks for helping us cook up a better experience.",
                 style: TextStyle(color: _C.sub, height: 1.7, fontSize: 14)),
             actions: [
               TextButton(
@@ -211,7 +220,7 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back
                 },
-                child: const Text('Done',
+                child: const Text('Yum 😋',
                     style: TextStyle(color: _C.accent, fontWeight: FontWeight.bold)),
               ),
             ],
@@ -234,7 +243,7 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
         ? const Center(child: CircularProgressIndicator(color: _C.primary))
         : CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(child: _SJVNHeader()),
+          const SliverToBoxAdapter(child: TopBar(title: 'Daily Menu Feedback')),
           if (_items.isNotEmpty)
             SliverToBoxAdapter(
               child: Padding(
@@ -293,62 +302,6 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
               padding: EdgeInsets.fromLTRB(16, 0, 16, 32),
               child: _FooterNotice(),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SJVNHeader extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final topPad = MediaQuery.of(context).padding.top;
-    return SizedBox(
-      height: topPad + 160,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/food_tray_bg.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0, right: 0, top: 0, bottom: 0,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.55), Colors.black.withOpacity(0.2)],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: topPad + 16, left: 0, right: 0,
-            child: Row(children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: Colors.white, size: 20),
-                onPressed: () => Navigator.pop(context),
-              ),
-              const SizedBox(width: 2),
-              const Expanded(
-                child: Text('Daily Menu Feedback',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.3,
-                        shadows: [Shadow(color: Colors.black45, blurRadius: 4, offset: Offset(0, 1))]
-                    )),
-              ),
-            ]),
           ),
         ],
       ),

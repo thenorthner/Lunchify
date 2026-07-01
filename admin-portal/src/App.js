@@ -1,23 +1,43 @@
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
+import api from "./services/api";
 
 function App() {
-  const token = localStorage.getItem("adminToken");
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    api.get("/auth/me")
+      .then((res) => {
+        setSession(res.data);
+      })
+      .catch((err) => {
+        setSession(null);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return <div>Loading session...</div>;
+  }
+
+  const ADMIN_ROLES = ['canteen_admin', 'hr_admin', 'it_admin'];
+  const valid = session?.user && ADMIN_ROLES.includes(session.user.role);
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* LOGIN */}
         <Route
           path="/"
-          element={token ? <Navigate to="/dashboard" replace /> : <Login />}
+          element={valid ? <Navigate to="/dashboard" replace /> : <Login />}
         />
-
-        {/* DASHBOARD */}
         <Route
           path="/dashboard"
-          element={token ? <Dashboard /> : <Navigate to="/" replace />}
+          element={valid ? <Dashboard user={session.user} /> : <Navigate to="/" replace />}
         />
       </Routes>
     </BrowserRouter>

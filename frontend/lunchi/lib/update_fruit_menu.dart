@@ -1,7 +1,7 @@
 //update_fruit_menu.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import '../config.dart';
 import 'auth_service.dart';
 

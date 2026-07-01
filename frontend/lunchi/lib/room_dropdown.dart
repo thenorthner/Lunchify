@@ -1,7 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import './config.dart'; // adjust path if needed
+import './auth_service.dart';
 
 class RoomDropdown extends StatefulWidget {
   final Function(int) onSelected;
@@ -24,7 +25,10 @@ class _RoomDropdownState extends State<RoomDropdown> {
   }
 
   Future<void> fetchRooms() async {
-    final res = await http.get(Uri.parse(AppConfig.rooms));
+    final res = await http.get(
+      Uri.parse(AppConfig.rooms),
+      headers: {'Authorization': 'Bearer ${AuthService.token}'},
+    );
 
     setState(() {
       rooms = jsonDecode(res.body);

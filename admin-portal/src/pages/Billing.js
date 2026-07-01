@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
 
 export default function Billing() {
   const [date, setDate] = useState("");
@@ -15,20 +16,9 @@ export default function Billing() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `http://localhost:3001/api/billing?date=${date}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          },
-        }
-      );
+      const res = await api.get(`/billing?date=${date}`);
 
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || "Error fetching bill");
-        return;
-      }
+      const data = res.data;
 
       setBill(data);
     } catch (err) {

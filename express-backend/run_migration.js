@@ -83,9 +83,9 @@ async function runMigration() {
         is_registered TINYINT(1) DEFAULT 0,
         is_admin TINYINT(1) DEFAULT 0,
         is_active TINYINT(1) DEFAULT 1,
-        coupons_left INT DEFAULT 16,
-        coupons_used INT DEFAULT 0,
-        monthly_limit INT DEFAULT 16,
+        coupons_left INT UNSIGNED DEFAULT 16,
+        coupons_used INT UNSIGNED DEFAULT 0,
+        monthly_limit INT UNSIGNED DEFAULT 16,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -119,8 +119,18 @@ async function runMigration() {
       await pool.query("ALTER TABLE users ADD COLUMN device_id VARCHAR(255) DEFAULT NULL");
     }
 
+    // Enforce UNSIGNED constraints on pre-existing users tables (BOLA / Race condition remediation)
+    console.log("Enforcing UNSIGNED constraints on users coupon columns...");
+    try {
+      await pool.query("ALTER TABLE users MODIFY COLUMN coupons_left INT UNSIGNED DEFAULT 16");
+      await pool.query("ALTER TABLE users MODIFY COLUMN coupons_used INT UNSIGNED DEFAULT 0");
+      await pool.query("ALTER TABLE users MODIFY COLUMN monthly_limit INT UNSIGNED DEFAULT 16");
+    } catch (alterErr) {
+      console.warn("⚠️ Warning: Could not alter user coupon columns: ", alterErr.message);
+    }
+
     // Set default assignments for legacy records
-    await pool.query("UPDATE users SET project_id = 1, canteen_id = 1 WHERE project_id IS NULL");
+    await pool.query("UPDATE users SET project_id = 5, canteen_id = 5 WHERE project_id IS NULL");
     await pool.query("UPDATE users SET role = 'it_admin' WHERE is_admin = 1");
     await pool.query("UPDATE users SET role = 'employee' WHERE is_admin = 0 AND role IS NULL");
 

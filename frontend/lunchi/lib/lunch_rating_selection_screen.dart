@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'config.dart';
 import 'auth_service.dart';
@@ -10,10 +10,12 @@ class LunchRatingSelectionScreen extends StatefulWidget {
   const LunchRatingSelectionScreen({super.key});
 
   @override
-  State<LunchRatingSelectionScreen> createState() => _LunchRatingSelectionScreenState();
+  State<LunchRatingSelectionScreen> createState() =>
+      _LunchRatingSelectionScreenState();
 }
 
-class _LunchRatingSelectionScreenState extends State<LunchRatingSelectionScreen> {
+class _LunchRatingSelectionScreenState
+    extends State<LunchRatingSelectionScreen> {
   bool _isLoading = true;
   bool _foodScanned = false;
   bool _fruitScanned = false;
@@ -28,9 +30,7 @@ class _LunchRatingSelectionScreenState extends State<LunchRatingSelectionScreen>
     try {
       final res = await http.get(
         Uri.parse('${AppConfig.apiBaseUrl}/api/qr/my-status-today'),
-        headers: {
-          'Authorization': 'Bearer ${AuthService.token}',
-        },
+        headers: {'Authorization': 'Bearer ${AuthService.token}'},
       );
 
       if (res.statusCode == 200) {
@@ -59,24 +59,44 @@ class _LunchRatingSelectionScreenState extends State<LunchRatingSelectionScreen>
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
-            SizedBox(width: 10),
-            Text('No Lunch Scanned', style: TextStyle(color: kPrimaryBlue)),
-          ],
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+        title: const Text(
+          'Hold up! 🛑',
+          style: TextStyle(
+            color: kPrimaryBlue,
+            fontWeight: FontWeight.w700,
+            fontSize: 18,
+          ),
         ),
         content: const Text(
-          'You need to buy and scan a lunch coupon at the canteen today before you can rate it.',
-          style: TextStyle(fontSize: 16, color: kSubtext),
+          "Can't review what you didn't chew😋. Purchase required to unlock opinions.",
+          style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Navigator.pop(context); // Go back to Home
-            },
-            child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold, color: kAccentBlue)),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to Home
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kPrimaryBlue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                'Alright Chief 🫡',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 15,
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -85,10 +105,49 @@ class _LunchRatingSelectionScreenState extends State<LunchRatingSelectionScreen>
 
   void _onLunchTypeSelected(String type, bool isScanned) {
     if (!isScanned) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("You haven't scanned a ${type == 'food' ? 'Food' : 'Fruit'} Lunch coupon today."),
-          backgroundColor: Colors.orange,
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
+          title: const Text(
+            'Hold up! 🛑',
+            style: TextStyle(
+              color: kPrimaryBlue,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
+          ),
+          content: const Text(
+            "Ain't no way you're rating imaginary food, Scan the coupon and we'll talk 😤.",
+            style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryBlue,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Alright Chief 🫡',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       );
       return;
@@ -96,7 +155,9 @@ class _LunchRatingSelectionScreenState extends State<LunchRatingSelectionScreen>
 
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => DailyMenuFeedbackScreen(lunchType: type)),
+      MaterialPageRoute(
+        builder: (_) => DailyMenuFeedbackScreen(lunchType: type),
+      ),
     );
   }
 
@@ -233,7 +294,11 @@ class _MenuOptionCardState extends State<_MenuOptionCard> {
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded, color: kAccentBlue, size: 24),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: kAccentBlue,
+                  size: 24,
+                ),
               ],
             ),
           ),

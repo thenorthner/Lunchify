@@ -65,9 +65,9 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, is_admin: user.is_admin },
+      { id: user.id, is_admin: user.is_admin, jti: require('crypto').randomUUID() },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h', issuer: 'lunchify-api', audience: 'lunchify-mobile' }
     );
 
     res.json({
@@ -98,10 +98,10 @@ router.post("/admin/login", async (req, res) => {
     }
 
     const [rows] = await db.query(
-      `SELECT id, name, password, is_admin, role
+      `SELECT id, name, password, portal_password, is_admin, role
        FROM users
-       WHERE id = ? AND is_active = 1`,
-      [employeeId.trim()]
+       WHERE (id = ? OR admin_id = ?) AND is_active = 1`,
+      [employeeId.trim(), employeeId.trim()]
     );
 
     if (!rows.length) {
@@ -114,15 +114,16 @@ router.post("/admin/login", async (req, res) => {
       return res.status(403).json({ message: "Not an admin" });
     }
 
-    const match = await bcrypt.compare(password, admin.password);
+    const passToCheck = admin.portal_password || admin.password;
+    const match = await bcrypt.compare(password, passToCheck);
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
     const token = jwt.sign(
-      { id: admin.id, is_admin: 1 },
+      { id: admin.id, is_admin: 1, jti: require('crypto').randomUUID() },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: process.env.JWT_EXPIRES_IN || '24h', issuer: 'lunchify-api', audience: 'lunchify-admin' }
     );
 
     res.json({

@@ -76,6 +76,7 @@ class _Header extends StatelessWidget {
               child: Image.asset(
                 'assets/images/sjvn_bg.png',
                 fit: BoxFit.fill,
+                semanticLabel: 'SJVN office background',
                 errorBuilder: (_, __, ___) => Container(
                   color: const Color(0xFFD0DCF0),
                 ),
@@ -110,6 +111,7 @@ class _Header extends StatelessWidget {
                         width: 60,
                         height: 50,
                         fit: BoxFit.contain,
+                        semanticLabel: 'SJVN logo',
                         errorBuilder: (_, __, ___) => const Icon(
                           Icons.lunch_dining,
                           size: 40,
@@ -122,6 +124,7 @@ class _Header extends StatelessWidget {
                         width: 120,
                         height: 100,
                         fit: BoxFit.contain,
+                        semanticLabel: 'Lunchify wordmark',
                         errorBuilder: (_, __, ___) => const Text(
                           'Lunchify',
                           style: TextStyle(
@@ -172,7 +175,10 @@ class _WelcomeCard extends StatelessWidget {
               color: kLightBlue,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline_rounded, color: kPrimaryBlue, size: 32),
+            child: Semantics(
+              hidden: true,
+              child: const Icon(Icons.person_outline_rounded, color: kPrimaryBlue, size: 32),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -367,7 +373,10 @@ class _MenuCardState extends State<_MenuCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: '${widget.item.title}. ${widget.item.subtitle}',
+      child: GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
@@ -444,6 +453,7 @@ class _MenuCardState extends State<_MenuCard> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'config.dart';
 import 'auth_service.dart';
@@ -22,7 +22,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
   void initState() {
     super.initState();
     final now = DateTime.now();
-    selectedMonth = "\${now.year}-\${now.month.toString().padLeft(2, '0')}";
+    selectedMonth = "${now.year}-${now.month.toString().padLeft(2, '0')}";
     _fetchScannedCoupons();
     _priceController.addListener(_calculateTotal);
   }
@@ -48,8 +48,8 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
       // Since we don't have a specific GET count route in billing yet, we can mock or use a generic one.
       // Wait, let's create a quick route in billing to get the scanned count.
       final res = await http.get(
-        Uri.parse('\${AppConfig.apiBaseUrl}/api/fruit-lunch-requests'), // We can use existing if it has scanned count or add one.
-        headers: {'Authorization': 'Bearer \${AuthService.token}'},
+        Uri.parse('${AppConfig.apiBaseUrl}/api/fruit-lunch-requests'), // We can use existing if it has scanned count or add one.
+        headers: {'Authorization': 'Bearer ${AuthService.token}'},
       );
 
       if (res.statusCode == 200) {
@@ -61,7 +61,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
         });
       }
     } catch (e) {
-      debugPrint("Error: \$e");
+      debugPrint("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to load scanned coupons')),
       );
@@ -89,9 +89,9 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
     setState(() => isLoading = true);
     try {
       final res = await http.post(
-        Uri.parse('\${AppConfig.apiBaseUrl}/api/billing/generate-canteen-bill'),
+        Uri.parse('${AppConfig.apiBaseUrl}/api/billing/generate-canteen-bill'),
         headers: {
-          'Authorization': 'Bearer \${AuthService.token}',
+          'Authorization': 'Bearer ${AuthService.token}',
           'Content-Type': 'application/json',
         },
         body: json.encode({
@@ -113,7 +113,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
           throw Exception(data['message'] ?? 'Failed to generate bill');
         }
       } else {
-        throw Exception('Server error: \${res.statusCode}');
+        throw Exception('Server error: ${res.statusCode}');
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -206,7 +206,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
                       const Text('Final Bill Amount', style: TextStyle(fontSize: 18, color: Colors.grey)),
                       const SizedBox(height: 8),
                       Text(
-                        '₹ \${totalAmount.toStringAsFixed(2)}',
+                        '₹ ${totalAmount.toStringAsFixed(2)}',
                         style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                       ),
                     ],

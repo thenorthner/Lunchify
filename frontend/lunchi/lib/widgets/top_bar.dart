@@ -7,12 +7,14 @@ class TopBar extends StatelessWidget {
   final String title;
   final String backgroundImage;
   final bool showBackButton;
+  final Widget? action;
 
   const TopBar({
     super.key,
     required this.title,
     this.backgroundImage = 'assets/images/food_tray_bg.png',
     this.showBackButton = true,
+    this.action,
   });
 
   @override
@@ -92,6 +94,7 @@ class TopBar extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (action != null) action!,
                     ],
                   ),
                 ],

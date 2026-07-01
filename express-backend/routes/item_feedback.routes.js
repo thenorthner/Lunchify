@@ -1,15 +1,31 @@
 const express = require('express');
 const router = express.Router();
 const mysqlPool = require('../db');
+const { requireAuth } = require('../middleware/auth.middleware');
 
-// POST /api/item-feedbacks/daily-items
-// Submit ratings for multiple menu items
+router.use(requireAuth);
+
 router.post('/daily-items', async (req, res) => {
   console.log('✅ ITEM-FEEDBACK POST HIT - body:', JSON.stringify(req.body).substring(0, 100));
-  const { employee_id, canteen_id, date, items } = req.body;
+  const { employee_id, date, items } = req.body;
+  
+  const effectiveCanteenId = req.user.role === 'employee' ? req.user.canteen_id : (req.body.canteen_id || req.user.canteen_id);
 
-  if (!employee_id || !canteen_id || !date || !items || !Array.isArray(items)) {
+  if (req.user.role === 'canteen_admin' && Number(effectiveCanteenId) !== Number(req.user.canteen_id)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
+
+  // BOLA check: standard employee can only submit feedback for themselves
+  if (req.user.role === 'employee' && employee_id !== req.user.id) {
+    return res.status(403).json({ error: 'Access denied. You can only submit feedback for yourself.' });
+  }
+
+  if (!employee_id || !effectiveCanteenId || !date || !items || !Array.isArray(items)) {
     return res.status(400).json({ error: 'Missing required fields or items is not an array' });
+  }
+
+  if (items.length > 50) {
+    return res.status(400).json({ error: 'Too many items in feedback' });
   }
 
   const connection = await mysqlPool.getConnection();
@@ -18,14 +34,19 @@ router.post('/daily-items', async (req, res) => {
 
     for (const item of items) {
       const { name, rating, remarks } = item;
-      if (!name || typeof rating !== 'number') continue;
+      if (!name || typeof rating !== 'number' || rating < 1 || rating > 5) continue;
+
+      let safeRemarks = remarks || '';
+      if (typeof safeRemarks === 'string' && safeRemarks.length > 500) {
+        safeRemarks = safeRemarks.substring(0, 500);
+      }
 
       // Upsert to handle updates if the user resubmits on the same day
       await connection.query(
         `INSERT INTO daily_item_feedbacks (employee_id, canteen_id, date, item_name, rating, remarks)
-         VALUES (?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE rating = VALUES(rating), remarks = VALUES(remarks)`,
-        [employee_id, canteen_id, date, name, rating, remarks || '']
+        [employee_id, effectiveCanteenId, date, name, rating, safeRemarks]
       );
     }
 
@@ -43,8 +64,13 @@ router.post('/daily-items', async (req, res) => {
 // GET /api/feedback/daily-items?date=YYYY-MM-DD&canteen_id=1
 // Fetch aggregated ratings for Admin Portal
 router.get('/daily-items', async (req, res) => {
-  const { date, canteen_id } = req.query;
+  // BOLA Check: Only admins should read aggregated feedback
+  if (!['canteen_admin', 'it_admin', 'hr_admin'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Access denied' });
+  }
 
+  const { date } = req.query;
+  
   if (!date) {
     return res.status(400).json({ error: 'Date is required' });
   }
@@ -61,9 +87,25 @@ router.get('/daily-items', async (req, res) => {
     `;
     const params = [date];
 
-    if (canteen_id) {
+    if (req.user.role === 'canteen_admin') {
       query += ` AND canteen_id = ?`;
-      params.push(canteen_id);
+      params.push(req.user.canteen_id);
+    } else if (req.user.role === 'it_admin' || req.user.role === 'hr_admin') {
+      if (!req.query.canteen_id) {
+        return res.status(400).json({ error: 'canteen_id is required' });
+      }
+      
+      if (req.user.role === 'hr_admin') {
+         const [canteenCheck] = await mysqlPool.query("SELECT project_id FROM canteens WHERE id = ?", [req.query.canteen_id]);
+         if (canteenCheck.length === 0 || canteenCheck[0].project_id !== req.user.project_id) {
+            return res.status(403).json({ error: 'Access denied: project mismatch' });
+         }
+      }
+
+      query += ` AND canteen_id = ?`;
+      params.push(req.query.canteen_id);
+    } else {
+      return res.status(403).json({ error: 'Access denied' });
     }
 
     query += ` GROUP BY item_name`;

@@ -57,9 +57,9 @@ class AdminPage extends StatelessWidget {
         },
       ),
       _AdminMenuItem(
-        icon: Icons.shopping_cart_outlined,
-        title: "View Lunch Orders",
-        subtitle: "View all lunch orders placed by employees",
+        icon: Icons.checklist_rounded,
+        title: "Track Lunch Orders",
+        subtitle: "Track and mark food & fruit lunch orders",
         onTap: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminOrdersPage()));
         },
@@ -88,19 +88,15 @@ class AdminPage extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScanHistoryPage()));
         },
       ),
-      _AdminMenuItem(
-        icon: Icons.pending_actions_rounded,
-        title: "Pending Approvals",
-        subtitle: "Review and approve pending requests",
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPendingRequestsPage()));
-        },
-      ),
     ];
 
     final role = AuthService.user?['role'];
     if (role == 'scanner') {
-      menuItems.removeWhere((item) => item.title != "Scan QR" && item.title != "Scan History");
+      menuItems.removeWhere((item) => 
+        item.title != "Scan QR" && 
+        item.title != "Scan History" && 
+        item.title != "Track Lunch Orders"
+      );
     }
 
     return Scaffold(
@@ -309,9 +305,11 @@ class _WelcomeCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Welcome to Lunchify Admin!',
-                  style: TextStyle(
+                Text(
+                  AuthService.user?['role'] == 'scanner' 
+                      ? 'Welcome to Lunchify Scanner!' 
+                      : 'Welcome to Lunchify Admin!',
+                  style: const TextStyle(
                     fontSize: 14,
                     color: _kSubtext,
                     fontWeight: FontWeight.w500,

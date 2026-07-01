@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 class AppConfig {
-  static const String apiBaseUrl = kIsWeb ? 'http://localhost:3001' : 'http://172.16.16.210:3001';
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://localhost:3001',
+  );
 
   // ---------- AUTH ----------
   static String get login => '$apiBaseUrl/api/auth/login';

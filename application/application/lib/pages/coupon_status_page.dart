@@ -139,6 +139,7 @@ class _TopBar extends StatelessWidget {
               'assets/images/sjvn_scene.png',
               fit: BoxFit.cover,
               alignment: Alignment.centerRight,
+              semanticLabel: 'SJVN scenic background',
               errorBuilder: (_, __, ___) => Container(
                 color: const Color(0xFFD0DCF0),
               ),
@@ -225,33 +226,43 @@ class _BackButtonState extends State<_BackButton>
     return MouseRegion(
       onEnter: (_) => _ctrl.forward(),
       onExit: (_) => _ctrl.reverse(),
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).maybePop(),
-        child: AnimatedBuilder(
-          animation: _ctrl,
-          builder: (_, __) => Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..translate(_slide.value, 0.0)
-              ..scale(_scale.value),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _kNavy.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+      child: Semantics(
+        button: true,
+        label: 'Go back',
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).maybePop(),
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (_, __) => Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..translate(_slide.value, 0.0)
+                ..scale(_scale.value),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _kNavy.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: _kNavy,
+                      size: 18,
+                    ),
                   ),
-                ],
-              ),
-              child: const Icon(
-                Icons.arrow_back,
-                color: _kNavy,
-                size: 18,
+                ),
               ),
             ),
           ),
@@ -290,122 +301,128 @@ class _CouponCardState extends State<_CouponCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: _kCard,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: _kBlue.withOpacity(0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Icon circle
-              Container(
-                width: 64,
-                height: 64,
-                decoration: const BoxDecoration(
-                  color: _kLight,
-                  shape: BoxShape.circle,
+    return MergeSemantics(
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _kCard,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: _kBlue.withOpacity(0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
                 ),
-                child: Icon(widget.icon, color: _kAccent, size: 30),
-              ),
-
-              const SizedBox(height: 14),
-
-              // Big count number
-              Text(
-                widget.count,
-                style: const TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.w900,
-                  color: _kAccent,
-                  height: 1.0,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              // Label
-              Text(
-                widget.label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: _kNavy,
-                ),
-              ),
-
-              const SizedBox(height: 6),
-
-              // Description
-              Text(
-                widget.description,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: _kSubtext,
-                  height: 1.4,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              // Bottom pill
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                decoration: BoxDecoration(
-                  color: _kPill,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(widget.pillIcon, color: _kAccent, size: 20),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.pillTitle,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: _kAccent,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            widget.pillSubtitle,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: _kSubtext,
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Icon circle
+                ExcludeSemantics(
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      color: _kLight,
+                      shape: BoxShape.circle,
                     ),
-                  ],
+                    child: Icon(widget.icon, color: _kAccent, size: 30),
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 14),
+
+                // Big count number
+                Text(
+                  widget.count,
+                  style: const TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    color: _kAccent,
+                    height: 1.0,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                // Label
+                Text(
+                  widget.label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: _kNavy,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                // Description
+                Text(
+                  widget.description,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: _kSubtext,
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Bottom pill
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: _kPill,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ExcludeSemantics(
+                        child: Icon(widget.pillIcon, color: _kAccent, size: 20),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.pillTitle,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: _kAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              widget.pillSubtitle,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: _kSubtext,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

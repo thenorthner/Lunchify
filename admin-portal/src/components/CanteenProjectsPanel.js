@@ -1,25 +1,184 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
+import PageHeader from "./PageHeader";
+import { CircularProgress } from "@mui/material";
+
+// Icon imports
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import SyncIcon from '@mui/icons-material/Sync';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import BusinessIcon from '@mui/icons-material/Business';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import ShowChartIcon from '@mui/icons-material/ShowChart';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
+
 import "../styles/CanteenProjectsPanel.css";
 
-export default function CanteenProjectsPanel() {
-  const token = localStorage.getItem("adminToken");
-  const user = JSON.parse(localStorage.getItem("adminUser") || "{}");
+const Row = ({ icon: Icon, label, value, mono, status }) => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--ink-muted)' }}>
+      <Icon style={{ fontSize: 13 }} />
+      <span className="eyebrow" style={{ fontSize: '9.5px', letterSpacing: '0.2em' }}>{label}</span>
+    </span>
+    <span
+      className={mono ? "font-mono-tab" : ""}
+      style={{
+        color: status ? "var(--emerald)" : "var(--ink)",
+        fontWeight: status ? 600 : 500,
+        fontSize: '12.5px',
+        display: 'flex',
+        alignItems: 'center'
+      }}
+    >
+      {status && (
+        <span
+          style={{ display: 'inline-block', height: '6px', width: '6px', borderRadius: '50%', background: 'var(--emerald)', marginRight: '6px' }}
+        />
+      )}
+      {value}
+    </span>
+  </div>
+);
 
+const ProjectCard = ({ p, onDelete }) => (
+  <div className="atelier" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, borderRadius: '12px' }}>
+    {/* Navy header */}
+    <div
+      style={{
+        padding: '24px 24px 20px 24px',
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'linear-gradient(140deg, var(--navy) 0%, var(--navy-2) 70%, var(--navy-3) 100%)',
+        color: 'var(--on-dark)',
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          right: '-48px',
+          top: '-48px',
+          opacity: 0.3,
+          width: 180, 
+          height: 180, 
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(84,189,245,.45), transparent 60%)",
+        }}
+      />
+      <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+          <span
+            style={{
+              padding: '2px 8px',
+              borderRadius: '99px',
+              fontSize: '9.5px',
+              background: 'rgba(84,189,245,.18)',
+              color: 'var(--on-dark-accent)',
+              border: '1px solid rgba(84,189,245,.32)',
+              letterSpacing: '0.22em',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+            }}
+          >
+            Project · {(p.project_id < 10 ? '0' : '') + p.project_id}
+          </span>
+          {p.project_state && (
+            <span className="font-mono-tab" style={{ fontSize: '10px', color: 'var(--on-dark-muted)' }}>
+              {p.project_state}
+            </span>
+          )}
+        </div>
+        <h3 className="font-display" style={{ fontSize: '22px', fontWeight: 500, lineHeight: 1.12, margin: '0 0 8px 0', color: 'inherit' }}>
+          {p.project_name}
+        </h3>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--on-dark-muted)' }}>
+          <LocationOnIcon style={{ fontSize: 13 }} />
+          <span>{p.project_location}</span>
+        </div>
+      </div>
+    </div>
+
+    {/* Body */}
+    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', flex: 1, background: '#ffffff' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <div className="eyebrow">Project DB ID</div>
+          <div className="font-display tnum" style={{ fontSize: '22px', fontWeight: 500, marginTop: '4px' }}>#{p.project_id}</div>
+        </div>
+        {p.project_id !== 5 && (
+          <button
+            onClick={() => onDelete(p.project_id, p.project_name)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', borderRadius: '99px', fontSize: '11.5px',
+              background: 'var(--spark-soft)',
+              color: 'var(--spark)',
+              border: '1px solid rgba(226,58,48,.3)',
+              cursor: 'pointer',
+              fontWeight: 500,
+              fontFamily: 'inherit'
+            }}
+          >
+            <DeleteIcon style={{ fontSize: 13 }} />
+            Delete
+          </button>
+        )}
+      </div>
+
+      <div className="hairline" style={{ margin: '20px 0' }} />
+
+      {/* Associated canteen */}
+      {p.canteen_id ? (
+        <div style={{ borderRadius: '12px', padding: '16px', background: 'var(--paper-2)', border: '1px solid var(--hairline)' }}>
+          <div className="eyebrow" style={{ color: 'var(--brass)', marginBottom: '8px' }}>Associated Canteen</div>
+          <div className="font-display" style={{ fontSize: '15px', lineHeight: 1.375, fontWeight: 500, color: 'var(--ink)' }}>
+            {p.canteen_name}
+          </div>
+          <div style={{ marginTop: '16px' }}>
+            <Row icon={QrCodeScannerIcon} label="Module ID" value={`#${p.canteen_id}`} mono />
+            <Row icon={LocationOnIcon} label="Location" value={p.canteen_location} />
+            <Row icon={AccessTimeIcon} label="Hours" value={`${p.open_time?.substring(0, 5)} - ${p.close_time?.substring(0, 5)}`} mono />
+            <Row icon={ShowChartIcon} label="Status" value="ACTIVE" status />
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: '#fffbeb', color: '#b45309', padding: '16px', borderRadius: '12px', fontSize: '13px', border: '1px solid #fef3c7' }}>
+          No associated canteen found. Please verify configuration.
+        </div>
+      )}
+
+      <button
+        style={{
+          marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
+          padding: '10px 16px', borderRadius: '10px', fontSize: '13px', 
+          color: 'var(--ink)', border: '1px solid var(--hairline)', background: 'transparent',
+          cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', fontFamily: 'inherit'
+        }}
+        onMouseOver={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
+        onFocus={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
+        onMouseOut={(e) => e.currentTarget.style.background = 'transparent'}
+        onBlur={(e) => e.currentTarget.style.background = 'transparent'}
+      >
+        <span>Inspect module</span>
+        <ChevronRightIcon style={{ fontSize: 16 }} />
+      </button>
+    </div>
+  </div>
+);
+
+export default function CanteenProjectsPanel({ user = {} }) {
   const [mappings, setMappings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ project_name: "", state: "", canteen_name: "", location: "", open_time: "07:00:00", close_time: "22:00:00" });
-
-  const axiosConfig = {
-    headers: { Authorization: `Bearer ${token}` }
-  };
+  const [q, setQ] = useState("");
 
   const fetchMappings = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:3001/api/transfer/projects-canteens", axiosConfig);
+      const res = await api.get("/transfer/projects-canteens");
       setMappings(res.data);
     } catch (err) {
       console.error("Error fetching project-canteen mappings:", err);
@@ -32,7 +191,7 @@ export default function CanteenProjectsPanel() {
     e.preventDefault();
     setCreating(true);
     try {
-      await axios.post("http://localhost:3001/api/transfer/create-module", formData, axiosConfig);
+      await api.post("/transfer/create-module", formData);
       alert("Project and Canteen Module created successfully!");
       setShowModal(false);
       setFormData({ project_name: "", state: "", canteen_name: "", location: "", open_time: "07:00:00", close_time: "22:00:00" });
@@ -63,7 +222,7 @@ export default function CanteenProjectsPanel() {
     }
 
     try {
-      const res = await axios.delete(`http://localhost:3001/api/transfer/projects/${projectId}`, axiosConfig);
+      const res = await api.delete(`/transfer/projects/${projectId}`);
       alert(res.data.message || "Project and Canteen deleted successfully. Users moved to CHQ.");
       fetchMappings();
     } catch (err) {
@@ -76,130 +235,135 @@ export default function CanteenProjectsPanel() {
     fetchMappings();
   }, []);
 
+  const list = mappings.filter((p) =>
+    !q || p.project_name.toLowerCase().includes(q.toLowerCase()) || (p.project_location || "").toLowerCase().includes(q.toLowerCase())
+  );
+
   return (
-    <div className="canteen-projects-container fade-in">
-      <div className="cp-header">
-        <div>
-          <h2>🏢 Project & Canteen Management</h2>
-          <p className="cp-subheader">IT Admin view of isolated projects and associated food modules.</p>
-        </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button className="cp-refresh-btn" onClick={() => setShowModal(true)} style={{ background: '#28a745' }}>➕ New Project & Canteen</button>
-          <button className="cp-refresh-btn" onClick={fetchMappings}>🔄 Sync Mappings</button>
-        </div>
-      </div>
-
-      {showModal && (
-        <div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 }}>
-          <div className="modal-content" style={{ background: 'white', padding: '20px', borderRadius: '8px', width: '400px' }}>
-            <h3>Create New Module</h3>
-            <form onSubmit={handleCreateModule}>
-              <label style={{ display: 'block', margin: '10px 0' }}>
-                Project Name *:
-                <input type="text" required value={formData.project_name} onChange={e => setFormData({...formData, project_name: e.target.value})} style={{ width: '100%' }} placeholder="e.g. Bikaner Project" />
-              </label>
-              <label style={{ display: 'block', margin: '10px 0' }}>
-                Canteen Name *:
-                <input type="text" required value={formData.canteen_name} onChange={e => setFormData({...formData, canteen_name: e.target.value})} style={{ width: '100%' }} placeholder="e.g. Bikaner Executive Canteen" />
-              </label>
-              <label style={{ display: 'block', margin: '10px 0' }}>
-                Location (City/Area) *:
-                <input type="text" required value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} style={{ width: '100%' }} placeholder="e.g. Bikaner" />
-              </label>
-              <label style={{ display: 'block', margin: '10px 0' }}>
-                State *:
-                <input type="text" required value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} style={{ width: '100%' }} placeholder="e.g. Rajasthan" />
-              </label>
-              <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                <button type="submit" disabled={creating} className="save-btn" style={{ flex: 1, padding: '10px', background: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}>{creating ? 'Saving...' : 'Create'}</button>
-                <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: '10px', background: '#dc3545', color: 'white', border: 'none', borderRadius: '4px' }}>Cancel</button>
-              </div>
-            </form>
+    <div className="projects-manager-container fade-in" style={{ fontFamily: '"Geist", "Inter", "Lexend", -apple-system, system-ui, sans-serif' }}>
+      <PageHeader
+        eyebrow="Chapter VI · Estate"
+        title="Projects across"
+        italicTail="the network"
+        description="IT Admin's view of isolated projects and their associated food modules. The architecture rule is firm: one project, one canteen."
+        right={
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button 
+              onClick={fetchMappings} 
+              disabled={loading}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '6px', 
+                fontSize: '13px', fontWeight: 500, color: '#0f172a',
+                background: '#fff', border: '1px solid #cbd5e1', borderRadius: '9999px',
+                padding: '6px 16px', cursor: 'pointer', transition: 'all 0.2s ease',
+                fontFamily: 'inherit'
+              }}
+              onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onFocus={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+              onBlur={(e) => e.currentTarget.style.background = '#fff'}
+            >
+              {loading ? <CircularProgress size={16} style={{ color: 'inherit' }} /> : <SyncIcon style={{ fontSize: 16, color: '#475569' }} />}
+              Sync Mappings
+            </button>
+            <button className="btn-ink" onClick={() => setShowModal(true)} style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AddIcon style={{ fontSize: 14 }} />
+              New Project & Canteen
+            </button>
           </div>
-        </div>
-      )}
+        }
+      />
 
-      <div className="rule-info-box">
-        💡 <strong>System Architecture Rule:</strong> "1 Project = 1 Canteen". Each project location is strictly mapped to one food module canteen. Employees are isolated to their own project's menu and orders.
+      {/* Architecture rule */}
+      <div
+        className="atelier"
+        style={{
+          padding: '20px',
+          marginBottom: '32px',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '16px',
+          background: "linear-gradient(180deg, rgba(224,236,253,.85), rgba(241,246,252,.6))",
+          borderColor: 'rgba(30,77,214,.22)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            placeItems: 'center',
+            borderRadius: '50%',
+            flexShrink: 0,
+            width: 36, 
+            height: 36,
+            background: "var(--emerald)",
+            color: "#fff",
+          }}
+        >
+          <BusinessIcon style={{ fontSize: 16 }} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <div className="eyebrow" style={{ color: "var(--emerald)", marginBottom: '4px' }}>System Architecture Rule</div>
+          <div className="font-display" style={{ fontSize: '18px', fontWeight: 500, letterSpacing: "-0.015em", color: 'var(--ink)' }}>
+            <span style={{ fontStyle: "italic", color: "var(--emerald)" }}>One project</span> · one canteen · isolated menus & orders.
+          </div>
+          <p style={{ fontSize: '12.5px', marginTop: '4px', color: "var(--ink-muted)", marginBottom: 0 }}>
+            Each project location is strictly mapped to a single food module. Employees only see their own project's menu and ordering surface.
+          </p>
+        </div>
       </div>
 
-      {loading ? (
-        <div className="cp-loading">
-          <div className="spinner"></div>
-          <p>Synchronizing project schemas...</p>
+      {/* Search */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <input
+          className="input-atelier"
+          placeholder="Search project or location..."
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          style={{ maxWidth: '400px', width: '100%' }}
+        />
+        <span className="eyebrow">{list.length} project{list.length === 1 ? "" : "s"}</span>
+      </div>
+
+      {loading && mappings.length === 0 ? (
+        <div className="loading-box">
+          <CircularProgress size={24} style={{ color: "var(--ink)", marginBottom: 12 }} />
+          <div>Synchronizing project schemas...</div>
         </div>
       ) : (
         <div className="projects-grid">
-          {mappings.map((item) => (
-            <div className="project-node-card" key={item.project_id}>
-              {/* Card Header with gradient */}
-              <div className="card-top-gradient">
-                <h3>{item.project_name}</h3>
-                <span className="location-pin">📍 {item.project_location}, {item.project_state}</span>
+          {list.map((p) => <ProjectCard key={p.project_id} p={p} onDelete={handleDeleteProject} />)}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="atelier-modal-overlay">
+          <div className="atelier-modal">
+            <h3 className="font-display" style={{ fontSize: 20, marginBottom: "24px" }}>Create New Module</h3>
+            <form onSubmit={handleCreateModule}>
+              <div className="form-group">
+                <label className="eyebrow" htmlFor="projectName">Project Name *</label>
+                <input id="projectName" type="text" required value={formData.project_name} onChange={e => setFormData({...formData, project_name: e.target.value})} className="input-atelier" placeholder="e.g. Bikaner Project" />
               </div>
-
-              {/* Card Body */}
-              <div className="card-body-details">
-                <div className="detail-row">
-                  <span className="detail-label">Project Database ID</span>
-                  <span className="detail-val font-code">#{item.project_id}</span>
-                </div>
-                
-                {item.project_id !== 5 && (
-                  <div style={{ marginTop: '10px', textAlign: 'right' }}>
-                    <button 
-                      onClick={() => handleDeleteProject(item.project_id, item.project_name)}
-                      style={{
-                        background: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        padding: '6px 12px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '0.85rem'
-                      }}
-                    >
-                      🗑️ Delete Entire Project
-                    </button>
-                  </div>
-                )}
-
-                <hr className="divider" />
-
-                {item.canteen_id ? (
-                  <div className="associated-canteen-info">
-                    <div className="canteen-title-row">
-                      <span className="canteen-tag">ASSOCIATED CANTEEN</span>
-                      <h4>{item.canteen_name}</h4>
-                    </div>
-
-                    <div className="canteen-meta-details">
-                      <div className="detail-row">
-                        <span className="detail-label">Canteen Module ID</span>
-                        <span className="detail-val font-code">#{item.canteen_id}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Physical Location</span>
-                        <span className="detail-val">{item.canteen_location}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Operating Hours</span>
-                        <span className="detail-val hours-tag">🕒 {item.open_time?.substring(0, 5)} - {item.close_time?.substring(0, 5)}</span>
-                      </div>
-                      <div className="detail-row">
-                        <span className="detail-label">Operational Status</span>
-                        <span className="detail-val status-active">🟢 Active & Running</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="no-canteen-warning">
-                    ⚠️ No associated canteen found for this project! Please verify configuration.
-                  </div>
-                )}
+              <div className="form-group">
+                <label className="eyebrow" htmlFor="canteenName">Canteen Name *</label>
+                <input id="canteenName" type="text" required value={formData.canteen_name} onChange={e => setFormData({...formData, canteen_name: e.target.value})} className="input-atelier" placeholder="e.g. Bikaner Executive Canteen" />
               </div>
-            </div>
-          ))}
+              <div className="form-group">
+                <label className="eyebrow" htmlFor="location">Location (City/Area) *</label>
+                <input id="location" type="text" required value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} className="input-atelier" placeholder="e.g. Bikaner" />
+              </div>
+              <div className="form-group">
+                <label className="eyebrow" htmlFor="state">State *</label>
+                <input id="state" type="text" required value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} className="input-atelier" placeholder="e.g. Rajasthan" />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button type="submit" disabled={creating} className="btn-ink" style={{ flex: 1 }}>{creating ? 'Saving...' : 'Create'}</button>
+                <button type="button" onClick={() => setShowModal(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'package:intl/intl.dart';
 import 'config.dart';
 import 'auth_service.dart';
@@ -130,10 +130,6 @@ class _SnackOrderHistoryPageState extends State<SnackOrderHistoryPage> {
 
     switch (status.toLowerCase()) {
       case 'pending':
-        bg = Colors.orange.shade50;
-        fg = Colors.orange.shade800;
-        label = 'Pending';
-        break;
       case 'accepted':
         bg = const Color(0xFFE8F5E9);
         fg = const Color(0xFF1A7A4E); // kGreen
@@ -189,7 +185,6 @@ class _SnackOrderHistoryPageState extends State<SnackOrderHistoryPage> {
               child: Row(
                 children: [
                   _buildFilterChip("All Orders", "all"),
-                  _buildFilterChip("Pending", "pending"),
                   _buildFilterChip("Accepted", "accepted"),
                   _buildFilterChip("Delivered", "delivered"),
                   _buildFilterChip("Cancelled", "cancelled"),
@@ -200,52 +195,58 @@ class _SnackOrderHistoryPageState extends State<SnackOrderHistoryPage> {
           
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                DropdownButton<String>(
-                  value: _sortNewest ? 'newest' : 'oldest',
-                  items: const [
-                    DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
-                    DropdownMenuItem(value: 'oldest', child: Text('Sort: Oldest')),
-                  ],
-                  onChanged: (v) {
-                    if (v != null) setState(() => _sortNewest = v == 'newest');
-                  },
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<int?>(
-                    isExpanded: true,
-                    value: _selectedYear,
-                    hint: const Text('Year'),
-                    items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('All Years')),
-                      ...List.generate(5, (i) => DateTime.now().year - i)
-                          .map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))),
-                    ],
-                    onChanged: (v) => setState(() => _selectedYear = v),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: DropdownButton<int?>(
-                    isExpanded: true,
-                    value: _selectedMonth?.month,
-                    hint: const Text('Month'),
-                    items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('All Months')),
-                      ...List.generate(12, (i) => i + 1)
-                          .map((m) => DropdownMenuItem(value: m, child: Text(DateFormat('MMM').format(DateTime(2020, m))))),
+            child: DefaultTextStyle(
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
+              child: Row(
+                children: [
+                  DropdownButton<String>(
+                    value: _sortNewest ? 'newest' : 'oldest',
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    items: const [
+                      DropdownMenuItem(value: 'newest', child: Text('Sort: Newest')),
+                      DropdownMenuItem(value: 'oldest', child: Text('Sort: Oldest')),
                     ],
                     onChanged: (v) {
-                       setState(() {
-                         if (v == null) _selectedMonth = null;
-                         else _selectedMonth = DateTime(DateTime.now().year, v);
-                       });
+                      if (v != null) setState(() => _sortNewest = v == 'newest');
                     },
                   ),
-                ),
-              ],
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      value: _selectedYear,
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      hint: const Text('Year'),
+                      items: [
+                        const DropdownMenuItem<int?>(value: null, child: Text('All Years')),
+                        ...List.generate(5, (i) => DateTime.now().year - i)
+                            .map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))),
+                      ],
+                      onChanged: (v) => setState(() => _selectedYear = v),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: DropdownButton<int?>(
+                      isExpanded: true,
+                      value: _selectedMonth?.month,
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
+                      hint: const Text('Month'),
+                      items: [
+                        const DropdownMenuItem<int?>(value: null, child: Text('All Months')),
+                        ...List.generate(12, (i) => i + 1)
+                            .map((m) => DropdownMenuItem(value: m, child: Text(DateFormat('MMM').format(DateTime(2020, m))))),
+                      ],
+                      onChanged: (v) {
+                         setState(() {
+                           if (v == null) _selectedMonth = null;
+                           else _selectedMonth = DateTime(DateTime.now().year, v);
+                         });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -292,7 +293,8 @@ class _SnackOrderHistoryPageState extends State<SnackOrderHistoryPage> {
                   // Apply filter
                   var filteredOrders = allOrders.where((order) {
                     if (_selectedFilter != 'all') {
-                      final status = (order['status'] ?? '').toString().toLowerCase();
+                      var status = (order['status'] ?? '').toString().toLowerCase();
+                      if (status == 'pending') status = 'accepted';
                       if (status != _selectedFilter) return false;
                     }
                     if (_selectedDate != null || _selectedMonth != null || _selectedYear != null) {

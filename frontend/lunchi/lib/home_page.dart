@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 
 import 'config.dart';
@@ -46,9 +46,7 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
     try {
       final res = await http.get(
         Uri.parse('${AppConfig.apiBaseUrl}/api/coupons/${widget.employeeId}'),
-        headers: {
-          'Authorization': 'Bearer ${AuthService.token}',
-        },
+        headers: {'Authorization': 'Bearer ${AuthService.token}'},
       );
 
       if (res.statusCode == 200) {
@@ -76,70 +74,160 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
   }
 
   List<_HomeMenuItem> get _menuItems => [
-        _HomeMenuItem(
-          icon: Icons.restaurant_menu_rounded,
-          title: "Today's Menu",
-          subtitle: "See what's cooking today",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TodayMenuPage())),
+    _HomeMenuItem(
+      icon: Icons.restaurant_menu_rounded,
+      title: "Today's Menu",
+      subtitle: "See what's cooking today",
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const TodayMenuPage()),
+      ),
+    ),
+    _HomeMenuItem(
+      icon: Icons.confirmation_number_rounded,
+      title: "Coupons Status",
+      subtitle: "$_couponCount coupons used",
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CouponStatusPage(employeeId: widget.employeeId),
+          ),
+        );
+        _fetchCouponCount();
+      },
+      badge: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: kLightBlue,
+          borderRadius: BorderRadius.circular(8),
         ),
-        _HomeMenuItem(
-          icon: Icons.confirmation_number_rounded,
-          title: "Coupons Status",
-          subtitle: "$_couponCount coupons used",
-          onTap: () async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => CouponStatusPage(employeeId: widget.employeeId)));
-            _fetchCouponCount();
-          },
-          badge: Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: kLightBlue,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Center(
-              child: Text(
-                '$_couponCount',
-                style: const TextStyle(
-                  color: kPrimaryBlue,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                ),
-              ),
+        child: Center(
+          child: Text(
+            '$_couponCount',
+            style: const TextStyle(
+              color: kPrimaryBlue,
+              fontWeight: FontWeight.w800,
+              fontSize: 16,
             ),
           ),
         ),
-        _HomeMenuItem(
-          icon: Icons.qr_code_2_rounded,
-          title: "Buy Lunch & Show QR",
-          subtitle: "Buy your lunch & show QR at canteen",
-          onTap: () async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => BuyLunchQrPage(employeeId: widget.employeeId, employeeName: widget.employeeName)));
-            _fetchCouponCount();
-          },
-        ),
-        _HomeMenuItem(
-          icon: Icons.fastfood_rounded,
-          title: "Snacks Hub",
-          subtitle: "Order snacks & track history",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SnackHubPage(employeeId: widget.employeeId))),
-        ),
-        _HomeMenuItem(
-          icon: Icons.card_giftcard_rounded,
-          title: "Share Coupons",
-          subtitle: "Send coupons to others",
-          onTap: () async {
-            await Navigator.push(context, MaterialPageRoute(builder: (_) => const ShareCouponsPage()));
-            _fetchCouponCount();
-          },
-        ),
-        _HomeMenuItem(
-          icon: Icons.headset_mic_rounded,
-          title: "Rating & Feedback",
-          subtitle: "Rate menu or report bugs",
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SupportRatingsHub())),
-        ),
-      ];
+      ),
+    ),
+    _HomeMenuItem(
+      icon: Icons.qr_code_2_rounded,
+      title: "Redeem Coupon & Show QR",
+      subtitle: "Redeem your coupon & show QR at canteen",
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BuyLunchQrPage(
+              employeeId: widget.employeeId,
+              employeeName: widget.employeeName,
+            ),
+          ),
+        );
+        _fetchCouponCount();
+      },
+    ),
+    _HomeMenuItem(
+      icon: Icons.fastfood_rounded,
+      title: "Canteen Hub",
+      subtitle: "Order food, snacks & track history",
+      isDisabled: !(AuthService.user?['is_gm_or_above'] == true),
+      onTap: () {
+        if (!(AuthService.user?['is_gm_or_above'] == true)) {
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+              title: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.lock_rounded, color: Colors.redAccent, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      "This ain't for everyone!",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800, 
+                        fontSize: 18, 
+                        color: Color(0xFF1A3A8F), // kPrimaryBlue
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: const Text(
+                "This lunch/snacks order feature is only for the big boss gang (GM & above) 🗿. Meanwhile, the rest of us gotta hit the canteen.",
+                style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
+              ),
+              actions: [
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A3A8F), // kPrimaryBlue
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Got it, Chief ✌️',
+                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+          return;
+        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SnackHubPage(employeeId: widget.employeeId),
+          ),
+        );
+      },
+    ),
+    _HomeMenuItem(
+      icon: Icons.card_giftcard_rounded,
+      title: "Share Coupons",
+      subtitle: "Send coupons to others",
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ShareCouponsPage()),
+        );
+        _fetchCouponCount();
+      },
+    ),
+    _HomeMenuItem(
+      icon: Icons.headset_mic_rounded,
+      title: "Rating & Feedback",
+      subtitle: "Rate menu or report bugs",
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SupportRatingsHub()),
+      ),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -211,9 +299,8 @@ class _Header extends StatelessWidget {
               child: Image.asset(
                 'assets/images/sjvn_bg.png',
                 fit: BoxFit.fill,
-                errorBuilder: (_, __, ___) => Container(
-                  color: const Color(0xFFD0DCF0),
-                ),
+                errorBuilder: (_, __, ___) =>
+                    Container(color: const Color(0xFFD0DCF0)),
               ),
             ),
             Positioned.fill(
@@ -308,7 +395,11 @@ class _WelcomeCard extends StatelessWidget {
               color: kLightBlue,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person_outline_rounded, color: kPrimaryBlue, size: 32),
+            child: const Icon(
+              Icons.person_outline_rounded,
+              color: kPrimaryBlue,
+              size: 32,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -358,7 +449,11 @@ class _WelcomeCard extends StatelessWidget {
               color: kLightBlue,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.dinner_dining, color: kAccentBlue, size: 36),
+            child: const Icon(
+              Icons.dinner_dining,
+              color: kAccentBlue,
+              size: 36,
+            ),
           ),
         ],
       ),
@@ -373,6 +468,7 @@ class _HomeMenuItem {
   final String subtitle;
   final Widget? badge;
   final VoidCallback onTap;
+  final bool isDisabled;
 
   const _HomeMenuItem({
     required this.icon,
@@ -380,6 +476,7 @@ class _HomeMenuItem {
     required this.subtitle,
     this.badge,
     required this.onTap,
+    this.isDisabled = false,
   });
 }
 
@@ -461,68 +558,83 @@ class _MenuCardState extends State<_MenuCard> {
       child: AnimatedScale(
         scale: _pressed ? 0.96 : 1.0,
         duration: const Duration(milliseconds: 120),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: kCardWhite,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: kPrimaryBlue.withOpacity(0.07),
-                blurRadius: 14,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      color: kLightBlue,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(widget.item.icon, color: kPrimaryBlue, size: 22),
-                  ),
-                  const Spacer(),
-                  if (widget.item.badge != null) widget.item.badge!,
-                  if (widget.item.badge == null)
-                    const Icon(Icons.chevron_right_rounded, color: kAccentBlue, size: 22),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                widget.item.title,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                  color: kPrimaryBlue,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                widget.item.subtitle,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: kSubtext,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                ),
-              ),
-              if (widget.item.badge != null) ...[
-                const SizedBox(height: 6),
-                const Align(
-                  alignment: Alignment.centerRight,
-                  child: Icon(Icons.chevron_right_rounded, color: kAccentBlue, size: 20),
+        child: Opacity(
+          opacity: widget.item.isDisabled ? 0.45 : 1.0,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: kCardWhite,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: kPrimaryBlue.withOpacity(0.07),
+                  blurRadius: 14,
+                  offset: const Offset(0, 3),
                 ),
               ],
-            ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        color: kLightBlue,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        widget.item.icon,
+                        color: kPrimaryBlue,
+                        size: 22,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (widget.item.badge != null) widget.item.badge!,
+                    if (widget.item.badge == null)
+                      const Icon(
+                        Icons.chevron_right_rounded,
+                        color: kAccentBlue,
+                        size: 22,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  widget.item.title,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    color: kPrimaryBlue,
+                    height: 1.25,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  widget.item.subtitle,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: kSubtext,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
+                if (widget.item.badge != null) ...[
+                  const SizedBox(height: 6),
+                  const Align(
+                    alignment: Alignment.centerRight,
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: kAccentBlue,
+                      size: 20,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ),
       ),
@@ -617,7 +729,11 @@ class _FooterBadge extends StatelessWidget {
               color: kPrimaryBlue,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.verified_user_rounded, color: Colors.white, size: 22),
+            child: const Icon(
+              Icons.verified_user_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
           const SizedBox(width: 14),
           Column(

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import '../config.dart';
 import 'auth_service.dart';
 
@@ -354,12 +354,8 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
                                   const SizedBox(height: 14),
                               itemBuilder: (context, index) => _OrderCard(
                                 order: filteredOrders[index],
-                                onAccept: filteredOrders[index].status == SnackStatus.pending
-                                    ? () => _updateStatus(filteredOrders[index].id, 'accepted')
-                                    : null,
-                                onDecline: filteredOrders[index].status == SnackStatus.pending
-                                    ? () => _updateStatus(filteredOrders[index].id, 'declined')
-                                    : null,
+                                onAccept: null,
+                                onDecline: null,
                                 onDelete: filteredOrders[index].status == SnackStatus.declined
                                     ? () => _deleteRequest(filteredOrders[index].id)
                                     : null,
@@ -701,49 +697,6 @@ class _OrderCard extends StatelessWidget {
               const Spacer(),
 
               // Accept/Decline button — shown only for pending orders
-              if (onAccept != null && onDecline != null) ...[
-                GestureDetector(
-                  onTap: onDecline,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _kRedBg,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Decline',
-                      style: TextStyle(
-                        color: _kRed,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                GestureDetector(
-                  onTap: onAccept,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 7,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _kAccent,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Accept',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
 
               if (onDelete != null)
                 GestureDetector(

@@ -1,0 +1,499 @@
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,300..900,0..100,0..1&family=Geist:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    /* Editorial Blueprint palette — cool ivory + deep navy + royal blue + sky blue + red spark
+       Variable names like --emerald and --brass are KEPT for backward compatibility;
+       their VALUES are now bluish so old components inherit the new theme automatically. */
+    --bone: #eef3fb;            /* page background — cool ivory */
+    --paper: #fbfdff;           /* surface — cool white paper */
+    --paper-2: #f1f6fc;         /* secondary surface */
+    --ink: #0a1733;             /* deep navy ink */
+    --ink-2: #16264c;
+    --ink-muted: #525e7e;
+    --ink-faint: #9aa3bc;
+    --hairline: #d4dcee;        /* cool hairline */
+    --hairline-strong: #b3c0d6;
+    /* "emerald" slot now holds ROYAL BLUE (primary action / italic accent) */
+    --emerald: #1e4dd6;         /* royal blue — primary */
+    --emerald-2: #2864e8;       /* royal bright */
+    --emerald-soft: #e0ecfd;    /* royal soft tint */
+    /* "brass" slot now holds SKY BLUE (highlight / accent) */
+    --brass: #2da4e8;           /* sky blue */
+    --brass-2: #54bdf5;         /* sky bright */
+    /* spark — used VERY sparingly for live dots, lightning marks, danger */
+    --spark: #e23a30;           /* SJVN red lightning */
+    --spark-soft: #fbe1de;
+    --rust: #d63327;            /* destructive */
+    --rust-soft: #fbe1de;
+    --amber: #b07a16;           /* warning */
+    --amber-soft: #fbeacb;
+
+    /* deep navy palette for dark surfaces (login cover, dark stat tile, dark filter bar) */
+    --navy: #06122e;
+    --navy-2: #0c1d44;
+    --navy-3: #14275a;
+    --on-dark: #dde8ff;         /* text on dark navy */
+    --on-dark-muted: #8a9bbe;
+    --on-dark-accent: #54bdf5;  /* sky blue on dark */
+
+    /* shadcn token mapping */
+    --background: 218 60% 95%;
+    --foreground: 222 64% 12%;
+    --card: 217 100% 99%;
+    --card-foreground: 222 64% 12%;
+    --popover: 217 100% 99%;
+    --popover-foreground: 222 64% 12%;
+    --primary: 222 75% 48%;
+    --primary-foreground: 218 60% 95%;
+    --secondary: 218 50% 92%;
+    --secondary-foreground: 222 64% 12%;
+    --muted: 218 40% 92%;
+    --muted-foreground: 222 18% 40%;
+    --accent: 218 88% 94%;
+    --accent-foreground: 222 75% 30%;
+    --destructive: 4 72% 50%;
+    --destructive-foreground: 218 60% 95%;
+    --border: 218 36% 82%;
+    --input: 218 36% 82%;
+    --ring: 222 75% 48%;
+    --radius: 0.5rem;
+}
+
+* {
+    border-color: hsl(var(--border));
+}
+
+html,
+body,
+#root {
+    background: var(--bone);
+    color: var(--ink);
+}
+
+body {
+    margin: 0;
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background:
+        radial-gradient(
+            1200px 600px at 85% -10%,
+            rgba(84, 189, 245, 0.22),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 500px at -10% 110%,
+            rgba(30, 77, 214, 0.14),
+            transparent 60%
+        ),
+        var(--bone);
+    background-attachment: fixed;
+    letter-spacing: -0.005em;
+}
+
+/* Subtle cool blueprint grain */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.04  0 0 0 0 0.07  0 0 0 0 0.18  0 0 0 0.07 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+}
+
+#root > * {
+    position: relative;
+    z-index: 1;
+}
+
+::selection {
+    background: var(--emerald);
+    color: var(--paper);
+}
+
+/* Typography utilities */
+.font-display {
+    font-family: "Fraunces", "Times New Roman", serif;
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 30, "WONK" 0;
+    letter-spacing: -0.025em;
+}
+.font-mono-tab {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-feature-settings: "tnum", "zero";
+}
+.font-sans-tight {
+    font-family: "Geist", sans-serif;
+    letter-spacing: -0.01em;
+}
+.tnum {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Eyebrow micro-label */
+.eyebrow {
+    font-family: "Geist", sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+}
+
+/* Hairline divider */
+.hairline {
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--hairline-strong),
+        transparent
+    );
+}
+
+/* Atelier panel — premium glass with cool blue tint */
+.atelier {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.92),
+            rgba(241, 246, 252, 0.78)
+        );
+    backdrop-filter: blur(14px) saturate(120%);
+    -webkit-backdrop-filter: blur(14px) saturate(120%);
+    border: 1px solid rgba(179, 192, 214, 0.55);
+    border-radius: 14px;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 28px 60px -30px rgba(10, 23, 51, 0.16),
+        0 8px 24px -20px rgba(10, 23, 51, 0.1);
+}
+
+.atelier-dark {
+    background: linear-gradient(180deg, var(--navy-2) 0%, var(--navy) 100%);
+    color: var(--on-dark);
+    border: 1px solid rgba(84, 189, 245, 0.22);
+    border-radius: 14px;
+}
+
+/* Sky-blue corner ornament */
+.brass-corner {
+    position: relative;
+}
+.brass-corner::before,
+.brass-corner::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--brass-2);
+    border-style: solid;
+    border-width: 0;
+}
+.brass-corner::before {
+    top: 10px;
+    left: 10px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+}
+.brass-corner::after {
+    bottom: 10px;
+    right: 10px;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+}
+
+/* Buttons */
+.btn-ink {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    transition:
+        transform 0.25s ease,
+        background 0.3s ease,
+        box-shadow 0.3s ease;
+    box-shadow: 0 8px 24px -12px rgba(10, 23, 51, 0.6);
+}
+.btn-ink:hover {
+    background: var(--emerald);
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px -14px rgba(30, 77, 214, 0.55);
+}
+.btn-ghost {
+    border: 1px solid var(--hairline-strong);
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight: 500;
+    transition: all 0.25s ease;
+}
+.btn-ghost:hover {
+    background: var(--paper);
+    border-color: var(--ink);
+}
+/* Re-skinned "brass" CTA — now a royal/sky gradient */
+.btn-brass {
+    background: linear-gradient(180deg, #54bdf5 0%, #1e4dd6 100%);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(30, 77, 214, 0.6);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        0 10px 24px -12px rgba(30, 77, 214, 0.55);
+    transition: transform 0.25s ease;
+}
+.btn-brass:hover {
+    transform: translateY(-1px);
+}
+.btn-spark {
+    background: var(--spark);
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 10px 18px;
+    font-weight: 500;
+    border: 1px solid rgba(226, 58, 48, 0.7);
+    box-shadow: 0 8px 22px -10px rgba(226, 58, 48, 0.55);
+    transition: transform 0.2s ease;
+}
+.btn-spark:hover {
+    transform: translateY(-1px);
+}
+
+/* Inputs */
+.input-atelier {
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--hairline-strong);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--ink);
+    width: 100%;
+    transition: all 0.25s ease;
+    font-family: "Geist", sans-serif;
+}
+.input-atelier::placeholder {
+    color: var(--ink-faint);
+}
+.input-atelier:focus {
+    outline: none;
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 4px rgba(30, 77, 214, 0.14);
+    background: var(--paper);
+}
+
+/* Chips */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px 6px 14px;
+    border-radius: 999px;
+    background: var(--paper);
+    border: 1px solid var(--hairline-strong);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+}
+.chip-emerald {
+    background: var(--emerald-soft);
+    border-color: rgba(30, 77, 214, 0.25);
+    color: var(--emerald);
+}
+.chip-sky {
+    background: #e4f1fb;
+    border-color: rgba(45, 164, 232, 0.3);
+    color: #0e6cb0;
+}
+.chip-amber {
+    background: var(--amber-soft);
+    border-color: rgba(176, 122, 22, 0.3);
+    color: #6a4a0e;
+}
+.chip-rust {
+    background: var(--rust-soft);
+    border-color: rgba(214, 51, 39, 0.3);
+    color: var(--rust);
+}
+.chip-spark {
+    background: var(--spark-soft);
+    border-color: rgba(226, 58, 48, 0.3);
+    color: var(--spark);
+}
+
+/* Editorial tabs */
+.atelier-tab {
+    position: relative;
+    padding: 18px 4px 22px;
+    cursor: pointer;
+    color: var(--ink-muted);
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+.atelier-tab:hover {
+    color: var(--ink);
+}
+.atelier-tab[data-active="true"] {
+    color: var(--ink);
+}
+.atelier-tab .tab-num {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--brass);
+    opacity: 0.95;
+}
+.atelier-tab[data-active="true"]::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--brass-2), var(--emerald));
+    border-radius: 2px;
+}
+
+/* Tables */
+.atelier-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.atelier-table thead th {
+    text-align: left;
+    font-family: "Geist", sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--hairline-strong);
+    background: transparent;
+}
+.atelier-table tbody td {
+    padding: 18px 18px;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 14px;
+    color: var(--ink);
+    vertical-align: middle;
+}
+.atelier-table tbody tr {
+    transition: background 0.2s ease;
+}
+.atelier-table tbody tr:hover {
+    background: rgba(30, 77, 214, 0.035);
+}
+.atelier-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Hover lift */
+.lift {
+    transition:
+        transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+        box-shadow 0.35s ease;
+}
+.lift:hover {
+    transform: translateY(-2px);
+}
+
+/* Ticker drift */
+@keyframes drift {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}
+.drift {
+    animation: drift 38s linear infinite;
+}
+
+/* Mount reveal */
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.rise {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Lightning spark pulse — for the brand mark */
+@keyframes spark {
+    0%, 100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    50% {
+        opacity: 0.65;
+        transform: translateY(-0.5px);
+    }
+}
+.spark-pulse {
+    animation: spark 2.4s ease-in-out infinite;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(179, 192, 214, 0.55);
+    border-radius: 999px;
+    border: 2px solid var(--bone);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--brass);
+}
+
+/* Date input chrome */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator {
+    opacity: 0.6;
+    cursor: pointer;
+}
+
+/* Focus ring */
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--emerald);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* Star rating */
+.star-row { display: inline-flex; gap: 2px; align-items: center; }
+.star-row svg { width: 14px; height: 14px; }
+.star-row .filled { color: var(--brass-2); fill: var(--brass-2); }
+.star-row .empty { color: var(--hairline-strong); fill: var(--hairline-strong); }

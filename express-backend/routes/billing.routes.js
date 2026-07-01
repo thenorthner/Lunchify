@@ -4,7 +4,7 @@ const { mysqlPool } = require("../db");
 const { requireAuth, requireHRAdmin } = require("../middleware/auth.middleware");
 const PDFDocument = require("pdfkit");
 const fs = require("fs");
-
+const path = require("path");
 // Require authentication for all billing routes
 router.use(requireAuth);
 
@@ -17,28 +17,97 @@ router.post("/generate-canteen-bill", async (req, res) => {
   const { bill_month, total_coupons_scanned, coupon_price, total_amount, place_generated } = req.body;
   const user = req.user;
 
-  if (user.role !== 'canteen_admin') {
-    return res.status(403).json({ error: "Only Canteen Admin can generate canteen bills" });
+  let targetCanteenId = user.canteen_id;
+  let targetProjectId = user.project_id;
+  
+  if (user.role === 'it_admin' && req.body.canteen_id) {
+    targetCanteenId = req.body.canteen_id;
+    // Assuming IT Admin generates bill for the canteen's project. We should fetch the project_id.
+    // For simplicity, we can pass it or fetch it. Let's fetch it below if needed, or rely on canteen's project_id.
+  } else if (user.role !== 'canteen_admin') {
+    return res.status(403).json({ error: "Only Canteen Admin or IT Admin can generate canteen bills" });
   }
 
-  if (!bill_month || !total_coupons_scanned || !coupon_price || !total_amount) {
+  if (!bill_month || !coupon_price) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
+  const conn = await mysqlPool.getConnection();
   try {
+    await conn.beginTransaction();
+
+    // Fetch project_id for this canteen
+    const [canteenRows] = await conn.query("SELECT project_id FROM canteens WHERE id = ?", [targetCanteenId]);
+    if (canteenRows.length > 0) {
+      targetProjectId = canteenRows[0].project_id;
+    }
+
+    // Dynamically calculate the scans server-side to prevent fraud
+    const [scanRows] = await conn.query(
+      `SELECT COUNT(*) AS total_scans
+       FROM qr_scan_logs
+       WHERE canteen_id = ? AND created_at >= ? AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)`,
+      [targetCanteenId, `${bill_month}-01`, bill_month]
+    );
+
+    const [foodRows] = await conn.query(
+      `SELECT COALESCE(SUM(quantity), 0) AS total_food
+       FROM food_lunch_orders
+       WHERE canteen_id = ? AND status = 'delivered' AND created_at >= ? AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)`,
+      [targetCanteenId, `${bill_month}-01`, bill_month]
+    );
+
+    const [fruitRows] = await conn.query(
+      `SELECT COALESCE(SUM(quantity), 0) AS total_fruit
+       FROM fruit_lunch_orders
+       WHERE canteen_id = ? AND status = 'delivered' AND created_at >= ? AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)`,
+      [targetCanteenId, `${bill_month}-01`, bill_month]
+    );
+
+    const totalCoupons = Number(scanRows[0].total_scans) + Number(foodRows[0].total_food) + Number(fruitRows[0].total_fruit);
+
+    // Fetch official coupon rate from DB
+    const [rateRows] = await conn.query(
+      `SELECT unit_price FROM coupon_rates
+       WHERE canteen_id = ? AND effective_from <= ? AND (effective_to IS NULL OR effective_to >= ?)
+       ORDER BY effective_from DESC LIMIT 1`,
+      [targetCanteenId, `${bill_month}-01`, `${bill_month}-01`]
+    );
+
+    if (rateRows.length === 0) {
+      await conn.rollback();
+      return res.status(400).json({ error: "No approved coupon rate found for this billing period." });
+    }
+
+    const price = Number(rateRows[0].unit_price);
+    const calculatedTotalAmount = totalCoupons * price;
+
     // Delete existing bill if any to recreate (prevent duplicates for same month & canteen)
-    await mysqlPool.query(
+    await conn.query(
       "DELETE FROM monthly_bills WHERE canteen_id = ? AND bill_month = ?",
-      [user.canteen_id, bill_month]
+      [targetCanteenId, bill_month]
     );
 
     // Insert new monthly bill
-    const [result] = await mysqlPool.query(
+    const [result] = await conn.query(
       `INSERT INTO monthly_bills 
        (employee_id, canteen_id, project_id, bill_month, total_coupons_used, coupon_price, total_amount, status, place_generated) 
        VALUES (?, ?, ?, ?, ?, ?, ?, 'submitted', ?)`,
-      [null, user.canteen_id, user.project_id, bill_month, total_coupons_scanned, coupon_price, total_amount, place_generated || 'Canteen Portal']
+      [null, targetCanteenId, targetProjectId, bill_month, totalCoupons, price, calculatedTotalAmount, place_generated || 'Canteen Portal']
     );
+
+    await conn.commit();
+
+    // Audit log
+    console.log(JSON.stringify({
+      event: "BILL_GENERATED",
+      timestamp: new Date().toISOString(),
+      actor_id: user.id,
+      bill_id: result.insertId,
+      canteen_id: user.canteen_id,
+      bill_month,
+      total_amount: calculatedTotalAmount
+    }));
 
     res.json({
       success: true,
@@ -48,17 +117,20 @@ router.post("/generate-canteen-bill", async (req, res) => {
         canteen_id: user.canteen_id,
         project_id: user.project_id,
         bill_month,
-        total_coupons_used: total_coupons_scanned,
-        coupon_price,
-        total_amount,
+        total_coupons_used: totalCoupons,
+        coupon_price: price,
+        total_amount: calculatedTotalAmount,
         status: 'submitted',
         place_generated: place_generated || 'Canteen Portal',
         generated_at: new Date()
       }
     });
   } catch (err) {
+    if (conn) await conn.rollback();
     console.error("❌ Error generating canteen monthly bill:", err);
     res.status(500).json({ error: "Internal server error" });
+  } finally {
+    if (conn) conn.release();
   }
 });
 
@@ -68,14 +140,19 @@ router.post("/generate-canteen-bill", async (req, res) => {
  */
 router.get("/canteen-bills", async (req, res) => {
   const user = req.user;
-  if (user.role !== 'canteen_admin') {
-    return res.status(403).json({ error: "Only Canteen Admin can access this route" });
+  
+  let targetCanteenId = user.canteen_id;
+  
+  if (user.role === 'it_admin' && req.query.canteen_id) {
+    targetCanteenId = req.query.canteen_id;
+  } else if (user.role !== 'canteen_admin') {
+    return res.status(403).json({ error: "Only Canteen Admin or IT Admin can access this route" });
   }
 
   try {
     const [rows] = await mysqlPool.query(
       `SELECT * FROM monthly_bills WHERE canteen_id = ? ORDER BY generated_at DESC`,
-      [user.canteen_id]
+      [targetCanteenId]
     );
     res.json(rows);
   } catch (err) {
@@ -188,39 +265,59 @@ router.get("/fruit-lunch-pdf", async (req, res) => {
     res.setHeader('Content-type', 'application/pdf');
     doc.pipe(res);
 
-    // --- Header ---
-    doc.rect(0, 0, 600, 100).fill('#f4f8fc');
-    doc.moveTo(0, 100).lineTo(600, 100).strokeColor('#c0d6f2').lineWidth(2).stroke();
+    // --- Header Background ---
+    doc.rect(0, 0, 600, 150).fill('#f4f8fc');
+    doc.moveTo(0, 150).lineTo(600, 150).strokeColor('#c0d6f2').lineWidth(2).stroke();
     
-    doc.font('Helvetica-Bold').fontSize(24).fillColor('#1a365d').text('SJVN Lunchify', 50, 25);
-    doc.font('Helvetica-Bold').fontSize(16).fillColor('#1e3a8a').text(`Fruit Lunch Orders - ${monthStr}`, 50, 60);
+    const logoPath = path.resolve(__dirname, '../../admin-portal/public/lunchify_logo.png');
+    if (fs.existsSync(logoPath)) {
+      doc.image(fs.readFileSync(logoPath), 470, 30, { width: 80 });
+    }
+    
+    // SJVN Lunchify
+    doc.font('Helvetica-Bold').fontSize(24).fillColor('#1a365d').text('SJVN Lunchify', 50, 40);
+    doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('Healthy Meals, Happy Employees', 50, 70);
+
+    // Large Title
+    doc.font('Helvetica-Bold').fontSize(24).fillColor('#1e3a8a').text('Fruit Lunch Orders', 50, 180);
+    doc.font('Helvetica-Bold').fontSize(14).fillColor('#64748b').text(`Month: ${monthStr}`, 50, 210);
+    doc.rect(50, 235, 60, 4).fill('#2563eb');
 
     // --- Table Header ---
-    const startY = 130;
-    doc.font('Helvetica-Bold').fontSize(10).fillColor('#000');
-    doc.text('Date', 50, startY);
-    doc.text('Employee Name', 150, startY);
-    doc.text('Emp ID', 350, startY);
-    doc.text('Item', 430, startY);
-    doc.text('Qty', 530, startY);
-    doc.moveTo(50, startY + 15).lineTo(550, startY + 15).strokeColor('#ccc').lineWidth(1).stroke();
+    const startY = 270;
+    doc.font('Helvetica-Bold').fontSize(10).fillColor('#ffffff');
+    doc.rect(50, startY, 500, 25).fill('#1e3a8a');
+    doc.fillColor('#ffffff');
+    doc.text('Date', 60, startY + 8);
+    doc.text('Employee Name', 160, startY + 8);
+    doc.text('Emp ID', 350, startY + 8);
+    doc.text('Item', 430, startY + 8);
+    doc.text('Qty', 510, startY + 8);
 
     // --- Table Rows ---
     let y = startY + 25;
-    doc.font('Helvetica').fontSize(9).fillColor('#333');
     for (let i = 0; i < orders.length; i++) {
       if (y > 750) {
         doc.addPage();
         y = 50;
       }
       const o = orders[i];
-      doc.text(o.date, 50, y);
-      doc.text(o.employee_name, 150, y);
-      doc.text(o.emp_id, 350, y);
-      doc.text(o.name || '-', 430, y);
-      doc.text(o.quantity.toString(), 530, y);
+      const dateObj = new Date(o.date);
+      const formattedDate = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
       
-      doc.moveTo(50, y + 15).lineTo(550, y + 15).strokeColor('#eee').lineWidth(1).stroke();
+      // Alternate row background
+      if (i % 2 === 0) {
+        doc.rect(50, y, 500, 25).fill('#f8fafc');
+      }
+
+      doc.font('Helvetica').fontSize(9).fillColor('#333');
+      doc.text(formattedDate, 60, y + 8);
+      doc.text(o.employee_name, 160, y + 8);
+      doc.text(o.emp_id, 350, y + 8);
+      doc.text(o.name || '-', 430, y + 8);
+      doc.text(o.quantity.toString(), 510, y + 8);
+      
+      doc.moveTo(50, y + 25).lineTo(550, y + 25).strokeColor('#e2e8f0').lineWidth(1).stroke();
       y += 25;
     }
 
@@ -286,6 +383,10 @@ router.get("/:id/pdf", async (req, res) => {
     doc.moveTo(0, 150).lineTo(600, 150).strokeColor('#c0d6f2').lineWidth(2).stroke();
 
     // --- Header Texts ---
+    const logoPath = path.resolve(__dirname, '../../admin-portal/public/lunchify_logo.png');
+    if (fs.existsSync(logoPath)) {
+      doc.image(fs.readFileSync(logoPath), 470, 30, { width: 80 });
+    }
     // SJVN Lunchify
     doc.font('Helvetica-Bold').fontSize(24).fillColor('#1a365d').text('SJVN Lunchify', 50, 40);
     doc.font('Helvetica').fontSize(10).fillColor('#4a5568').text('Healthy Meals, Happy Employees', 50, 70);
@@ -367,6 +468,105 @@ router.get("/:id/pdf", async (req, res) => {
       doc.font('Helvetica-Bold').fontSize(10).fillColor('#92400e').text('HR Comments:', 70, 635);
       doc.font('Helvetica').fontSize(10).fillColor('#92400e').text(bill.comments, 70, 650, { width: 450 });
     }
+
+    // --- Page 2: Day-wise Breakdown ---
+    doc.addPage();
+    
+    // Header for Page 2
+    doc.rect(0, 0, 600, 100).fill('#f4f8fc');
+    doc.moveTo(0, 100).lineTo(600, 100).strokeColor('#c0d6f2').lineWidth(2).stroke();
+    
+    if (fs.existsSync(logoPath)) {
+      doc.image(fs.readFileSync(logoPath), 470, 25, { width: 60 });
+    }
+    
+    doc.font('Helvetica-Bold').fontSize(20).fillColor('#1e3a8a').text('Day-wise Billing Breakdown', 50, 40);
+    doc.font('Helvetica').fontSize(12).fillColor('#64748b').text(`Month: ${bill.bill_month} | Canteen: ${bill.canteen_name}`, 50, 65);
+
+    // Fetch Day-wise Data
+    const [dailyRows] = await mysqlPool.query(`
+      SELECT DATE(created_at) as date, COUNT(id) as count, 'qr' as type
+      FROM qr_scan_logs WHERE canteen_id = ? AND created_at LIKE ? GROUP BY DATE(created_at)
+      UNION ALL
+      SELECT DATE(date) as date, SUM(quantity) as count, 'food' as type
+      FROM food_lunch_orders WHERE canteen_id = ? AND status = 'delivered' AND date LIKE ? GROUP BY DATE(date)
+      UNION ALL
+      SELECT DATE(date) as date, SUM(quantity) as count, 'fruit' as type
+      FROM fruit_lunch_orders WHERE canteen_id = ? AND status = 'delivered' AND date LIKE ? GROUP BY DATE(date)
+    `, [bill.canteen_id, `${bill.bill_month}%`, bill.canteen_id, `${bill.bill_month}%`, bill.canteen_id, `${bill.bill_month}%`]);
+
+    const dailyData = {};
+    dailyRows.forEach(r => {
+      // Handle Date object correctly by formatting to YYYY-MM-DD
+      const d = new Date(r.date);
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      if (!dailyData[dateStr]) dailyData[dateStr] = { qr: 0, food: 0, fruit: 0, total: 0 };
+      dailyData[dateStr][r.type] += Number(r.count || 0);
+      dailyData[dateStr].total += Number(r.count || 0);
+    });
+
+    const sortedDates = Object.keys(dailyData).sort();
+
+    // Table Header
+    let yTable = 140;
+    doc.rect(50, yTable, 500, 25).fill('#1e3a8a');
+    doc.font('Helvetica-Bold').fontSize(10).fillColor('#ffffff');
+    doc.text('Date', 60, yTable + 8);
+    doc.text('QR Scans', 160, yTable + 8);
+    doc.text('Food Orders', 260, yTable + 8);
+    doc.text('Fruit Orders', 370, yTable + 8);
+    doc.text('Daily Total', 480, yTable + 8);
+
+    yTable += 25;
+
+    // Table Rows
+    doc.font('Helvetica').fontSize(10).fillColor('#333333');
+    for (let i = 0; i < sortedDates.length; i++) {
+      if (yTable > 700) {
+        doc.addPage();
+        yTable = 50;
+      }
+      
+      const dateStr = sortedDates[i];
+      const data = dailyData[dateStr];
+      
+      if (i % 2 === 0) {
+        doc.rect(50, yTable, 500, 25).fill('#f8fafc');
+        doc.fillColor('#333333');
+      }
+
+      doc.text(dateStr, 60, yTable + 8);
+      doc.text(data.qr.toString(), 160, yTable + 8);
+      doc.text(data.food.toString(), 260, yTable + 8);
+      doc.text(data.fruit.toString(), 370, yTable + 8);
+      doc.font('Helvetica-Bold').text(data.total.toString(), 480, yTable + 8);
+      doc.font('Helvetica');
+
+      doc.moveTo(50, yTable + 25).lineTo(550, yTable + 25).strokeColor('#e2e8f0').lineWidth(1).stroke();
+      
+      yTable += 25;
+    }
+
+    if (sortedDates.length === 0) {
+      doc.font('Helvetica-Oblique').text('No daily breakdown data available.', 60, yTable + 20);
+      yTable += 40;
+    }
+
+    // Grand Totals at bottom of table
+    yTable += 10;
+    doc.rect(50, yTable, 500, 30).fill('#eff6ff');
+    doc.font('Helvetica-Bold').fontSize(11).fillColor('#1e3a8a');
+    doc.text('GRAND TOTAL', 60, yTable + 10);
+    
+    const grandQr = sortedDates.reduce((sum, d) => sum + dailyData[d].qr, 0);
+    const grandFood = sortedDates.reduce((sum, d) => sum + dailyData[d].food, 0);
+    const grandFruit = sortedDates.reduce((sum, d) => sum + dailyData[d].fruit, 0);
+    const grandTotal = sortedDates.reduce((sum, d) => sum + dailyData[d].total, 0);
+    
+    doc.text(grandQr.toString(), 160, yTable + 10);
+    doc.text(grandFood.toString(), 260, yTable + 10);
+    doc.text(grandFruit.toString(), 370, yTable + 10);
+    doc.text(grandTotal.toString(), 480, yTable + 10);
 
     // --- Footer ---
     doc.roundedRect(50, 720, 495, 60, 8).fillAndStroke('#f8fafc', '#e2e8f0');

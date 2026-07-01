@@ -6,8 +6,23 @@ import 'home_page.dart';
 import 'admin_page.dart';
 import 'auth_service.dart';
 
+import 'package:flutter/services.dart';
+import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  bool jailbroken = false;
+  try {
+    jailbroken = await FlutterJailbreakDetection.jailbroken;
+    // In strict enterprise apps, block execution if compromised
+    if (jailbroken) {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    }
+  } catch (e) {
+    jailbroken = true;
+  }
+
   await AuthService.init();
   runApp(const LunchifyApp());
 }

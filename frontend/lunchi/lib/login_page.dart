@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'admin_page.dart';
 import 'home_page.dart';
 import 'signup_page.dart';
@@ -412,14 +412,14 @@ class _FormSection extends StatelessWidget {
                           ? [const Color(0xFF1A7A4E), const Color(0xFF22A66A)]
                           : loading
                               ? [kBlue, kSky]
-                              : [kNavy, kBlue],
+                              : [const Color(0xFF1A2E6E), const Color(0xFF2563EB)],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
-                        color: kNavy.withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 4),
+                        color: const Color(0xFF1A2E6E).withOpacity(0.35),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),

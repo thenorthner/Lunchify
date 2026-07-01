@@ -1,148 +1,93 @@
+/* Tabs.css - Sleek horizontal tab bar styling */
+
 .tabs {
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
-  gap: 20px;
-  margin-top: 25px;
+  background: #eef4fc;
+  border-bottom: 1px solid var(--hairline-strong);
+  padding: 12px 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-sizing: border-box;
 }
 
-/* TAB CARD */
-.tab-card {
-  flex: 1;                 /* makes tabs stretch full width */
-  min-height: 120px;       /* keeps original height feel */
-
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-
+.tabs-left-side {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  gap: 16px;
+}
 
+.tabs-module-name {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2da4e8;
+  letter-spacing: 0.1em;
+}
+
+.tabs-divider {
+  color: var(--ink-faint);
+  font-weight: 300;
+}
+
+.tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  border: 2px solid transparent;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
-/* HOVER EFFECT */
-.tab-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.12);
+.tab-item:hover {
+  color: var(--ink);
 }
 
-/* ACTIVE TAB */
-.tab-card.active {
-  border-color: #0b5ed7;
-  background: linear-gradient(135deg, #e8f1ff, #ffffff);
-  color: #0b5ed7;
+.tab-number {
+  font-family: "Fraunces", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 14px;
+  color: #2563eb;
 }
 
-/* ICON */
-.tab-icon {
-  background: #eef2ff;
-  color: #3730a3;
-  width: 64px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 16px;
-  margin-bottom: 12px;
+.tab-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-muted);
 }
 
-/* LABEL */
-.tab-card span {
-  font-size: 16px;
+.tab-item.active {
+  border-bottom-color: #2563eb;
+}
+
+.tab-item.active .tab-label {
+  color: var(--ink);
   font-weight: 600;
 }
 
-/* TAB CONTENT */
-.tab-content {
-  margin-top: 30px;
-  background: #f9fafc;
-  padding: 25px;
-  border-radius: 14px;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-}
-
-/* SUBTLE ANIMATION */
-.fade-in {
-  animation: fade 0.3s ease-in;
-}
-
-@keyframes fade {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-/* CENTER SET MENU SECTION */
-.tab-content {
+.tabs-right-side {
   display: flex;
-  justify-content: center;
-}
-/* SET MENU CARD STYLING */
-.tab-content > div {
-  width: 100%;
-  max-width: 720px;   /* perfect admin width */
-}
-/* BILLING */
-.billing-card {
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 18px;
-  width: 100%;
-  max-width: 720px;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+  align-items: center;
+  font-family: monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
 }
 
-.billing-card h2 {
-  margin-bottom: 20px;
-}
-
-.billing-dates {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.billing-dates label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 6px;
-}
-
-.billing-dates input {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #dcdcdc;
-}
-
-.billing-summary {
-  display: flex;
-  gap: 20px;
-}
-
-.summary-box {
-  flex: 1;
-  background: #f8fafc;
-  padding: 20px;
-  border-radius: 14px;
-  text-align: center;
-}
-
-.summary-box span {
-  display: block;
-  font-size: 14px;
-  color: #666;
-}
-
-.summary-box strong {
-  font-size: 24px;
-  margin-top: 6px;
-  display: block;
+.tabs-session-date {
+  font-weight: 600;
+  color: var(--ink);
+  margin-left: 6px;
 }

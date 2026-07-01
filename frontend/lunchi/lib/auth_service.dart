@@ -1,9 +1,12 @@
 //auth.service.dart
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lunchi/network/http_wrapper.dart' as http;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'config.dart';
+import 'network/secure_client.dart';
+
+const storage = FlutterSecureStorage();
 
 class AuthService {
   static String? token;
@@ -21,9 +24,8 @@ class AuthService {
   static String get employeeId => user?['id'] ?? user?['employee_id'] ?? '';
 
   static Future<void> init() async {
-    final prefs = await SharedPreferences.getInstance();
-    token = prefs.getString('auth_token');
-    final userJson = prefs.getString('auth_user');
+    token = await storage.read(key: 'auth_token');
+    final userJson = await storage.read(key: 'auth_user');
     if (userJson != null) {
       try {
         user = Map<String, dynamic>.from(jsonDecode(userJson));
@@ -36,26 +38,22 @@ class AuthService {
   static Future<void> saveSession(String newToken, Map<String, dynamic> newUser) async {
     token = newToken;
     user = newUser;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', newToken);
-    await prefs.setString('auth_user', jsonEncode(newUser));
+    await storage.write(key: 'auth_token', value: newToken);
+    await storage.write(key: 'auth_user', value: jsonEncode(newUser));
   }
 
   static Future<void> clearSession() async {
     token = null;
     user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
-    await prefs.remove('auth_user');
+    await storage.delete(key: 'auth_token');
+    await storage.delete(key: 'auth_user');
   }
 
   static void logout() {
     token = null;
     user = null;
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.remove('auth_token');
-      prefs.remove('auth_user');
-    });
+    storage.delete(key: 'auth_token');
+    storage.delete(key: 'auth_user');
   }
 
   // ✅ SAFE JSON OBJECT DECODER
@@ -79,11 +77,15 @@ class AuthService {
 
   static Future<Map<String, dynamic>> checkId(String employeeId) async {
     final url = Uri.parse(AppConfig.checkId(employeeId));
-    final response = await http.get(url, headers: const {'Accept': 'application/json'});
+    final client = SecureClient.getClient();
+    final response = await client.get(url, headers: const {'Accept': 'application/json'});
 
     final data = _decodeMapOrThrow(response, hint: 'CHECK-ID');
 
     if (response.statusCode == 200) return data;
+    if (response.statusCode == 400 && data['data'] != null) {
+      return data['data'] as Map<String, dynamic>;
+    }
     throw Exception(data['message'] ?? 'Check ID failed');
   }
 
@@ -92,8 +94,9 @@ class AuthService {
     required String phone,
   }) async {
     final url = Uri.parse(AppConfig.loginRequest);
+    final client = SecureClient.getClient();
 
-    final response = await http.post(
+    final response = await client.post(
       url,
       headers: const {
         'Content-Type': 'application/json',
@@ -119,8 +122,9 @@ class AuthService {
     required String password,
   }) async {
     final url = Uri.parse(AppConfig.verifyOtp);
+    final client = SecureClient.getClient();
 
-    final response = await http.post(
+    final response = await client.post(
       url,
       headers: const {
         'Content-Type': 'application/json',
@@ -146,8 +150,9 @@ class AuthService {
     required String password,
   }) async {
     final url = Uri.parse(AppConfig.login);
+    final client = SecureClient.getClient();
 
-    final response = await http.post(
+    final response = await client.post(
       url,
       headers: const {
         'Content-Type': 'application/json',

@@ -10,7 +10,7 @@
         android:name="${applicationName}"
         android:label="Lunchify"
         android:icon="@mipmap/launcher_icon"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"

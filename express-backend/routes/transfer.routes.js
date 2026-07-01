@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { mysqlPool } = require("../db");
 const { requireAuth, requireHRAdmin, requireITAdmin } = require("../middleware/auth.middleware");
+const { logAudit } = require('../utils/logger');
 
 // Require authentication for all transfer routes
 router.use(requireAuth);
@@ -36,10 +37,10 @@ router.post("/request", requireHRAdmin, async (req, res) => {
     const employee = userRows[0];
     const from_project_id = employee.project_id;
 
-    // Enforce HR project isolation unless IT admin
-    if (req.user.role === 'hr_admin' && from_project_id !== req.user.project_id) {
+    // Enforce HR project isolation: HR Admins can only transfer employees OUT OF their own project OR INTO their own project
+    if (req.user.role === 'hr_admin' && from_project_id !== req.user.project_id && parseInt(to_project_id, 10) !== req.user.project_id) {
       await conn.rollback();
-      return res.status(403).json({ error: "Access denied. Employee belongs to another project." });
+      return res.status(403).json({ error: "Access denied. You can only transfer employees to or from your assigned project." });
     }
 
     if (from_project_id === parseInt(to_project_id, 10)) {
@@ -73,6 +74,14 @@ router.post("/request", requireHRAdmin, async (req, res) => {
        VALUES (?, ?, ?, ?, ?)`,
       [employee_id, from_project_id, to_project_id, employee.coupons_left, req.user.id]
     );
+
+    logAudit('TRANSFER_INITIATED', req.user.id, {
+      employee_id,
+      from_project_id,
+      to_project_id,
+      targetCanteenId,
+      coupons_transferred: employee.coupons_left
+    });
 
     await conn.commit();
     res.json({
@@ -127,18 +136,41 @@ router.get("/history", requireHRAdmin, async (req, res) => {
 });
 
 /**
- * GET /api/transfer/projects-canteens
- * IT Admin retrieves all projects and their associated canteens
+ * GET /api/transfer/projects
+ * Retrieve a list of all active projects for the transfer dropdown
  */
-router.get("/projects-canteens", async (req, res) => {
+router.get("/projects", requireAuth, async (req, res) => {
   try {
-    const [rows] = await mysqlPool.query(`
+    const [rows] = await mysqlPool.query("SELECT id, name, location FROM projects ORDER BY name ASC");
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching projects:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /api/transfer/projects-canteens
+// IT Admin retrieves all projects and their associated canteens, HR Admin retrieves for their project
+router.get("/projects-canteens", requireAuth, async (req, res) => {
+  if (!['it_admin', 'hr_admin'].includes(req.user.role)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+
+  try {
+    let query = `
       SELECT p.id as project_id, p.name as project_name, p.location as project_location, p.state as project_state,
              c.id as canteen_id, c.name as canteen_name, c.location as canteen_location, c.open_time, c.close_time
       FROM projects p
       LEFT JOIN canteens c ON c.project_id = p.id
-      ORDER BY p.id ASC
-    `);
+    `;
+    const params = [];
+    if (req.user.role === 'hr_admin') {
+      query += ` WHERE p.id = ?`;
+      params.push(req.user.project_id);
+    }
+    query += ` ORDER BY p.id ASC`;
+
+    const [rows] = await mysqlPool.query(query, params);
     res.json(rows);
   } catch (err) {
     console.error("❌ Error fetching projects and canteens:", err);
@@ -211,8 +243,12 @@ router.post("/canteens", requireITAdmin, async (req, res) => {
  */
 router.delete("/projects/:id", requireITAdmin, async (req, res) => {
   const projectId = req.params.id;
-  const CHQ_PROJECT_ID = 5;
-  const CHQ_CANTEEN_ID = 5;
+  const CHQ_PROJECT_ID = Number(process.env.CHQ_PROJECT_ID);
+  const CHQ_CANTEEN_ID = Number(process.env.CHQ_CANTEEN_ID);
+
+  if (!CHQ_PROJECT_ID || !CHQ_CANTEEN_ID) {
+    return res.status(500).json({ error: "System configuration error: CHQ fallback IDs not set." });
+  }
 
   if (parseInt(projectId, 10) === CHQ_PROJECT_ID) {
     return res.status(400).json({ error: "Cannot delete the default CHQ Project." });
@@ -220,7 +256,6 @@ router.delete("/projects/:id", requireITAdmin, async (req, res) => {
 
   const conn = await mysqlPool.getConnection();
   try {
-    await conn.query("SET FOREIGN_KEY_CHECKS=0");
     await conn.beginTransaction();
 
     // Move users to CHQ
@@ -243,7 +278,7 @@ router.delete("/projects/:id", requireITAdmin, async (req, res) => {
     for (const table of tablesWithCanteen) {
       try {
         await conn.query(`UPDATE ${table} SET canteen_id = ? WHERE canteen_id = ?`, [CHQ_CANTEEN_ID, canteenIdToDelete]);
-      } catch (e) {}
+      } catch (e) {} // Ignore if table doesn't have canteen_id
     }
 
     const tablesWithProject = [
@@ -269,16 +304,23 @@ router.delete("/projects/:id", requireITAdmin, async (req, res) => {
     const [delProj] = await conn.query("DELETE FROM projects WHERE id = ?", [projectId]);
     if (delProj.affectedRows === 0) {
       await conn.rollback();
-      await conn.query("SET FOREIGN_KEY_CHECKS=1");
       return res.status(404).json({ error: "Project not found." });
     }
 
     await conn.commit();
-    await conn.query("SET FOREIGN_KEY_CHECKS=1");
+    
+    // Audit log
+    console.log(JSON.stringify({
+      event: "PROJECT_DELETED",
+      timestamp: new Date().toISOString(),
+      actor_id: req.user.id,
+      deleted_project_id: projectId,
+      fallback_project_id: CHQ_PROJECT_ID
+    }));
+
     res.json({ success: true, message: "Project and Canteen deleted successfully. Users moved to CHQ." });
   } catch (err) {
     await conn.rollback();
-    await conn.query("SET FOREIGN_KEY_CHECKS=1");
     console.error("❌ Error deleting project:", err);
     res.status(500).json({ error: "Internal server error" });
   } finally {

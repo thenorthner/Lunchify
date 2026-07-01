@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import api from "../services/api";
 import DashboardTabs from "../components/DashboardTabs";
 import MenuManager from "../components/MenuManager";
 import ReportsPanel from "../components/ReportsPanel";
@@ -11,13 +12,15 @@ import ItemFeedbackViewer from "../components/ItemFeedbackViewer";
 import AdminAccountsPanel from "../components/AdminAccountsPanel";
 import OrdersManager from "../components/OrdersManager";
 import ScanHistoryPanel from "../components/ScanHistoryPanel";
-import BusinessIcon from '@mui/icons-material/Business';
+import Brand from "../components/Brand";
 import PersonIcon from '@mui/icons-material/Person';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ExploreIcon from '@mui/icons-material/Explore';
+import SecurityIcon from '@mui/icons-material/Security';
+import ReceiptIcon from '@mui/icons-material/Receipt';
 import "./Dashboard.css";
 
-export default function Dashboard() {
-  const user = JSON.parse(localStorage.getItem("adminUser") || "{}");
+export default function Dashboard({ user = {} }) {
   const role = user.role || "canteen_admin";
 
   const getInitialTab = (userRole) => {
@@ -29,67 +32,101 @@ export default function Dashboard() {
 
   const [activeTab, setActiveTab] = useState(() => getInitialTab(role));
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminToken");
-    localStorage.removeItem("adminUser");
+  const handleLogout = async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch(e) {}
     window.location.href = "/";
   };
 
   return (
     <>
-      <div className="dashboard-container" style={{ paddingTop: '20px' }}>
-        <div className="dashboard-banner">
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><BusinessIcon fontSize="large" /> SJVN Lunchify Admin Panel</h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div className="admin-profile-badge">
-              <span className="profile-icon"><PersonIcon /></span>
-              <div className="profile-text">
-                <strong>{user.name || "Administrator"}</strong>
-                <span className="role-subtext">{role.replace("_", " ").toUpperCase()}</span>
+      <div className="dashboard-container" style={{ padding: 0 }}>
+        <header className="dashboard-banner">
+          <Brand size="md" on="light" />
+
+          {/* Core Module Selector (Pills) */}
+          <div className="module-selector-pills">
+            <button className={`module-pill ${role === 'canteen_admin' ? 'active' : 'disabled'}`}>
+              <ExploreIcon style={{ fontSize: 16 }} />
+              <span>Operations</span>
+            </button>
+            <button className={`module-pill ${role === 'it_admin' ? 'active' : 'disabled'}`}>
+              <SecurityIcon style={{ fontSize: 16 }} />
+              <span>Governance</span>
+            </button>
+            <button className={`module-pill ${role === 'hr_admin' ? 'active' : 'disabled'}`}>
+              <ReceiptIcon style={{ fontSize: 16 }} />
+              <span>HR Review</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '6px 20px 6px 6px',
+              background: '#fff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '9999px',
+            }}>
+              <div style={{
+                width: '32px', height: '32px',
+                borderRadius: '50%',
+                background: '#2563eb',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff'
+              }}>
+                <PersonIcon style={{ fontSize: 18 }} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                <span style={{ fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>{user.name || "Demo Canteen Admin"}</span>
+                <span style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.1em', color: '#64748b', textTransform: 'uppercase' }}>{role.replace("_", " ")}</span>
               </div>
             </div>
             <button 
               onClick={handleLogout} 
               style={{
-                background: 'rgba(255, 255, 255, 0.2)',
-                border: 'none',
-                color: '#ffffff',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                fontWeight: '600',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 20px',
+                background: '#fff',
+                border: '1px solid #cbd5e1',
+                borderRadius: '9999px',
+                color: '#0f172a',
+                fontSize: '14px',
+                fontWeight: 500,
                 cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
+                transition: 'all 0.2s ease'
               }}
-              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)'}
+              onMouseOver={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onFocus={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseOut={(e) => e.currentTarget.style.background = '#fff'}
+              onBlur={(e) => e.currentTarget.style.background = '#fff'}
             >
-              <LogoutIcon fontSize="small" /> Logout
+              <LogoutIcon style={{ fontSize: 18, color: '#475569' }} /> Sign out
             </button>
           </div>
-        </div>
+        </header>
 
         <DashboardTabs
           activeTab={activeTab}
           setActiveTab={setActiveTab}
-          role={role}
+          allowedTabs={user.allowedTabs || []}
         />
 
         {/* CONTENT AREA */}
-        <div className="dashboard-content-area">
-          {activeTab === "menu" && <MenuManager />}
-          {activeTab === "reports" && <ReportsPanel />}
-          {activeTab === "canteen_billing" && <CanteenBillingPanel />}
-          {activeTab === "billing" && <BillingPanel />}
-          {activeTab === "transfers" && <TransferPanel />}
-          {activeTab === "canteen_projects" && <CanteenProjectsPanel />}
-          {activeTab === "feedbacks" && <FeedbackViewer />}
-          {activeTab === "item_feedbacks" && <ItemFeedbackViewer />}
-          {activeTab === "admin_accounts" && <AdminAccountsPanel />}
-          {activeTab === "orders" && <OrdersManager />}
-          {activeTab === "scan_history" && <ScanHistoryPanel />}
-        </div>
+        <main className="dashboard-content-area">
+          {activeTab === "menu" && <MenuManager user={user} />}
+          {activeTab === "reports" && <ReportsPanel user={user} />}
+          {activeTab === "canteen_billing" && <CanteenBillingPanel user={user} />}
+          {activeTab === "billing" && <BillingPanel user={user} />}
+          {activeTab === "transfers" && <TransferPanel user={user} />}
+          {activeTab === "canteen_projects" && <CanteenProjectsPanel user={user} />}
+          {activeTab === "feedbacks" && <FeedbackViewer user={user} />}
+          {activeTab === "item_feedbacks" && <ItemFeedbackViewer user={user} />}
+          {activeTab === "admin_accounts" && <AdminAccountsPanel user={user} />}
+          {activeTab === "orders" && <OrdersManager user={user} />}
+          {activeTab === "scan_history" && <ScanHistoryPanel user={user} />}
+        </main>
       </div>
     </>
   );

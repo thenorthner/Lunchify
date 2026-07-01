@@ -35,8 +35,8 @@ class SupportRatingsHub extends StatelessWidget {
                     const SizedBox(height: 20),
                     _HubCard(
                       icon: Icons.bug_report_rounded,
-                      title: "App Feedback",
-                      subtitle: "Report any bugs or issues to the IT admin",
+                      title: "Report a Bug",
+                      subtitle: "Found something broken? Let the IT team know",
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => const FeedbackPage()),

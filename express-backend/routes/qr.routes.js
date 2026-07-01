@@ -27,6 +27,14 @@ router.post('/generate-qr', async (req, res) => {
     });
   }
 
+  // BOLA check: standard employee can only generate QR for themselves
+  if (req.user.role === 'employee' && req.user.id !== employeeId) {
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied. You can only generate QR codes for yourself.',
+    });
+  }
+
   try {
     const qrId = uuidv4();
     const qrData = `QR_${qrId}|${employeeId}|${type}|${date}`;
@@ -57,7 +65,15 @@ router.post('/status', async (req, res) => {
 
   try {
     // qrToken format: QR_1234abcd-56ef...|EMP123|Food Lunch|2023-10-25
-    const qrId = qrToken.split('|')[0].replace('QR_', '');
+    const parts = qrToken.split('|');
+    const qrId = parts[0].replace('QR_', '');
+    const embeddedEmpId = parts[1];
+
+    // BOLA check: standard employee can only query their own QR status
+    if (req.user.role === 'employee' && req.user.id !== embeddedEmpId) {
+      return res.status(403).json({ error: 'Access denied. You can only view status of your own QR codes.' });
+    }
+
     const [rows] = await mysqlPool.query('SELECT used FROM qr_codes WHERE id = ?', [qrId]);
     
     if (rows.length === 0) {
@@ -77,7 +93,15 @@ router.post('/cancel', async (req, res) => {
   if (!qrToken) return res.status(400).json({ error: 'Missing qrToken' });
 
   try {
-    const qrId = qrToken.split('|')[0].replace('QR_', '');
+    const parts = qrToken.split('|');
+    const qrId = parts[0].replace('QR_', '');
+    const embeddedEmpId = parts[1];
+
+    // BOLA check: standard employee can only cancel their own QR
+    if (req.user.role === 'employee' && req.user.id !== embeddedEmpId) {
+      return res.status(403).json({ error: 'Access denied. You can only cancel your own QR codes.' });
+    }
+
     // Only delete if it hasn't been used yet
     await mysqlPool.query('DELETE FROM qr_codes WHERE id = ? AND used = 0', [qrId]);
     return res.json({ success: true, message: 'QR canceled' });
@@ -111,12 +135,18 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
     }
 
     const qrId = parts[0].replace('QR_', '');
-    const employeeId = parts[1];
+    const embeddedEmployeeId = parts[1];
     const type = parts[2];
     const qrDate = parts[3];
 
-    // Removed date check to allow non-expiring QRs
-
+    // Enforce same-day expiry
+    const today = new Date().toLocaleDateString('en-CA');
+    if (qrDate !== today) {
+      return res.status(400).json({
+        success: false,
+        message: 'QR expired. QR codes are only valid on the day they are generated.',
+      });
+    }
     await conn.beginTransaction();
 
     const [qrRows] = await conn.query(
@@ -138,6 +168,16 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'QR already used',
+      });
+    }
+
+    // Verify token integrity: don't trust embedded employee ID
+    const employeeId = qr.employee_id;
+    if (embeddedEmployeeId !== employeeId) {
+      await conn.rollback();
+      return res.status(400).json({
+        success: false,
+        message: 'QR token integrity check failed',
       });
     }
 
@@ -205,7 +245,7 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
   }
 });
 
-// ✅ GET /api/qr/scan-logs - Returns scan logs for the current month for a canteen
+// ✅ GET /api/qr/scan-logs - Returns scan logs for a canteen, with optional filters
 router.get('/scan-logs', requireCanteenAdmin, async (req, res) => {
   try {
     let canteenId = req.user.canteen_id;
@@ -213,17 +253,38 @@ router.get('/scan-logs', requireCanteenAdmin, async (req, res) => {
       canteenId = req.query.canteen_id;
     }
 
-    const monthStr = new Date().toLocaleDateString('en-CA').slice(0, 7); // YYYY-MM
-    const [rows] = await mysqlPool.query(
-      `SELECT ql.id, ql.created_at, u.name as employee_name, u.id as employee_id, q.type, q.items
-       FROM qr_scan_logs ql
-       JOIN qr_codes q ON ql.qr_id = q.id
-       JOIN users u ON q.employee_id = u.id
-       WHERE ql.canteen_id = ? 
-       AND ql.created_at LIKE ?
-       ORDER BY ql.created_at DESC`,
-      [canteenId, `${monthStr}%`]
-    );
+    const { employee_id, date, month } = req.query;
+
+    let query = `
+      SELECT ql.id, ql.created_at, u.name as employee_name, u.id as employee_id, q.type, q.items
+      FROM qr_scan_logs ql
+      JOIN qr_codes q ON ql.qr_id = q.id
+      JOIN users u ON q.employee_id = u.id
+      WHERE ql.canteen_id = ?
+    `;
+    const queryParams = [canteenId];
+
+    if (employee_id) {
+      query += ` AND u.id = ?`;
+      queryParams.push(employee_id);
+    }
+
+    if (date) {
+      // date is expected in YYYY-MM-DD
+      query += ` AND ql.created_at LIKE ?`;
+      queryParams.push(`${date}%`);
+    } else if (month) {
+      // month is expected in YYYY-MM
+      query += ` AND ql.created_at LIKE ?`;
+      queryParams.push(`${month}%`);
+    } else {
+      // Default: Last 30 days
+      query += ` AND ql.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`;
+    }
+
+    query += ` ORDER BY ql.created_at DESC`;
+
+    const [rows] = await mysqlPool.query(query, queryParams);
     res.json(rows);
   } catch (err) {
     console.error('Scan logs Error:', err);

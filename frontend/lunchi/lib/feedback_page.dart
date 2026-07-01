@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 
 
@@ -88,7 +88,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       body: SafeArea(
         child: Column(
           children: [
-            const TopBar(title: "Report a Problem / Feedback"),
+            const TopBar(title: "Report a Bug"),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(24),
@@ -115,7 +115,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                "We Value Your Feedback",
+                                "Report a Bug or Issue",
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,
@@ -124,49 +124,14 @@ class _FeedbackPageState extends State<FeedbackPage> {
                               ),
                               const SizedBox(height: 8),
                               const Text(
-                                "Experiencing any issue in the canteen or want to suggest an improvement? Submit your report below to notify the IT admin team directly.",
+                                "Found a bug or something not working? Report it below and the IT admin team will look into it.",
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Color(0xFF8A96A8), // kGray
                                 ),
                               ),
                               const SizedBox(height: 24),
-                              
-                              // STAR RATING SELECTOR
-                              const Text(
-                                "Rate Canteen Experience",
-                                style: TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF1A2340), // kDarkText
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: List.generate(5, (index) {
-                                  final starValue = index + 1;
-                                  return IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _rating = starValue;
-                                      });
-                                    },
-                                    icon: Icon(
-                                      _rating >= starValue
-                                          ? Icons.star_rounded
-                                          : Icons.star_outline_rounded,
-                                      color: const Color(0xFFFACC15), // kYellow
-                                      size: 38,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(),
-                                  );
-                                }),
-                              ),
-                              const SizedBox(height: 24),
-  
-                              // SUBJECT FIELD
+                                // SUBJECT FIELD
                               const Text(
                                 "Subject / Topic",
                                 style: TextStyle(
@@ -185,7 +150,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                                   return null;
                                 },
                                 decoration: InputDecoration(
-                                  hintText: "e.g., App scan bug, Food hygiene, Menu discrepancy",
+                                  hintText: "e.g., QR scan not working, Order not showing, App crash",
                                   hintStyle: const TextStyle(color: Color(0xFF8A96A8)), // kGray
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
@@ -220,7 +185,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                                 maxLines: 5,
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return "Please write your feedback details";
+                                    return "Please describe the bug or issue";
                                   }
                                   if (value.trim().length < 10) {
                                     return "Please describe in at least 10 characters";
@@ -228,7 +193,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                                   return null;
                                 },
                                 decoration: InputDecoration(
-                                  hintText: "Please describe the problem or suggestion in detail so we can investigate...",
+                                  hintText: "Describe the bug step by step so we can fix it...",
                                   hintStyle: const TextStyle(color: Color(0xFF8A96A8)), // kGray
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),

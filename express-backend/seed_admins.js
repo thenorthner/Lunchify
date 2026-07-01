@@ -2,6 +2,10 @@ const { mysqlPool } = require('./db');
 const bcrypt = require('bcryptjs');
 
 async function seed() {
+  if (process.env.NODE_ENV === 'production') {
+    console.error("FATAL: Cannot run seed script in production environment.");
+    process.exit(1);
+  }
   try {
     const password = 'admin';
     const hash = await bcrypt.hash(password, 10);

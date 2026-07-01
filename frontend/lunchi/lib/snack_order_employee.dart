@@ -2,8 +2,8 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'snack_order_status_page.dart';
+import 'package:lunchi/network/http_wrapper.dart' as http;
+import 'snack_order_history_page.dart';
 import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
@@ -110,7 +110,7 @@ class _EmployeeSnackOrderPageState extends State<EmployeeSnackOrderPage> {
 
     final items = _selectedSnacks.entries.map((e) {
       return {
-        "snack": e.key,
+        "name": e.key,
         "quantity": e.value,
         "cost": (_snackCosts[e.key] ?? 0) * e.value,
       };
@@ -147,7 +147,7 @@ class _EmployeeSnackOrderPageState extends State<EmployeeSnackOrderPage> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (_) => SnackOrderStatusPage(employeeId: widget.employeeId),
+              builder: (_) => SnackOrderHistoryPage(employeeId: widget.employeeId),
             ),
           );
         }

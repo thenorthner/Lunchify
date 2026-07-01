@@ -1,43 +1,57 @@
 const jwt = require("jsonwebtoken");
 const { mysqlPool } = require("../db");
+const { JWT_SECRET } = require("../config/jwt");
 
 exports.requireAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization;
+  const match = req.headers.cookie?.match(/(?:^|;\s*)admin_session=([^;]*)/);
+  const cookieToken = match ? match[1] : null;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  let token = null;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else if (cookieToken) {
+    token = cookieToken;
+  }
+
+  if (!token) {
     return res.status(401).json({ message: "No token provided" });
   }
 
   try {
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const expectedAudience = (authHeader && authHeader.startsWith("Bearer ")) ? 'lunchify-mobile' : 'lunchify-admin';
 
-    // 1. Single-Device Session Token Check & User Validation
+    const decoded = jwt.verify(token, JWT_SECRET, {
+      issuer: 'lunchify-api',
+      audience: expectedAudience
+    });
+    // 1. Single-Device Session Token Check & User Validation (for ALL roles)
     const [rows] = await mysqlPool.query(
-      "SELECT id, role, project_id, canteen_id, session_token, last_coupon_reset_month, coupons_left FROM users WHERE id = ?",
+      `SELECT id, role, project_id, canteen_id, session_token, last_coupon_reset_month, coupons_left, monthly_limit, is_active
+       FROM users WHERE id = ?`,
       [decoded.id]
     );
 
-    if (rows.length === 0) {
-      return res.status(401).json({ message: "User not found" });
+    if (rows.length === 0 || rows[0].is_active !== 1) {
+      return res.status(401).json({ message: "User not found or inactive" });
     }
 
     const dbUser = rows[0];
 
-    // Check session token mismatch (signifies another device logged in)
-    if (dbUser.session_token && decoded.sessionToken && dbUser.session_token !== decoded.sessionToken) {
-      return res.status(401).json({ message: "Logged in from another device. Please login again." });
+    if (!decoded.sessionToken || decoded.sessionToken !== dbUser.session_token) {
+      return res.status(401).json({ message: "Session expired. Please log in again." });
     }
 
-    // 2. Automated Monthly 16 Coupon Reset Check
-    const currentMonth = new Date().toLocaleDateString('en-CA').slice(0, 7); // 'YYYY-MM'
+    // 2. Automated Monthly Coupon Reset Check (Race condition fixed)
+    const currentMonth = new Date().toISOString().slice(0, 7); // 'YYYY-MM'
     if (dbUser.role === 'employee' && dbUser.last_coupon_reset_month !== currentMonth) {
-      console.log(`⏳ Auto-resetting coupons for employee ${dbUser.id} for month ${currentMonth}`);
       await mysqlPool.query(
-        "UPDATE users SET coupons_left = 16, coupons_used = 0, last_coupon_reset_month = ? WHERE id = ?",
-        [currentMonth, dbUser.id]
+        `UPDATE users
+         SET coupons_left = monthly_limit, coupons_used = 0, last_coupon_reset_month = ?
+         WHERE id = ? AND (last_coupon_reset_month IS NULL OR last_coupon_reset_month <> ?)`,
+        [currentMonth, dbUser.id, currentMonth]
       );
-      dbUser.coupons_left = 16;
+      dbUser.coupons_left = dbUser.monthly_limit;
       dbUser.last_coupon_reset_month = currentMonth;
     }
 

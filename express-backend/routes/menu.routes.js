@@ -6,11 +6,18 @@ const { requireAuth, requireCanteenAdmin } = require("../middleware/auth.middlew
 // Require authentication for all menu endpoints
 router.use(requireAuth);
 
+function resolveCanteenId(req) {
+  if (req.user.role === 'it_admin' && req.body.canteen_id) {
+    return Number(req.body.canteen_id);
+  }
+  return Number(req.user.canteen_id);
+}
+
 /* ================= FOOD MENU ================= */
 
 router.post("/food", requireCanteenAdmin, async (req, res) => {
   const { menu_date, items } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
 
   try {
     // Delete existing food menu for this date and canteen to prevent duplicates
@@ -25,7 +32,7 @@ router.post("/food", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -57,14 +64,14 @@ router.get("/food", async (req, res) => {
 
     return res.json({ items: [] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /* ================= WEEKLY FOOD MENU ================= */
 router.post("/weekly/food", requireCanteenAdmin, async (req, res) => {
   const { day_of_week, items } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
 
   try {
     await mysqlPool.query(
@@ -75,7 +82,7 @@ router.post("/weekly/food", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -83,7 +90,7 @@ router.post("/weekly/food", requireCanteenAdmin, async (req, res) => {
 
 router.post("/fruit", requireCanteenAdmin, async (req, res) => {
   const { menu_date, fruits } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
 
   try {
     // Delete existing fruit menu for this date and canteen to prevent duplicates
@@ -98,7 +105,7 @@ router.post("/fruit", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -128,14 +135,14 @@ router.get("/fruit", async (req, res) => {
 
     return res.json({ items: [] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /* ================= WEEKLY FRUIT MENU ================= */
 router.post("/weekly/fruit", requireCanteenAdmin, async (req, res) => {
   const { day_of_week, fruits } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
 
   try {
     await mysqlPool.query(
@@ -146,7 +153,7 @@ router.post("/weekly/fruit", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -154,7 +161,9 @@ router.post("/weekly/fruit", requireCanteenAdmin, async (req, res) => {
 
 router.post("/snacks", requireCanteenAdmin, async (req, res) => {
   const { menu_date, session, items } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
+
+  if (!Array.isArray(items) || items.length > 50) return res.status(400).json({ error: 'Invalid items array' });
 
   try {
     // Delete existing snack menu for this date, session and canteen to prevent duplicates
@@ -169,7 +178,7 @@ router.post("/snacks", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -235,14 +244,14 @@ router.get("/snacks", async (req, res) => {
     );
     res.json(rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
 /* ================= WEEKLY SNACKS MENU ================= */
 router.post("/weekly/snacks", requireCanteenAdmin, async (req, res) => {
   const { day_of_week, session, items } = req.body;
-  const canteen_id = req.body.canteen_id || req.user.canteen_id;
+  const canteen_id = resolveCanteenId(req);
 
   try {
     await mysqlPool.query(
@@ -253,7 +262,7 @@ router.post("/weekly/snacks", requireCanteenAdmin, async (req, res) => {
     );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -293,7 +302,7 @@ router.get("/snacks-by-time", async (req, res) => {
 
     return res.json({ items: [] });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

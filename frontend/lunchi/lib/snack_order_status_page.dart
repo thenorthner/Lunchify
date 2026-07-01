@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
@@ -197,8 +197,7 @@ class _SnackOrderStatusPageState extends State<SnackOrderStatusPage> {
                       final total = order['total'] ?? 0;
                       final id = order['id'];
                       final session = order['session'] ?? 'morning';
-
-                      final isAccepted = status == 'accepted';
+                      final isAccepted = status == 'accepted' || status == 'pending';
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 16),
@@ -231,7 +230,7 @@ class _SnackOrderStatusPageState extends State<SnackOrderStatusPage> {
                                     ),
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                     child: Text(
-                                      isAccepted ? "● Accepted" : "● Pending",
+                                      isAccepted ? "● Accepted" : "● Processing",
                                       style: TextStyle(
                                         fontWeight: FontWeight.w700,
                                         fontSize: 12,

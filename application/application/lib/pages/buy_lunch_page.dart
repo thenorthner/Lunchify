@@ -82,10 +82,12 @@ class _BuyLunchPageState extends State<BuyLunchPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(
-                            Icons.verified_user_rounded,
-                            color: _kAccent,
-                            size: 22,
+                          const ExcludeSemantics(
+                            child: Icon(
+                              Icons.verified_user_rounded,
+                              color: _kAccent,
+                              size: 22,
+                            ),
                           ),
                           const SizedBox(width: 10),
                           Expanded(
@@ -203,17 +205,19 @@ class _BuyLunchPageState extends State<BuyLunchPage> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: const BoxDecoration(
-                              color: _kAccent,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.verified_user_rounded,
-                              color: Colors.white,
-                              size: 20,
+                          ExcludeSemantics(
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: const BoxDecoration(
+                                color: _kAccent,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.verified_user_rounded,
+                                color: Colors.white,
+                                size: 20,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -276,6 +280,7 @@ class _TopBar extends StatelessWidget {
               'assets/images/food_tray_bg.png',
               fit: BoxFit.cover,
               alignment: Alignment.centerRight,
+              semanticLabel: 'Food tray background',
               errorBuilder: (_, __, ___) => Container(color: const Color(0xFFD0DCF0)),
             ),
           ),
@@ -357,30 +362,40 @@ class _BackButtonState extends State<_BackButton>
     return MouseRegion(
       onEnter: (_) => _ctrl.forward(),
       onExit:  (_) => _ctrl.reverse(),
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).maybePop(),
-        child: AnimatedBuilder(
-          animation: _ctrl,
-          builder: (_, __) => Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.identity()
-              ..translate(_slide.value, 0.0)
-              ..scale(_scale.value),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: _kNavy.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+      child: Semantics(
+        button: true,
+        label: 'Go back',
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).maybePop(),
+          child: AnimatedBuilder(
+            animation: _ctrl,
+            builder: (_, __) => Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..translate(_slide.value, 0.0)
+                ..scale(_scale.value),
+              child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: _kNavy.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(Icons.arrow_back, color: _kNavy, size: 18),
                   ),
-                ],
+                ),
               ),
-              child: const Icon(Icons.arrow_back, color: _kNavy, size: 18),
             ),
           ),
         ),
@@ -412,63 +427,73 @@ class _ActionCardState extends State<_ActionCard> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown:  (_) => setState(() => _pressed = true),
-      onTapUp:    (_) { setState(() => _pressed = false); widget.onTap(); },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.97 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: _kCard,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: [
-              BoxShadow(
-                color: _kBlue.withOpacity(0.07),
-                blurRadius: 14,
-                offset: const Offset(0, 3),
+    return Semantics(
+      button: true,
+      label: '${widget.title}: ${widget.subtitle}',
+      child: GestureDetector(
+        onTapDown:  (_) => setState(() => _pressed = true),
+        onTapUp:    (_) { setState(() => _pressed = false); widget.onTap(); },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.97 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          child: MergeSemantics(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              decoration: BoxDecoration(
+                color: _kCard,
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kBlue.withOpacity(0.07),
+                    blurRadius: 14,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: const BoxDecoration(
-                  color: _kLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(widget.icon, color: _kAccent, size: 26),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.title,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w800,
-                        color: _kNavy,
+              child: Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        color: _kLight,
+                        shape: BoxShape.circle,
                       ),
+                      child: Icon(widget.icon, color: _kAccent, size: 26),
                     ),
-                    const SizedBox(height: 3),
-                    Text(
-                      widget.subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: _kSubtext,
-                      ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: _kNavy,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          widget.subtitle,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: _kSubtext,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  ExcludeSemantics(
+                    child: const Icon(Icons.chevron_right_rounded, color: _kAccent, size: 24),
+                  ),
+                ],
               ),
-              const Icon(Icons.chevron_right_rounded, color: _kAccent, size: 24),
-            ],
+            ),
           ),
         ),
       ),
@@ -497,42 +522,48 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown:   (_) => setState(() => _pressed = true),
-      onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          height: 52,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [_kNavy, _kAccent],
-            ),
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: [
-              BoxShadow(
-                color: _kNavy.withOpacity(0.3),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTapDown:   (_) => setState(() => _pressed = true),
+        onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.96 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [_kNavy, _kAccent],
               ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(widget.icon, color: Colors.white, size: 18),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: _kNavy.withOpacity(0.3),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
                 ),
-              ),
-            ],
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ExcludeSemantics(
+                  child: Icon(widget.icon, color: Colors.white, size: 18),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -556,27 +587,31 @@ class _OutlineButtonState extends State<_OutlineButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown:   (_) => setState(() => _pressed = true),
-      onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
-      onTapCancel: () => setState(() => _pressed = false),
-      child: AnimatedScale(
-        scale: _pressed ? 0.96 : 1.0,
-        duration: const Duration(milliseconds: 120),
-        child: Container(
-          height: 52,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: _kAccent, width: 1.8),
-          ),
-          child: Center(
-            child: Text(
-              widget.label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: _kAccent,
+    return Semantics(
+      button: true,
+      label: widget.label,
+      child: GestureDetector(
+        onTapDown:   (_) => setState(() => _pressed = true),
+        onTapUp:     (_) { setState(() => _pressed = false); widget.onTap(); },
+        onTapCancel: () => setState(() => _pressed = false),
+        child: AnimatedScale(
+          scale: _pressed ? 0.96 : 1.0,
+          duration: const Duration(milliseconds: 120),
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(color: _kAccent, width: 1.8),
+            ),
+            child: Center(
+              child: Text(
+                widget.label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: _kAccent,
+                ),
               ),
             ),
           ),
@@ -591,9 +626,12 @@ class _OutlineButtonState extends State<_OutlineButton> {
 class _QrCodePainterWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: _QrPainter(),
-      size: const Size(double.infinity, double.infinity),
+    return Semantics(
+      label: 'QR code for lunch coupon',
+      child: CustomPaint(
+        painter: _QrPainter(),
+        size: const Size(double.infinity, double.infinity),
+      ),
     );
   }
 }

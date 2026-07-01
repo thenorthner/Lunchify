@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
@@ -11,9 +11,8 @@ import 'widgets/item_selection_sheet.dart';
 import 'package:lunchi/app_theme.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'dart:io';
+
 class BuyLunchQrPage extends StatefulWidget {
   final String employeeId;
   final String employeeName;
@@ -46,22 +45,26 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      final tempDir = await getTemporaryDirectory();
-      final file = await File('${tempDir.path}/qr_code.png').create();
-      await file.writeAsBytes(pngBytes);
+      final xFile = XFile.fromData(
+        pngBytes,
+        mimeType: 'image/png',
+        name: 'lunchify_qr.png',
+      );
 
       await Share.shareXFiles(
-        [XFile(file.path)],
-        text: '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+        [xFile],
+        text:
+            '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
       );
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sharing QR Code: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error sharing QR Code: $e')));
       }
     }
   }
+
   List<String> todayFoodMenu = [];
   List<String> todayFruitMenu = [];
 
@@ -200,7 +203,10 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   Future<void> _showFruitLunchOrderDialog() async {
     final now = DateTime.now();
     if (now.hour >= 19) {
-      _showInfoDialog('Orders Closed', 'Fruit lunch orders must be placed before 7:00 PM.');
+      _showInfoDialog(
+        'Orders Closed',
+        'Fruit lunch orders must be placed before 7:00 PM.',
+      );
       return;
     }
 
@@ -208,16 +214,19 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Confirm Order'),
-        content: const Text('Would You like To place a fruit lunch order 😋 ?'),
+        content: const Text('Let\'s secure the fruit munchies, shall we? 🍎😋'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const Text('Panic & Exit.'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: kAccentBlue),
-            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+            child: const Text(
+              'Lock It In.',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -260,7 +269,8 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
 
       _showInfoDialog(
         body['success'] == true ? 'Success' : 'Failed',
-        body['message']?.toString() ?? 'Fruit Lunch Order Placed.',
+        body['message']?.toString() ??
+            'A Wise Choice Was Made 🗿. Food Secured 🔥',
       );
     } catch (e) {
       _showInfoDialog('Error', e.toString());
@@ -305,10 +315,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         body: jsonEncode({'qrToken': qrToken}),
       );
 
-      final body = _decodeJsonOrThrow(
-        resp,
-        endpointHint: '/api/qr/status',
-      );
+      final body = _decodeJsonOrThrow(resp, endpointHint: '/api/qr/status');
 
       if (body['scanned'] == true) {
         _statusTimer?.cancel();
@@ -360,9 +367,13 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         title: Text(title),
         content: Text(message),
         actions: [
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            style: ElevatedButton.styleFrom(backgroundColor: kAccentBlue),
+            child: const Text(
+              'Naturally😌',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -384,13 +395,21 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                 color: Colors.green.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle_rounded, color: Colors.green, size: 60),
+              child: const Icon(
+                Icons.check_circle_rounded,
+                color: Colors.green,
+                size: 60,
+              ),
             ),
             const SizedBox(height: 20),
             const Text(
               'Lunch Purchased Successfully! 🎉',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kNavy),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: kNavy,
+              ),
             ),
             const SizedBox(height: 10),
             const Text(
@@ -404,11 +423,20 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: kAccentBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Great!', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Great!',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -577,9 +605,25 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                             Row(
                               children: [
                                 Expanded(
-                                  child: _OutlineButton(
-                                    label: 'Cancel QR',
-                                    onTap: _cancelQr,
+                                  child: OutlinedButton(
+                                    onPressed: _cancelQr,
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: kAccentBlue,
+                                      side: const BorderSide(color: kAccentBlue, width: 1.5),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                    child: const Text(
+                                      'Cancel QR',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -587,11 +631,19 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
                                   child: ElevatedButton.icon(
                                     onPressed: _shareQrCode,
                                     icon: const Icon(Icons.share, size: 20),
-                                    label: const Text('Share QR', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                    label: const Text(
+                                      'Share QR',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: kAccentBlue,
                                       foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      padding: const EdgeInsets.symmetric(
+                                        vertical: 14,
+                                      ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
@@ -730,7 +782,7 @@ class _TopBar extends StatelessWidget {
                 _BackButton(),
                 const SizedBox(width: 10),
                 const Text(
-                  'Buy Lunch',
+                  'Redeem Coupon',
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w800,
@@ -943,13 +995,15 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
         child: Container(
           height: 52,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [kNavy, kAccentBlue]),
-            borderRadius: BorderRadius.circular(30),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1A2E6E), Color(0xFF2563EB)],
+            ),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: kNavy.withOpacity(0.3),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
+                color: const Color(0xFF1A2E6E).withOpacity(0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 6),
               ),
             ],
           ),
@@ -1001,10 +1055,10 @@ class _OutlineButtonState extends State<_OutlineButton> {
         scale: _pressed ? 0.96 : 1.0,
         duration: const Duration(milliseconds: 120),
         child: Container(
-          height: 52,
+          padding: const EdgeInsets.symmetric(vertical: 14),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(color: kAccentBlue, width: 1.8),
           ),
           child: Center(

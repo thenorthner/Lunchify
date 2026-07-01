@@ -21,8 +21,11 @@ export default function Menu({ type }) {
       {items.map(i => (
         <div key={i.id}>{i.name} – ₹{i.price}</div>
       ))}
-      <input placeholder="Item" onChange={e => setName(e.target.value)} />
-      <input placeholder="Price" onChange={e => setPrice(e.target.value)} />
+      <label htmlFor="menu-itemName" className="sr-only">Item Name</label>
+      <input id="menu-itemName" placeholder="Item" onChange={e => setName(e.target.value)} />
+      
+      <label htmlFor="menu-itemPrice" className="sr-only">Price</label>
+      <input id="menu-itemPrice" placeholder="Price" onChange={e => setPrice(e.target.value)} />
       <button onClick={addItem}>Add</button>
     </div>
   );

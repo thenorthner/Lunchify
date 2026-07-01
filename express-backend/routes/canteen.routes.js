@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const { requireAuth, requireITAdmin, requireHRAdmin } = require('../middleware/auth.middleware');
+
+router.use(requireAuth);
 
 // GET /api/canteens
 // Fetch all canteens with user counts
-router.get('/', async (req, res) => {
+router.get('/', requireHRAdmin, async (req, res) => {
     try {
         const query = `
             SELECT 
@@ -28,10 +31,14 @@ router.get('/', async (req, res) => {
 
 // DELETE /api/canteens/:id
 // Delete a canteen and map its users to CHQ
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireITAdmin, async (req, res) => {
     const canteenId = req.params.id;
-    const CHQ_PROJECT_ID = 5;
-    const CHQ_CANTEEN_ID = 5;
+    const CHQ_PROJECT_ID = Number(process.env.CHQ_PROJECT_ID);
+    const CHQ_CANTEEN_ID = Number(process.env.CHQ_CANTEEN_ID);
+
+    if (!CHQ_PROJECT_ID || !CHQ_CANTEEN_ID) {
+      return res.status(500).json({ error: "System configuration error: CHQ fallback IDs not set." });
+    }
 
     // Prevent deleting the default CHQ canteen to avoid orphan loops
     if (parseInt(canteenId, 10) === CHQ_CANTEEN_ID) {

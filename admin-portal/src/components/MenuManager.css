@@ -1,137 +1,117 @@
+/* MenuManager.css - Atelier Admin Console Styling */
+
 .menu-manager-container {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding-bottom: 40px;
+  padding: 40px 20px;
 }
 
-.menu-header-banner {
-  width: 100%;
-  height: 140px;
-  background-color: #D0DCF0;
-  border-radius: 12px 12px 0 0;
-  overflow: hidden;
-  position: relative;
-}
-
-.menu-header-banner img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.8;
-}
-
-.menu-tabs-container {
-  background-color: white;
-  border-bottom: 1px solid #E2E8F0;
-  border-radius: 0 0 12px 12px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 12px rgba(26, 58, 143, 0.05);
-}
-
-.date-override-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 16px;
-  background-color: #F8FAFC;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  border: 1px solid #E2E8F0;
-}
-
-.date-override-container span {
-  font-weight: 700;
-  color: #1A2E6E;
-  font-size: 14px;
-}
-
-.menu-section-card {
-  background-color: white;
+/* Atelier Box */
+.atelier {
+  background: var(--paper);
+  border: 1px solid var(--hairline);
   border-radius: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 16px rgba(26, 58, 143, 0.06);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.brass-corner {
+  position: relative;
   overflow: hidden;
+}
+
+.brass-corner::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, transparent 50%, rgba(180, 138, 68, 0.1) 50%);
+  border-top-right-radius: 16px;
+  pointer-events: none;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .menu-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.menu-section {
+  padding: 28px;
 }
 
 .menu-section-header {
   display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  background-color: white;
-  border-bottom: 1px solid #F1F5F9;
+  align-items: flex-start;
+  gap: 20px;
 }
 
-.menu-section-header svg {
-  color: #1A3A8F;
-  margin-right: 12px;
+.menu-section-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #e0ecfd; /* emerald-soft */
+  color: var(--emerald);
+  border: 1px solid rgba(31,90,71,.18);
 }
 
-.menu-section-header h3 {
+.menu-section-title-wrap {
+  flex: 1;
+}
+
+.menu-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.menu-section-title h3 {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   margin: 0;
-  color: #1A2E6E;
-  font-size: 16px;
-  font-weight: 700;
+}
+
+.menu-section-kicker {
+  margin-top: 4px;
 }
 
 .menu-section-content {
-  padding: 20px;
+  margin-top: 24px;
 }
 
-.chips-container {
+.tags-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.input-container {
-  display: flex;
+.atelier-tag {
+  display: inline-flex;
   align-items: center;
-  background-color: #F8FAFC;
-  border-radius: 12px;
-  padding: 4px 8px;
-  border: 1px solid #E2E8F0;
+  gap: 8px;
+  padding: 6px 6px 6px 14px;
+  border-radius: 20px;
+  background: var(--paper);
+  border: 1px solid var(--hairline-strong);
+  color: var(--ink);
+  font-size: 13px;
 }
 
-.input-container input {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 10px;
-  font-size: 14px;
-  outline: none;
-  color: #1A2E6E;
-}
-
-.input-container input::placeholder {
-  color: #8A96A8;
-}
-
-.input-container .add-btn {
-  background-color: #1A3A8F;
-  color: white;
-  min-width: 32px;
-  width: 32px;
-  height: 32px;
+.atelier-tag-close {
+  display: grid;
+  place-items: center;
   border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  box-shadow: 0 2px 8px rgba(26, 58, 143, 0.3);
-}
-
-.save-all-btn {
-  width: 100%;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 700;
-  border-radius: 12px;
-  text-transform: none;
-  background-color: #1A3A8F !important;
-  box-shadow: 0 4px 12px rgba(26, 58, 143, 0.2) !important;
 }
 
 .snacks-input-row {
