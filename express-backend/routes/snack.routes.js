@@ -28,7 +28,7 @@ router.get('/active', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     let query = `
-      SELECT o.id, o.employee_id, u.name, o.room, o.session, o.items, o.total, o.status, o.created_at 
+      SELECT o.id, o.employee_id, u.name, o.room, o.session, o.items, o.total_amount as total, o.status, o.created_at 
       FROM snack_orders o
       LEFT JOIN users u ON o.employee_id = u.id
     `;
@@ -140,7 +140,7 @@ router.post('/', async (req, res) => {
     }
 
     const [result] = await mysqlPool.query(
-      `INSERT INTO snack_orders (employee_id, room, session, items, total, status, canteen_id, project_id, created_at) 
+      `INSERT INTO snack_orders (employee_id, room, session, items, total_amount, status, canteen_id, project_id, created_at) 
        VALUES (?, ?, ?, ?, ?, 'accepted', ?, ?, NOW())`,
       [
         employee_id,

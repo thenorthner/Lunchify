@@ -67,10 +67,10 @@ router.post('/status', async (req, res) => {
     // qrToken format: QR_1234abcd-56ef...|EMP123|Food Lunch|2023-10-25
     const parts = qrToken.split('|');
     const qrId = parts[0].replace('QR_', '');
-    const embeddedEmpId = parts[1];
+    const embeddedEmpId = parts.length > 1 ? parts[1] : null;
 
     // BOLA check: standard employee can only query their own QR status
-    if (req.user.role === 'employee' && req.user.id !== embeddedEmpId) {
+    if (req.user.role === 'employee' && embeddedEmpId && req.user.id !== embeddedEmpId) {
       return res.status(403).json({ error: 'Access denied. You can only view status of your own QR codes.' });
     }
 
@@ -95,10 +95,10 @@ router.post('/cancel', async (req, res) => {
   try {
     const parts = qrToken.split('|');
     const qrId = parts[0].replace('QR_', '');
-    const embeddedEmpId = parts[1];
+    const embeddedEmpId = parts.length > 1 ? parts[1] : null;
 
     // BOLA check: standard employee can only cancel their own QR
-    if (req.user.role === 'employee' && req.user.id !== embeddedEmpId) {
+    if (req.user.role === 'employee' && embeddedEmpId && req.user.id !== embeddedEmpId) {
       return res.status(403).json({ error: 'Access denied. You can only cancel your own QR codes.' });
     }
 
@@ -127,26 +127,29 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
   const conn = await mysqlPool.getConnection();
   try {
     const parts = qrData.split('|');
-    if (parts.length !== 4) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid QR format',
-      });
+    let qrId, embeddedEmployeeId, qrDate;
+
+    if (parts.length === 4) {
+      qrId = parts[0].replace('QR_', '');
+      embeddedEmployeeId = parts[1];
+      qrDate = parts[3];
+    } else if (parts.length === 1) {
+      qrId = parts[0].replace('QR_', '');
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid QR format' });
     }
 
-    const qrId = parts[0].replace('QR_', '');
-    const embeddedEmployeeId = parts[1];
-    const type = parts[2];
-    const qrDate = parts[3];
-
-    // Enforce same-day expiry
-    const today = new Date().toLocaleDateString('en-CA');
-    if (qrDate !== today) {
-      return res.status(400).json({
-        success: false,
-        message: 'QR expired. QR codes are only valid on the day they are generated.',
-      });
+    if (qrDate) {
+      // Enforce same-day expiry for new QR format
+      const today = new Date().toLocaleDateString('en-CA');
+      if (qrDate !== today) {
+        return res.status(400).json({
+          success: false,
+          message: 'QR expired. QR codes are only valid on the day they are generated.',
+        });
+      }
     }
+
     await conn.beginTransaction();
 
     const [qrRows] = await conn.query(
@@ -173,7 +176,7 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
 
     // Verify token integrity: don't trust embedded employee ID
     const employeeId = qr.employee_id;
-    if (embeddedEmployeeId !== employeeId) {
+    if (embeddedEmployeeId && embeddedEmployeeId !== employeeId) {
       await conn.rollback();
       return res.status(400).json({
         success: false,

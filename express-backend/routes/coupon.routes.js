@@ -186,10 +186,10 @@ router.get('/history/:employeeId', requireAuth, async (req, res) => {
       SELECT 'received' as usage_type, amount, CONCAT(DATE_FORMAT(shared_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('Received from: ', u.name) as description 
       FROM coupon_shares c JOIN users u ON c.sender_id = u.id WHERE receiver_id = ? AND shared_at LIKE ?
       UNION ALL
-      SELECT 'lunch' as usage_type, 1 as amount, CONCAT(DATE_FORMAT(qsl.created_at, '%Y-%m-%dT%T'), 'Z') as used_at, 'Instant QR Scan at Canteen' as description 
+      SELECT 'lunch' as usage_type, 1 as amount, CONCAT(DATE_FORMAT(qsl.created_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('QR Scan at Canteen: ', q.type) as description 
       FROM qr_scan_logs qsl 
       JOIN qr_codes q ON qsl.qr_id = q.id 
-      WHERE q.employee_id = ? AND q.type = 'instant' AND qsl.created_at LIKE ?
+      WHERE q.employee_id = ? AND qsl.created_at LIKE ?
       ORDER BY used_at DESC
     `;
     

@@ -130,9 +130,11 @@ async function runMigration() {
     }
 
     // Set default assignments for legacy records
+    await pool.query("SET FOREIGN_KEY_CHECKS=0;");
     await pool.query("UPDATE users SET project_id = 5, canteen_id = 5 WHERE project_id IS NULL");
     await pool.query("UPDATE users SET role = 'it_admin' WHERE is_admin = 1");
     await pool.query("UPDATE users SET role = 'employee' WHERE is_admin = 0 AND role IS NULL");
+    await pool.query("SET FOREIGN_KEY_CHECKS=1;");
 
     // 5. Feedbacks Table
     console.log("Creating feedbacks table...");
