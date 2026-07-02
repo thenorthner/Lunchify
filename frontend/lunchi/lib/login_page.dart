@@ -516,28 +516,7 @@ class _FormSection extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 14),
 
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                decoration: BoxDecoration(
-                  color: kSubtle,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: kBorder),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.shield_outlined, color: kBlue.withOpacity(0.7), size: 20),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Secure access for SJVN employees only.\nYour data is safe with us.',
-                        style: TextStyle(fontSize: 12, color: kGray, height: 1.5),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),

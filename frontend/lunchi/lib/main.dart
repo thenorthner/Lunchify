@@ -8,6 +8,7 @@ import 'auth_service.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +42,7 @@ class LunchifyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        fontFamily: 'Libre Baskerville',
+        textTheme: GoogleFonts.spaceGroteskTextTheme(),
         scaffoldBackgroundColor: kBgColor,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(

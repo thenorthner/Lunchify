@@ -113,10 +113,11 @@ class _AdminScanHistoryPageState extends State<AdminScanHistoryPage> {
               onPressed: _fetchScanLogs,
             ),
           ),
+          const SizedBox(height: 16),
           // Filter Section
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 Row(
