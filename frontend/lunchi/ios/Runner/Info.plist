@@ -15,12 +15,6 @@
 	<string>This app requires camera access to scan QR codes for lunch coupons.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>This app requires microphone access for recording video (if needed by the camera plugin).</string>
-	
-	<!-- 🔥 REQUIRED FOR GEOLOCATOR (LOCATION) ON iOS -->
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to your location to verify your presence in the cafeteria.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app needs access to your location in the background to verify your presence in the cafeteria.</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
