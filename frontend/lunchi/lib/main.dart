@@ -17,10 +17,14 @@ void main() async {
     jailbroken = await FlutterJailbreakDetection.jailbroken;
     // In strict enterprise apps, block execution if compromised
     if (jailbroken) {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      print('WARNING: Device appears to be jailbroken/rooted!');
+      // Commented out to prevent instant crash during development
+      // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     }
   } catch (e) {
-    jailbroken = true;
+    print('Jailbreak detection error: $e');
+    // Don't assume jailbroken on exception during debug
+    jailbroken = false; 
   }
 
   await AuthService.init();

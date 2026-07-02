@@ -13,3 +13,6 @@ dist/
 build/
 
 ~$*.xlsx
+
+# VS Code Code Runner temp files
+tempCodeRunnerFile*
