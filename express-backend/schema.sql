@@ -84,6 +84,7 @@ CREATE TABLE `food_lunch_orders` (
   `delivered_at` timestamp NULL DEFAULT NULL,
   `canteen_id` int(11) DEFAULT 1,
   `project_id` int(11) DEFAULT 1,
+  `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`items`)),
   PRIMARY KEY (`id`),
   KEY `employee_id` (`employee_id`),
   KEY `canteen_id` (`canteen_id`),
@@ -110,7 +111,7 @@ CREATE TABLE `food_menu` (
   PRIMARY KEY (`id`),
   KEY `canteen_id` (`canteen_id`),
   CONSTRAINT `food_menu_ibfk_1` FOREIGN KEY (`canteen_id`) REFERENCES `canteens` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `fruit_lunch_orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -126,6 +127,7 @@ CREATE TABLE `fruit_lunch_orders` (
   `delivered_at` timestamp NULL DEFAULT NULL,
   `canteen_id` int(11) DEFAULT 1,
   `project_id` int(11) DEFAULT 1,
+  `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`items`)),
   PRIMARY KEY (`id`),
   KEY `employee_id` (`employee_id`),
   KEY `canteen_id` (`canteen_id`),
@@ -144,7 +146,7 @@ CREATE TABLE `fruit_menu` (
   PRIMARY KEY (`id`),
   KEY `canteen_id` (`canteen_id`),
   CONSTRAINT `fruit_menu_ibfk_1` FOREIGN KEY (`canteen_id`) REFERENCES `canteens` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 CREATE TABLE `lunch_logs` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
