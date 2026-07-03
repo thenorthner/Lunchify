@@ -42,7 +42,7 @@ class LunchifyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        textTheme: GoogleFonts.spaceGroteskTextTheme(),
+        fontFamily: 'FKGrotesk',
         scaffoldBackgroundColor: kBgColor,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(

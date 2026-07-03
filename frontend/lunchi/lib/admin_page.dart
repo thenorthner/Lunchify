@@ -289,7 +289,7 @@ class _WelcomeCard extends StatelessWidget {
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: _kNavy,
-                          fontFamily: 'EBGaramond',
+                          fontFamily: 'FKGrotesk',
                         ),
                       ),
                       TextSpan(
@@ -298,7 +298,7 @@ class _WelcomeCard extends StatelessWidget {
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: _kAccent,
-                          fontFamily: 'EBGaramond',
+                          fontFamily: 'FKGrotesk',
                         ),
                       ),
                     ],

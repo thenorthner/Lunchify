@@ -100,7 +100,7 @@ class _CouponStatusPageState extends State<CouponStatusPage> {
                                           fontSize: 24,
                                           fontWeight: FontWeight.w800,
                                           color: kNavy,
-                                          fontFamily: 'EBGaramond',
+                                          fontFamily: 'FKGrotesk',
                                         ),
                                       ),
                                       const TextSpan(

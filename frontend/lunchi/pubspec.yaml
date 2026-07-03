@@ -26,7 +26,7 @@ dependencies:
   path_provider: ^2.1.4
   flutter_secure_storage: ^10.3.1
   flutter_jailbreak_detection: ^1.10.0
-  google_fonts: ^8.1.0
+  google_fonts: 6.2.1
 
 
 dev_dependencies:
@@ -65,6 +65,21 @@ flutter:
     - assets/audio/applepay.mp3
 
   fonts:
+    - family: FKGrotesk
+      fonts:
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-Regular.otf
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-Medium.otf
+          weight: 500
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-Bold.otf
+          weight: 700
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-Italic.otf
+          style: italic
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-MediumItalic.otf
+          weight: 500
+          style: italic
+        - asset: assets/fonts/FKGrotesk/FKGroteskTrial-BoldItalic.otf
+          weight: 700
+          style: italic
     - family: EBGaramond
       fonts:
         - asset: assets/fonts/EBGaramond/EBGaramond-VariableFont_wght.ttf
