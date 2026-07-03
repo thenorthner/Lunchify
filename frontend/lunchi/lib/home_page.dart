@@ -419,7 +419,7 @@ class _WelcomeCard extends StatelessWidget {
                         ),
                       ),
                       TextSpan(
-                        text: employeeName,
+                        text: employeeName.split(' ').first,
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
