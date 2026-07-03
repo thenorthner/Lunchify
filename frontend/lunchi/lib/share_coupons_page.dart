@@ -196,17 +196,7 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
                       size: 80,
                       color: kPrimaryBlue,
                     ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      "Share Your Coupons",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: kPrimaryBlue,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 24),
                     const Text(
                       "Transfer your extra coupons to a colleague. Make sure the Employee ID is correct.",
                       textAlign: TextAlign.center,

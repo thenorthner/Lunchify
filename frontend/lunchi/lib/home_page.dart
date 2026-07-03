@@ -410,7 +410,7 @@ class _WelcomeCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       const TextSpan(
-                        text: "Lunch O' Clock, ",
+                        text: "Let's Feast, ",
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
