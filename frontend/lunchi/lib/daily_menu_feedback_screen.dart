@@ -215,13 +215,35 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
             content: const Text("Thanks for helping us cook up a better experience.",
                 style: TextStyle(color: _C.sub, height: 1.7, fontSize: 14)),
             actions: [
-              TextButton(
-                onPressed: () {
+              GestureDetector(
+                onTap: () {
                   Navigator.pop(context); // Close dialog
                   Navigator.pop(context); // Go back
                 },
-                child: const Text('Yum 😋',
-                    style: TextStyle(color: _C.accent, fontWeight: FontWeight.bold)),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF2563EB).withOpacity(0.35),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'Yum 😋',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

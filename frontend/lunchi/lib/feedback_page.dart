@@ -114,15 +114,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                "Report a Bug or Issue",
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w800,
-                                  color: Color(0xFF1A2E6E), // kNavy
-                                ),
-                              ),
-                              const SizedBox(height: 8),
+
                               const Text(
                                 "Found a bug or something not working? Report it below and the IT admin team will look into it.",
                                 style: TextStyle(
