@@ -4,6 +4,7 @@ import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
+import 'widgets/self_share_dialog.dart';
 
 class ShareCouponsPage extends StatefulWidget {
   const ShareCouponsPage({Key? key}) : super(key: key);
@@ -30,31 +31,8 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
     if (recipientId == myId) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Hey!"),
-          content: const Text(
-            "You already own this coupon, genius.🫠",
-            style: TextStyle(fontSize: 16),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A3A8F),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                "My bad 😅",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+        barrierDismissible: true,
+        builder: (context) => const SelfShareDialog(),
       );
       return;
     }
