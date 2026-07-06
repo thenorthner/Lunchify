@@ -562,7 +562,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
                     value: selectedYear,
                     hint: const Text('Year'),
                     items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('All Years')),
+                      const DropdownMenuItem<int?>(value: null, child: Text('Years')),
                       ...List.generate(5, (i) => DateTime.now().year - i)
                           .map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))),
                     ],
@@ -573,7 +573,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
                     value: selectedMonth?.month,
                     hint: const Text('Month'),
                     items: [
-                      const DropdownMenuItem<int?>(value: null, child: Text('All Months')),
+                      const DropdownMenuItem<int?>(value: null, child: Text('Months')),
                       ...List.generate(12, (i) => i + 1)
                           .map((m) => DropdownMenuItem(value: m, child: Text(m.toString().padLeft(2, '0')))),
                     ],
@@ -625,7 +625,7 @@ class _TopBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 120,
+      height: 130, // Increased height to accommodate SafeArea on modern phones
       clipBehavior: Clip.hardEdge,
       decoration: const BoxDecoration(
         color: Color(0xFFD0DCF0),
@@ -667,11 +667,13 @@ class _TopBar extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 38),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 _BackButton(),
                 const SizedBox(width: 10),
                 Expanded(

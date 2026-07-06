@@ -221,7 +221,7 @@ router.post('/scan', requireCanteenAdmin, async (req, res) => {
     // Log the scan with the scanner's canteen ID
     await conn.query(
       `INSERT INTO qr_scan_logs (qr_id, scanned_by, lunch_type, canteen_id, items) VALUES (?, ?, ?, ?, ?)`,
-      [qrId, scannerId, type, canteenId, qr.items ? JSON.stringify(qr.items) : null]
+      [qrId, scannerId, qr.type, canteenId, qr.items ? JSON.stringify(qr.items) : null]
     );
 
     await conn.commit();

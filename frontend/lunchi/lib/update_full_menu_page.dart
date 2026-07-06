@@ -92,14 +92,24 @@ class _UpdateFullMenuPageState extends State<UpdateFullMenuPage> with SingleTick
     if (decoded == null) return [];
     if (decoded is Map) {
       final v = decoded[key];
-      if (v is List) return v.map((e) => e.toString()).toList();
+      if (v is List) {
+        return v.map((e) {
+          if (e is Map) return (e['name'] ?? e.toString()).toString();
+          return e.toString();
+        }).toList();
+      }
       return [];
     }
     if (decoded is List && decoded.isNotEmpty) {
       final first = decoded.first;
       if (first is Map) {
         final v = first[key];
-        if (v is List) return v.map((e) => e.toString()).toList();
+        if (v is List) {
+          return v.map((e) {
+            if (e is Map) return (e['name'] ?? e.toString()).toString();
+            return e.toString();
+          }).toList();
+        }
       }
     }
     return [];
