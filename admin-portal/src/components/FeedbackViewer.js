@@ -167,39 +167,7 @@ export default function FeedbackViewer({ user = {} }) {
         }
       />
 
-      {/* Triage stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        {[
-          { k: "high",   label: "High priority",   v: counts.high,   color: "var(--spark)",   bg: "var(--spark-soft)", Icon: BoltIcon },
-          { k: "medium", label: "Medium",          v: counts.medium, color: "#8a6018",        bg: "var(--amber-soft)", Icon: ReportProblemIcon },
-          { k: "low",    label: "Low / general",   v: counts.low,    color: "#0e6cb0",        bg: "#e4f1fb", Icon: InfoOutlinedIcon },
-        ].map((s) => (
-          <div
-            key={s.k}
-            className="atelier"
-            style={{ padding: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-          >
-            <div>
-              <div className="eyebrow">{s.label}</div>
-              <div className="font-display tnum" style={{ fontSize: 38, fontWeight: 400, color: s.color, marginTop: '4px' }}>{s.v}</div>
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                placeItems: 'center',
-                borderRadius: '12px',
-                width: 44,
-                height: 44,
-                background: s.bg,
-                color: s.color,
-                border: `1px solid ${s.color}30`
-              }}
-            >
-              <s.Icon style={{ fontSize: 20 }} />
-            </div>
-          </div>
-        ))}
-      </div>
+
 
       {/* Search */}
       <div className="atelier-dark" style={{ padding: '16px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
