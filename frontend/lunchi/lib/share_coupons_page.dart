@@ -5,6 +5,7 @@ import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/self_share_dialog.dart';
+import 'widgets/confirm_share_dialog.dart';
 
 class ShareCouponsPage extends StatefulWidget {
   const ShareCouponsPage({Key? key}) : super(key: key);
@@ -62,38 +63,8 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
 
       final confirm = await showDialog<bool>(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Confirm Transfer"),
-          content: Text(
-            "Really wanna give shiny coupons to $recipientName?",
-            style: const TextStyle(fontSize: 16),
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text(
-                "Maybe Not",
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A3A8F),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text(
-                "Bless The Homie ✨",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-          ],
-        ),
+        barrierDismissible: false,
+        builder: (context) => ConfirmShareDialog(recipientName: recipientName),
       );
 
       if (confirm == true) {
