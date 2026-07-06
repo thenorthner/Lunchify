@@ -12,6 +12,8 @@ import 'package:lunchi/app_theme.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class BuyLunchQrPage extends StatefulWidget {
   final String employeeId;
@@ -45,11 +47,11 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      final xFile = XFile.fromData(
-        pngBytes,
-        mimeType: 'image/png',
-        name: 'lunchify_qr.png',
-      );
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/lunchify_qr.png');
+      await file.writeAsBytes(pngBytes);
+      
+      final xFile = XFile(file.path);
 
       await Share.shareXFiles(
         [xFile],
@@ -270,7 +272,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       _showInfoDialog(
         body['success'] == true ? 'Success' : 'Failed',
         body['message']?.toString() ??
-            'A Wise Choice Was Made 🗿. Food Secured 🔥',
+            'A Wise Choice Was Made 🗿. \n Food Secured 🔥',
       );
     } catch (e) {
       _showInfoDialog('Error', e.toString());

@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class QrGeneratorPage extends StatefulWidget {
   final String type; // food / fruit / snack
@@ -35,8 +37,12 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/lunchify_qr_generator.png');
+      await file.writeAsBytes(pngBytes);
+
       await Share.shareXFiles(
-        [XFile.fromData(pngBytes, mimeType: 'image/png', name: 'qr_code.png')],
+        [XFile(file.path)],
         text: '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
       );
     } catch (e) {
