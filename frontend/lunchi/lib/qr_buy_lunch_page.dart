@@ -14,6 +14,8 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'widgets/confirm_order_dialog.dart';
+import 'widgets/success_dialog.dart';
 
 class BuyLunchQrPage extends StatefulWidget {
   final String employeeId;
@@ -214,23 +216,12 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
 
     final bool? confirm = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Confirm Order'),
-        content: const Text('Let\'s secure the fruit munchies, shall we? 🍎😋'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Panic & Exit.'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: kAccentBlue),
-            child: const Text(
-              'Lock It In.',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+      barrierDismissible: false,
+      builder: (_) => const ConfirmOrderDialog(
+        title: 'Confirm Order',
+        message: "Let's secure the fruit munchies,\nshall we? 🍎😋",
+        cancelText: 'Panic & Exit',
+        confirmText: 'Lock It In.',
       ),
     );
 
@@ -363,6 +354,18 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
   }
 
   Future<void> _showInfoDialog(String title, String message) {
+    if (title == 'Success') {
+      return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => SuccessDialog(
+          title: "Success",
+          message: "A Wise Choice Was Made 🦉.\nFood Secured 🔥",
+          buttonText: "Naturally 😉",
+        ),
+      );
+    }
+    
     return showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -373,7 +376,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(backgroundColor: kAccentBlue),
             child: const Text(
-              'Naturally😌',
+              'Got it',
               style: TextStyle(color: Colors.white),
             ),
           ),

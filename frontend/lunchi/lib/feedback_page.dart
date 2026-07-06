@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'config.dart';
 import 'auth_service.dart';
 import 'widgets/top_bar.dart';
+import 'widgets/success_dialog.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage({super.key});
@@ -34,15 +35,30 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   void _showToast(String message, {bool isSuccess = true}) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess ? Colors.green : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    if (isSuccess) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => SuccessDialog(
+          title: "Thank You! 💙",
+          message: "Your feedback has been submitted\nsuccessfully.",
+          buttonText: "Great! Got it 🎉",
+          onPressed: () {
+            Navigator.pop(context); // Close dialog
+          },
+        ),
+      );
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+      );
+    }
   }
 
   Future<void> _submitFeedback() async {
