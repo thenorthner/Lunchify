@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
-class SuccessDialog extends StatelessWidget {
+class InfoShieldDialog extends StatelessWidget {
   final String title;
   final String message;
   final String buttonText;
   final VoidCallback? onPressed;
+  final IconData icon;
 
-  const SuccessDialog({
+  const InfoShieldDialog({
     super.key,
     required this.title,
     required this.message,
     required this.buttonText,
+    required this.icon,
     this.onPressed,
   });
 
@@ -46,7 +48,7 @@ class SuccessDialog extends StatelessWidget {
                 height: 160,
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Color(0xFFF0FDF4), Colors.white], // Light green to white
+                    colors: [Color(0xFFEFF6FF), Colors.white],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                   ),
@@ -56,10 +58,10 @@ class SuccessDialog extends StatelessWidget {
             
             // Decorative Confetti Dots
             Positioned(top: 50, left: 60, child: _buildDot(const Color(0xFFFBBF24), 6)),
-            Positioned(top: 70, left: 40, child: _buildDot(const Color(0xFF818CF8), 8)), // Purple
+            Positioned(top: 70, left: 40, child: _buildDot(const Color(0xFF93C5FD), 8)),
             Positioned(top: 30, right: 80, child: _buildDot(const Color(0xFF6EE7B7), 6)),
             Positioned(top: 60, right: 50, child: _buildDot(const Color(0xFFFBBF24), 8)),
-            Positioned(top: 80, right: 80, child: _buildDot(const Color(0xFF93C5FD), 6)), // Blue
+            Positioned(top: 80, right: 80, child: _buildDot(const Color(0xFF93C5FD), 6)),
             
             // Cloud shapes
             Positioned(top: 100, left: -20, child: _buildCloud(90)),
@@ -76,16 +78,16 @@ class SuccessDialog extends StatelessWidget {
                 children: [
                   const SizedBox(height: 10),
                   
-                  // Checkmark icon with green glow
+                  // Icon
                   Container(
                     width: 76,
                     height: 76,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF22C55E), // Green background
+                      color: const Color(0xFF2563EB),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF22C55E).withOpacity(0.3),
+                          color: const Color(0xFF2563EB).withOpacity(0.3),
                           blurRadius: 28,
                           spreadRadius: 8,
                         ),
@@ -96,10 +98,10 @@ class SuccessDialog extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.check_rounded,
+                    child: Icon(
+                      icon,
                       color: Colors.white,
-                      size: 44,
+                      size: 40,
                     ),
                   ),
                   
@@ -119,29 +121,30 @@ class SuccessDialog extends StatelessWidget {
                   
                   const SizedBox(height: 16),
                   
-                  // Divider with heart
+                  // Divider
                   Row(
                     children: [
                       Expanded(
-                        child: Divider(color: const Color(0xFFBBF7D0).withOpacity(0.5), thickness: 1.5),
+                        child: Divider(color: const Color(0xFFBFDBFE).withOpacity(0.5), thickness: 1.5),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: const Icon(Icons.favorite, color: Color(0xFF22C55E), size: 16),
+                        padding: const EdgeInsets.all(4),
+                        child: Icon(icon, color: const Color(0xFF3B82F6), size: 16),
                       ),
                       Expanded(
-                        child: Divider(color: const Color(0xFFBBF7D0).withOpacity(0.5), thickness: 1.5),
+                        child: Divider(color: const Color(0xFFBFDBFE).withOpacity(0.5), thickness: 1.5),
                       ),
                     ],
                   ),
                   
                   const SizedBox(height: 16),
                   
+                  // Message
                   Text(
                     message,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 14,
                       color: Color(0xFF475569),
                       height: 1.5,
                       fontWeight: FontWeight.w500,
@@ -171,9 +174,7 @@ class SuccessDialog extends StatelessWidget {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: onPressed ?? () {
-                          Navigator.pop(context); // Close dialog
-                        },
+                        onPressed: onPressed ?? () => Navigator.pop(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,

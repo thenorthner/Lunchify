@@ -9,6 +9,7 @@ import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import BoltIcon from '@mui/icons-material/Bolt';
 import ReportProblemIcon from '@mui/icons-material/ReportProblem';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import "../styles/FeedbackViewer.css";
 
 const PRIORITY = {
@@ -18,14 +19,47 @@ const PRIORITY = {
 };
 
 const Initials = (name) => {
-  if (!name) return "?";
-  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  if (!name) return "U";
+  return name.substring(0, 2).toUpperCase();
 };
 
-const TicketCard = ({ t }) => {
+const TicketCard = ({ t, onDelete }) => {
   const p = PRIORITY[t.priority?.toUpperCase()] || PRIORITY.LOW;
   const Icon = p.icon;
+
+  const handleRespond = async () => {
+    const response = window.prompt(`Respond to ${t.employee_name}'s ticket:\nSubject: ${t.subject}`);
+    if (!response) return;
+
+    try {
+      const res = await api.post(`/feedbacks/${t.id}/respond`, { message: response });
+      if (res.data?.success) {
+        alert(`Response sent! A push notification has been sent to ${t.employee_name}'s mobile device.`);
+      } else {
+        alert("Failed to send response.");
+      }
+    } catch (err) {
+      console.error("Error sending response:", err);
+      alert("Error sending response. Make sure the backend supports this.");
+    }
+  };
   
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this ticket?")) {
+      try {
+        const res = await api.delete(`/feedbacks/${t.id}`);
+        if (res.data?.success) {
+          onDelete(t.id);
+        } else {
+          alert("Failed to delete ticket.");
+        }
+      } catch (err) {
+        console.error("Error deleting ticket:", err);
+        alert("Error deleting ticket.");
+      }
+    }
+  };
+
   return (
     <div className="atelier lift" style={{ padding: '24px', marginBottom: '16px' }}>
       {/* Top row */}
@@ -46,10 +80,7 @@ const TicketCard = ({ t }) => {
           >
             {t.canteen_name} {t.project_name ? `(${t.project_name})` : ''}
           </span>
-          <span className={`chip ${p.cls}`}>
-            <Icon style={{ fontSize: 14, marginRight: 4 }} />
-            {t.priority || "LOW"}
-          </span>
+
         </div>
         <div className="font-mono-tab" style={{ fontSize: '11.5px', color: 'var(--ink-muted)' }}>
           {new Date(t.created_at).toLocaleString()}
@@ -92,13 +123,24 @@ const TicketCard = ({ t }) => {
             </div>
           </div>
         </div>
-        <button
-          className="btn-ghost"
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}
-        >
-          <ChatBubbleOutlineIcon style={{ fontSize: 14 }} />
-          Respond
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            className="btn-ghost"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}
+            onClick={handleRespond}
+          >
+            <ChatBubbleOutlineIcon style={{ fontSize: 14 }} />
+            Respond
+          </button>
+          <button
+            className="btn-ghost"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#ef4444' }}
+            onClick={handleDelete}
+            title="Delete Ticket"
+          >
+            <DeleteOutlineIcon style={{ fontSize: 16 }} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -208,7 +250,11 @@ export default function FeedbackViewer({ user = {} }) {
           </div>
         ) : (
           filteredFeedbacks.map((ticket, index) => (
-            <TicketCard key={ticket.id || index} t={ticket} />
+            <TicketCard 
+              key={ticket.id || index} 
+              t={ticket} 
+              onDelete={(id) => setFeedbacks(prev => prev.filter(f => f.id !== id))}
+            />
           ))
         )}
       </div>

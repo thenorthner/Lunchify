@@ -5,6 +5,7 @@ import 'config.dart';
 import 'auth_service.dart';
 import 'daily_menu_feedback_screen.dart';
 import 'app_theme.dart';
+import 'widgets/review_lock_dialog.dart';
 
 class LunchRatingSelectionScreen extends StatefulWidget {
   const LunchRatingSelectionScreen({super.key});
@@ -57,49 +58,7 @@ class _LunchRatingSelectionScreenState
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-        title: const Text(
-          'Hold up! 🛑',
-          style: TextStyle(
-            color: kPrimaryBlue,
-            fontWeight: FontWeight.w700,
-            fontSize: 18,
-          ),
-        ),
-        content: const Text(
-          "Can't review what you didn't chew😋. Purchase required to unlock opinions.",
-          style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Close dialog
-                Navigator.pop(context); // Go back to Home
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kPrimaryBlue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                elevation: 0,
-              ),
-              child: const Text(
-                'Alright Chief 🫡',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 15,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+      builder: (context) => const ReviewLockDialog(),
     );
   }
 
@@ -107,48 +66,7 @@ class _LunchRatingSelectionScreenState
     if (!isScanned) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
-          title: const Text(
-            'Hold up! 🛑',
-            style: TextStyle(
-              color: kPrimaryBlue,
-              fontWeight: FontWeight.w700,
-              fontSize: 18,
-            ),
-          ),
-          content: const Text(
-            "Ain't no way you're rating imaginary food, Scan the coupon and we'll talk 😤.",
-            style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.4),
-          ),
-          actions: [
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kPrimaryBlue,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
-                child: const Text(
-                  'Alright Chief 🫡',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        builder: (context) => const ReviewLockDialog(),
       );
       return;
     }

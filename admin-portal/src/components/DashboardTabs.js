@@ -19,9 +19,9 @@ export default function DashboardTabs({ activeTab, setActiveTab, allowedTabs = [
   if (allowedTabs.length === 0) return null;
 
   // Determine active module based on tabs content
-  const isHR = allowedTabs.includes("billing") || allowedTabs.includes("transfers") || allowedTabs.includes("item_feedbacks");
   const isIT = allowedTabs.includes("canteen_projects") || allowedTabs.includes("admin_accounts");
-  const moduleName = isHR ? "HR Review" : isIT ? "Governance" : "Operations";
+  const isHR = allowedTabs.includes("billing") || allowedTabs.includes("transfers") || (allowedTabs.includes("item_feedbacks") && !isIT);
+  const moduleName = isIT ? "Governance" : isHR ? "HR Review" : "Operations";
 
   // Format current date: e.g., "01 Jul 2026"
   const formatDate = () => {

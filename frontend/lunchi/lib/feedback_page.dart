@@ -45,6 +45,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           buttonText: "Great! Got it 🎉",
           onPressed: () {
             Navigator.pop(context); // Close dialog
+            Navigator.pop(context); // Close page
           },
         ),
       );
@@ -85,7 +86,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
       if (res.statusCode == 201 || (body is Map && body['success'] == true)) {
         _showToast(body['message'] ?? 'Feedback submitted successfully! Thank you.', isSuccess: true);
-        if (mounted) Navigator.pop(context);
       } else {
         final errorMsg = body['error'] ?? body['message'] ?? 'Failed to submit feedback';
         _showToast(errorMsg, isSuccess: false);

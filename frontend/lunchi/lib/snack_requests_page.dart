@@ -302,7 +302,7 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
                       value: selectedYear,
                       hint: const Text('Year'),
                       items: [
-                        const DropdownMenuItem<int?>(value: null, child: Text('All Years')),
+                        const DropdownMenuItem<int?>(value: null, child: Text('Years')),
                         ...List.generate(5, (i) => DateTime.now().year - i)
                             .map((y) => DropdownMenuItem(value: y, child: Text(y.toString()))),
                       ],
@@ -316,7 +316,7 @@ class _SnackRequestsPageState extends State<SnackRequestsPage> {
                       value: selectedMonth?.month,
                       hint: const Text('Month'),
                       items: [
-                        const DropdownMenuItem<int?>(value: null, child: Text('All Months')),
+                        const DropdownMenuItem<int?>(value: null, child: Text('Months')),
                         ...List.generate(12, (i) => i + 1)
                             .map((m) => DropdownMenuItem(value: m, child: Text(m.toString().padLeft(2, '0')))),
                       ],

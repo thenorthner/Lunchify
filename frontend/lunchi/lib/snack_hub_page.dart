@@ -41,30 +41,140 @@ class _SnackHubPageState extends State<SnackHubPage> {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Confirm Order'),
-        content: const Text(
-          'One step closer to a well-earned lunch 😋. Secure Your Lunch!',
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1A3A8F),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with blue shield
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Little blue burst lines
+                  Positioned(top: 25, left: 40, child: Transform.rotate(angle: -0.5, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  Positioned(top: 40, left: 30, child: Transform.rotate(angle: -1.0, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  Positioned(top: 55, left: 40, child: Transform.rotate(angle: -1.5, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  
+                  Positioned(top: 25, right: 40, child: Transform.rotate(angle: 0.5, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  Positioned(top: 40, right: 30, child: Transform.rotate(angle: 1.0, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  Positioned(top: 55, right: 40, child: Transform.rotate(angle: 1.5, child: Container(width: 2, height: 8, color: const Color(0xFF3B82F6)))),
+                  
+                  // Main circle
+                  Container(
+                    width: 80, height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFDBEAFE).withOpacity(0.8),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 56, height: 56,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2563EB), // Blue shield color
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.verified_user_rounded, // Shield with check
+                          color: Colors.white,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            child: const Text(
-              'Secure Lunch',
-              style: TextStyle(color: Colors.white),
+            const SizedBox(height: 16),
+            const Text(
+              'Confirm Order',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1E3A8A), // kNavy
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            
+            // Divider with verified badge
+            Row(
+              children: [
+                Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  child: const Icon(Icons.verified, size: 20, color: Color(0xFF2563EB)),
+                ),
+                Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            const Text(
+              'One step closer to a well-earned lunch!\n😋 Secure your lunch now.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Color(0xFF475569),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 28),
+            
+            // Buttons
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade300),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Color(0xFF475569),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF2563EB),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.verified_user_rounded, color: Colors.white, size: 16),
+                        SizedBox(width: 6),
+                        Text(
+                          'Secure Lunch',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
 
@@ -91,34 +201,133 @@ class _SnackHubPageState extends State<SnackHubPage> {
         showDialog(
           context: context,
           builder: (_) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: const [
-                Icon(Icons.check_circle_outline, color: Colors.green, size: 28),
-                SizedBox(width: 10),
-                Expanded(child: Text('Lunch Stash Secured ✨', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))),
-              ],
-            ),
-            content: const Text(
-              'Freshness incoming. Stay tuned 😎',
-              style: TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-            actions: [
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1A3A8F),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with glowing check & sparkles
+                SizedBox(
+                  height: 100,
+                  width: double.infinity,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      // Little green burst lines
+                      Positioned(top: 25, left: 40, child: Transform.rotate(angle: -0.5, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      Positioned(top: 40, left: 30, child: Transform.rotate(angle: -1.0, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      Positioned(top: 55, left: 40, child: Transform.rotate(angle: -1.5, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      
+                      Positioned(top: 25, right: 40, child: Transform.rotate(angle: 0.5, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      Positioned(top: 40, right: 30, child: Transform.rotate(angle: 1.0, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      Positioned(top: 55, right: 40, child: Transform.rotate(angle: 1.5, child: Container(width: 2, height: 8, color: const Color(0xFF22C55E)))),
+                      
+                      // Soft glow behind the circle
+                      Container(
+                        width: 90, height: 90,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF22C55E).withOpacity(0.2),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                      ),
+                      
+                      // Main circle with gradient
+                      Container(
+                        width: 64, height: 64,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF4ADE80), Color(0xFF22C55E)],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, 5)),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                child: const Text(
-                  'Alright 👍',
-                  style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                
+                const SizedBox(height: 16),
+                
+                // Title
+                const Text(
+                  'Lunch Stash Secured! 🎉',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF1E3A8A), // kNavy
+                  ),
                 ),
-              ),
-            ],
+                
+                const SizedBox(height: 16),
+                
+                // Divider with shield
+                Row(
+                  children: [
+                    Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      child: const Icon(Icons.verified, size: 20, color: Color(0xFF22C55E)),
+                    ),
+                    Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+                  ],
+                ),
+                
+                const SizedBox(height: 16),
+                
+                // Subtitle
+                const Text(
+                  'Freshness incoming.\nStay tuned 😎',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF475569),
+                    height: 1.4,
+                  ),
+                ),
+                
+                const SizedBox(height: 28),
+                
+                // Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF1A3A8F),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Alright 👍',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       } else {

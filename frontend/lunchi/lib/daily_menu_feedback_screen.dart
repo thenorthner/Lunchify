@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'auth_service.dart'; // To get employeeId
 import 'config.dart';  // For backend URL
 import 'widgets/top_bar.dart';
+import 'widgets/success_dialog.dart';
 
 class MenuItem {
   final String name;
@@ -121,6 +122,38 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
       final now = DateTime.now();
       final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final token = AuthService.token ?? '';
+      
+      // Check if already rated today
+      try {
+        final checkResp = await http.get(
+          Uri.parse('${AppConfig.apiBaseUrl}/api/item-feedbacks/check-today?date=$todayStr'),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+        if (checkResp.statusCode == 200) {
+          final checkData = json.decode(checkResp.body);
+          if (checkData['has_rated'] == true) {
+            if (mounted) {
+              showDialog(
+                context: context,
+                barrierDismissible: false, // Prevent dismissing by tapping outside
+                builder: (_) => SuccessDialog(
+                  title: "Already Rated! 🎉",
+                  message: "You've already rated today's munchies!",
+                  buttonText: 'Alright 👍',
+                  onPressed: () {
+                    Navigator.pop(context); // Close dialog
+                    Navigator.pop(context); // Go back
+                  },
+                ),
+              );
+            }
+            return;
+          }
+        }
+      } catch (e) {
+        print('Error checking if already rated: $e');
+      }
+
       final response = await http.get(
         Uri.parse('${AppConfig.apiBaseUrl}/api/menu/${widget.lunchType}?date=$todayStr'),
         headers: {'Authorization': 'Bearer $token'},
@@ -135,7 +168,12 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
 
         setState(() {
           _items = itemsList
-              .map((item) => MenuItem(name: item.toString()))
+              .map((item) {
+                if (item is Map) {
+                  return MenuItem(name: item['name']?.toString() ?? item['dish']?.toString() ?? item.toString());
+                }
+                return MenuItem(name: item.toString());
+              })
               .toList();
           for (var _ in _items) _controllers.add(TextEditingController());
           _menuDate = todayStr;
@@ -199,53 +237,14 @@ class _DailyMenuFeedbackScreenState extends State<DailyMenuFeedbackScreen> {
       if (response.statusCode == 200) {
         showDialog(
           context: context,
-          builder: (_) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: const Row(children: [
-              Icon(Icons.check_circle_rounded, color: _C.accent),
-              SizedBox(width: 8),
-              Flexible(
-                child: Text("Chef's Notes Updated",
-                    style: TextStyle(
-                        color: _C.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 17)),
-              ),
-            ]),
-            content: const Text("Thanks for helping us cook up a better experience.",
-                style: TextStyle(color: _C.sub, height: 1.7, fontSize: 14)),
-            actions: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2563EB).withOpacity(0.35),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: const Text(
-                    'Yum 😋',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          builder: (_) => SuccessDialog(
+            title: "Chef's Notes Updated 👨‍🍳",
+            message: "Thanks for helping us cook up\na better experience. 🍲",
+            buttonText: 'Yum 😋',
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Go back
+            },
           ),
         );
       } else {

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'config.dart';
+
 import 'package:flutter/material.dart';
 import 'package:lunchi/network/http_wrapper.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
@@ -11,7 +13,7 @@ class SnackOrderPage extends StatefulWidget {
 }
 
 class _SnackOrderPageState extends State<SnackOrderPage> {
-  final String baseUrl = 'http://YOUR_SERVER_IP:3001';
+  final String baseUrl = AppConfig.apiBaseUrl;
 
   List snacks = [];
   Map<int, int> quantities = {};

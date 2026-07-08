@@ -166,30 +166,83 @@ class _QRScannerPageState extends State<QRScannerPage>
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
         ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 70, height: 70,
-              decoration: const BoxDecoration(
-                color: Color(0xFFDCFCE7),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_rounded,
-                color: Color(0xFF16A34A),
-                size: 38,
+            // Sparkling Header Icon
+            SizedBox(
+              height: 120,
+              width: 120,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Sparkles (using Positioned dots/icons)
+                  Positioned(top: 15, left: 15, child: Transform.rotate(angle: -0.5, child: const Icon(Icons.horizontal_rule, size: 14, color: Color(0xFF22C55E)))),
+                  Positioned(top: 25, right: 20, child: const Icon(Icons.star, size: 12, color: Color(0xFFF59E0B))),
+                  Positioned(bottom: 25, left: 15, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFF87171), shape: BoxShape.circle))),
+                  Positioned(bottom: 35, right: 10, child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFFC084FC), shape: BoxShape.circle))),
+                  Positioned(top: 45, right: 5, child: Container(width: 10, height: 10, decoration: const BoxDecoration(color: Color(0xFF3B82F6), shape: BoxShape.circle))),
+                  
+                  // Main circle
+                  Container(
+                    width: 80, height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withOpacity(0.15),
+                          blurRadius: 24,
+                          spreadRadius: 8,
+                        ),
+                      ],
+                    ),
+                    child: Container(
+                      margin: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEFF6FF), // very light blue
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.qr_code_2_rounded,
+                        color: Color(0xFF2563EB),
+                        size: 40,
+                      ),
+                    ),
+                  ),
+                  
+                  // Green check badge
+                  Positioned(
+                    bottom: 12,
+                    right: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF22C55E),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 3),
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 18,
+                        weight: 800,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             const Text(
               'QR Scanned!',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: _kNavy,
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1E3A8A),
               ),
             ),
             const SizedBox(height: 8),
@@ -197,19 +250,62 @@ class _QRScannerPageState extends State<QRScannerPage>
               'Lunch recorded successfully\nfor $employeeName ($employeeIdDisplay)',
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: 13.5,
-                color: Color(0xFF5A7CC9),
+                fontSize: 14,
+                color: Color(0xFF64748B),
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 16),
-            if (items.isNotEmpty) ...[
-              const Text("Items to serve:", style: TextStyle(fontWeight: FontWeight.bold, color: _kNavy)),
-              const SizedBox(height: 8),
-              ...items.map((item) => Text("• ${item['quantity']}x ${item['name']}", style: const TextStyle(color: _kNavy))),
-            ] else
-              const Text("1x Food Lunch", style: TextStyle(fontWeight: FontWeight.bold, color: _kNavy)),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+            
+            // Recorded Meal Card
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF3B82F6),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.restaurant, color: Colors.white, size: 20),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Recorded Meal",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          items.isNotEmpty ? "${items[0]['quantity']}x ${items[0]['name']}" : "1x Food Lunch",
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+            
+            // Scan Next Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -219,19 +315,29 @@ class _QRScannerPageState extends State<QRScannerPage>
                   _scanCtrl.repeat();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _kAccent,
+                  backgroundColor: const Color(0xFF2563EB),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
                 ),
-                child: const Text(
-                  'Scan Next',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.qr_code_scanner, color: Colors.white, size: 18),
+                    SizedBox(width: 10),
+                    Text(
+                      'Scan Next',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                  ],
                 ),
               ),
             ),

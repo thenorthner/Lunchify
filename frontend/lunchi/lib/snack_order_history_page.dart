@@ -109,6 +109,7 @@ class _SnackOrderHistoryPageState extends State<SnackOrderHistoryPage> {
         selected: isSelected,
         selectedColor: const Color(0xFF1A3A8F), // kPrimaryBlue
         backgroundColor: Colors.white,
+        checkmarkColor: Colors.white,
         side: BorderSide(
           color: isSelected ? const Color(0xFF1A3A8F) : const Color(0xFFDCE8F5), // kBorder
         ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lunchi/network/http_wrapper.dart' as http;
+import 'package:lunchi/widgets/info_shield_dialog.dart';
 
 import 'otp_verification_page.dart';
 import 'login_page.dart';
@@ -103,7 +104,24 @@ class _SignupPageState extends State<SignupPage>
       }
 
       if (decoded['eligible'] == false) {
-        _show(decoded['message'] ?? 'Unable to proceed with registration');
+        if (decoded['message'] == 'Already registered') {
+          showDialog(
+            context: context,
+            builder: (_) => InfoShieldDialog(
+              title: "Employee Already Registered!",
+              message: "The employee ID $empId is already linked to a registered account. Please log in to continue.",
+              buttonText: 'Log In Now',
+              icon: Icons.shield,
+              onPressed: () {
+                Navigator.pop(context); // Close dialog
+                // Optional: navigate to login, but they are already on a screen with a login button, or pop to login.
+                // Assuming they might want to just close the dialog.
+              },
+            ),
+          );
+        } else {
+          _show(decoded['message'] ?? 'Unable to proceed with registration');
+        }
         _clearEmployee();
         return;
       }

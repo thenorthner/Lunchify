@@ -55,13 +55,150 @@ class _LoginPageState extends State<LoginPage>
     super.dispose();
   }
 
-  void _showError(String message) {
+  void _showError(String msg) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: kRed,
-        duration: const Duration(seconds: 4),
+        content: Text(msg),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showAccountNotFoundDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with red shield
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Little red burst lines
+                  Positioned(top: 25, left: 40, child: Transform.rotate(angle: -0.5, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  Positioned(top: 40, left: 30, child: Transform.rotate(angle: -1.0, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  Positioned(top: 55, left: 40, child: Transform.rotate(angle: -1.5, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  
+                  Positioned(top: 25, right: 40, child: Transform.rotate(angle: 0.5, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  Positioned(top: 40, right: 30, child: Transform.rotate(angle: 1.0, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  Positioned(top: 55, right: 40, child: Transform.rotate(angle: 1.5, child: Container(width: 2, height: 8, color: const Color(0xFFF87171)))),
+                  
+                  // Main circle
+                  Container(
+                    width: 80, height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFFEE2E2).withOpacity(0.8),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 56, height: 56,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFF87171), // Red shield color
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.gpp_bad_rounded,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Account Not Found',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1E3A8A), // kNavy
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'This account is not registered\nwith Lunchify.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: Color(0xFF64748B),
+                height: 1.4,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Please sign up first to continue.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                color: Color(0xFF1E293B),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 28),
+            // Go to Sign Up Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
+                ),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const SignupPage()));
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      'Go to Sign Up',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // Cancel button
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: TextButton.styleFrom(
+                foregroundColor: const Color(0xFF64748B),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -148,7 +285,12 @@ class _LoginPageState extends State<LoginPage>
         final msg = (data is Map)
             ? (data['message'] ?? data['error'] ?? 'Login failed').toString()
             : 'Login failed (non-JSON response)';
-        _showError(msg);
+        
+        if (msg.toLowerCase().contains('not registered')) {
+          _showAccountNotFoundDialog();
+        } else {
+          _showError(msg);
+        }
       }
     } on SocketException catch (e) {
       _showError("SocketException: ${e.message}");

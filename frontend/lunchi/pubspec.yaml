@@ -26,7 +26,6 @@ dependencies:
   path_provider: ^2.1.4
   flutter_secure_storage: ^10.3.1
   flutter_jailbreak_detection: ^1.10.0
-  google_fonts: 6.2.1
 
 
 dev_dependencies:
@@ -60,6 +59,8 @@ flutter:
     - assets/images/sjvn_scene.png
     - assets/images/sjvn_bg.png
     - assets/images/food_tray_bg.png
+    - assets/images/floating_icons_1.png
+    - assets/images/floating_icons_2.png
     - assets/images/logo.png
     - assets/images/w_logo.png
     - assets/audio/applepay.mp3

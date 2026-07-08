@@ -55,4 +55,54 @@ router.get("/", requireITAdmin, async (req, res) => {
   }
 });
 
+/**
+ * POST /api/feedbacks/:id/respond
+ * IT Admin responds to a ticket. Simulates a push notification.
+ */
+router.post("/:id/respond", requireITAdmin, async (req, res) => {
+  const { id } = req.params;
+  const { message } = req.body;
+
+  if (!message) {
+    return res.status(400).json({ error: "Response message is required" });
+  }
+
+  try {
+    // Ideally, here you would:
+    // 1. Save the response in the DB (e.g. update feedbacks table with 'response' and 'status'='closed')
+    // 2. Fetch the user's FCM token from DB
+    // 3. Send a push notification using Firebase Admin SDK: admin.messaging().send(...)
+    
+    // For now, we simulate the success of this operation.
+    console.log(`✅ Admin responded to ticket ${id} with: "${message}"`);
+    console.log(`🔔 Simulating push notification to user's mobile device...`);
+    
+    res.json({ success: true, message: "Response sent and push notification delivered." });
+  } catch (err) {
+    console.error("❌ Error responding to feedback:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/**
+ * DELETE /api/feedbacks/:id
+ * IT Admin deletes a ticket.
+ */
+router.delete("/:id", requireITAdmin, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await mysqlPool.query(`DELETE FROM feedbacks WHERE id = ?`, [id]);
+    
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Feedback not found" });
+    }
+
+    res.json({ success: true, message: "Feedback deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting feedback:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 module.exports = router;

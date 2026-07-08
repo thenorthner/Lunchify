@@ -91,11 +91,21 @@ router.post('/', async (req, res) => {
     if (!Array.isArray(parsed)) throw new Error('Invalid items format');
 
     return parsed.reduce((sum, item) => {
-      const catalogItem = SNACKS_CATALOG.find(s => s.name === item.name);
-      if (!catalogItem) throw new Error(`Unknown item: ${item.name}`);
       const qty = Number(item.qty ?? item.quantity ?? 1);
       if (!Number.isInteger(qty) || qty < 1) throw new Error('Invalid quantity');
-      return sum + catalogItem.cost * qty;
+      
+      let itemTotal = 0;
+      if (item.cost !== undefined && !isNaN(Number(item.cost))) {
+        itemTotal = Number(item.cost);
+      } else if (item.price !== undefined && !isNaN(Number(item.price))) {
+        itemTotal = Number(item.price) * qty;
+      } else {
+        const catalogItem = SNACKS_CATALOG.find(s => s.name === item.name);
+        if (!catalogItem) throw new Error(`Unknown item: ${item.name}`);
+        itemTotal = catalogItem.cost * qty;
+      }
+      
+      return sum + itemTotal;
     }, 0);
   }
 
@@ -140,10 +150,11 @@ router.post('/', async (req, res) => {
     }
 
     const [result] = await mysqlPool.query(
-      `INSERT INTO snack_orders (employee_id, room, session, items, total_amount, status, canteen_id, project_id, created_at) 
-       VALUES (?, ?, ?, ?, ?, 'accepted', ?, ?, NOW())`,
+      `INSERT INTO snack_orders (employee_id, name, date, room, session, items, total_amount, status, canteen_id, project_id, created_at) 
+       VALUES (?, ?, CURDATE(), ?, ?, ?, ?, 'accepted', ?, ?, NOW())`,
       [
         employee_id,
+        req.user.name,
         roomVal,
         sessionVal,
         typeof items === 'string' ? items : JSON.stringify(items),

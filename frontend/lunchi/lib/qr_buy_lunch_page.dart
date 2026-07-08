@@ -55,10 +55,12 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
       
       final xFile = XFile(file.path);
 
+      final RenderBox? box = context.findRenderObject() as RenderBox?;
       await Share.shareXFiles(
         [xFile],
         text:
             '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+        sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
       );
     } catch (e) {
       if (mounted) {
@@ -361,7 +363,7 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
         builder: (_) => SuccessDialog(
           title: "Success",
           message: "A Wise Choice Was Made 🦉.\nFood Secured 🔥",
-          buttonText: "Naturally 😉",
+          buttonText: "Naturally😏",
         ),
       );
     }
@@ -389,58 +391,129 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
     return showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.all(24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
-                shape: BoxShape.circle,
+            // Header with sparkles and glowing check
+            SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Faint clouds background
+                  Positioned(left: -20, bottom: 0, child: Icon(Icons.cloud, color: Colors.blue.withOpacity(0.04), size: 80)),
+                  Positioned(right: -20, bottom: 10, child: Icon(Icons.cloud, color: Colors.blue.withOpacity(0.04), size: 60)),
+                  
+                  // Sparkles (using Positioned dots/icons)
+                  Positioned(top: 15, left: 30, child: const Icon(Icons.star, size: 12, color: Color(0xFFF59E0B))),
+                  Positioned(top: 25, right: 30, child: Transform.rotate(angle: 0.5, child: const Icon(Icons.horizontal_rule, size: 14, color: Color(0xFF3B82F6)))),
+                  Positioned(bottom: 25, left: 40, child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFF22C55E), shape: BoxShape.circle))),
+                  Positioned(bottom: 35, right: 40, child: Container(width: 8, height: 8, decoration: const BoxDecoration(color: Color(0xFFF87171), shape: BoxShape.circle))),
+                  Positioned(top: 50, left: 50, child: Container(width: 6, height: 6, decoration: const BoxDecoration(color: Color(0xFFC084FC), shape: BoxShape.circle))),
+                  
+                  // Main glowing circle
+                  Container(
+                    width: 90, height: 90,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFDCFCE7).withOpacity(0.4),
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 64, height: 64,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF22C55E),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(color: Color(0x5522C55E), blurRadius: 16, spreadRadius: 4)
+                          ]
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 42,
+                          weight: 800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: const Icon(
-                Icons.check_circle_rounded,
-                color: Colors.green,
-                size: 60,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Lunch Purchased\nSuccessfully! 🎉',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF1E3A8A), // kNavy equivalent
+                height: 1.3,
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
-              'Lunch Purchased Successfully! 🎉',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: kNavy,
-              ),
+            
+            // Divider with verified badge
+            Row(
+              children: [
+                Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 12),
+                  child: const Icon(Icons.verified, size: 22, color: Color(0xFF2563EB)),
+                ),
+                Expanded(child: Container(height: 1.5, color: const Color(0xFFE2E8F0))),
+              ],
             ),
-            const SizedBox(height: 10),
+            
+            const SizedBox(height: 20),
             const Text(
-              'Enjoy your meal! Your lunch coupon has been verified and redeemed.',
+              'Enjoy your meal!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: kSubtext, height: 1.4),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF475569)),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 6),
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(fontSize: 14, color: Color(0xFF64748B), height: 1.5, fontFamily: 'PlusJakartaSans'),
+                children: [
+                  TextSpan(text: 'Your lunch coupon has been\n'),
+                  TextSpan(text: 'verified and redeemed.', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                ]
+              )
+            ),
+            const SizedBox(height: 28),
+            
+            // Great Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: kAccentBlue,
+                  backgroundColor: const Color(0xFF2563EB),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 0,
                 ),
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
-                  'Great!',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      'Great!',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                  ],
                 ),
               ),
             ),

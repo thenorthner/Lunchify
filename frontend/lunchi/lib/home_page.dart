@@ -17,6 +17,7 @@ import 'app_theme.dart'; // <-- added import
 import 'snack_hub_page.dart';
 import 'support_ratings_hub.dart';
 import 'share_coupons_page.dart';
+import 'widgets/info_shield_dialog.dart';
 
 class LunchifyHomePage extends StatefulWidget {
   final String employeeName;
@@ -117,7 +118,7 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
     ),
     _HomeMenuItem(
       icon: Icons.qr_code_2_rounded,
-      title: "Redeem Coupon & Show QR",
+      title: "Ready . Set . Lunch",
       subtitle: "Redeem your coupon & show QR at canteen",
       onTap: () async {
         await Navigator.push(
@@ -141,59 +142,12 @@ class _LunchifyHomePageState extends State<LunchifyHomePage> {
         if (!(AuthService.user?['is_gm_or_above'] == true)) {
           showDialog(
             context: context,
-            builder: (_) => AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
-              title: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(Icons.lock_rounded, color: Colors.redAccent, size: 24),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Text(
-                      "This ain't for everyone!",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800, 
-                        fontSize: 18, 
-                        color: Color(0xFF1A3A8F), // kPrimaryBlue
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              content: const Text(
-                "This lunch/snacks order feature is only for the big boss gang (GM & above) 🗿. Meanwhile, the rest of us gotta hit the canteen.",
-                style: TextStyle(fontSize: 15, color: Colors.black87, height: 1.5),
-              ),
-              actions: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A3A8F), // kPrimaryBlue
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Got it, Chief ✌️',
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 15),
-                    ),
-                  ),
-                ),
-              ],
+            builder: (_) => InfoShieldDialog(
+              title: "This ain't for everyone!",
+              message: "This lunch/snacks order feature is only for the big boss gang (GM & above) 🗿. Meanwhile, the rest of us gotta hit the canteen. 😄",
+              buttonText: '😎 Got it, Chief ✌️',
+              icon: Icons.lock,
+              onPressed: () => Navigator.pop(context),
             ),
           );
           return;
@@ -388,20 +342,7 @@ class _WelcomeCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: const BoxDecoration(
-              color: kLightBlue,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.person_outline_rounded,
-              color: kPrimaryBlue,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
+
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

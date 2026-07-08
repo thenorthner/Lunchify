@@ -61,6 +61,25 @@ router.post('/daily-items', async (req, res) => {
   }
 });
 
+// GET /api/item-feedbacks/check-today
+// Check if current user has already submitted feedback for a specific date
+router.get('/check-today', async (req, res) => {
+  try {
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ error: 'Date is required' });
+    }
+    const [rows] = await mysqlPool.query(
+      "SELECT id FROM daily_item_feedbacks WHERE employee_id = ? AND date = ? LIMIT 1",
+      [req.user.id, date]
+    );
+    res.json({ has_rated: rows.length > 0 });
+  } catch (error) {
+    console.error('Error checking feedback status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /api/feedback/daily-items?date=YYYY-MM-DD&canteen_id=1
 // Fetch aggregated ratings for Admin Portal
 router.get('/daily-items', async (req, res) => {

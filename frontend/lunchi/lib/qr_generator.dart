@@ -41,9 +41,11 @@ class _QrGeneratorPageState extends State<QrGeneratorPage> {
       final file = File('${tempDir.path}/lunchify_qr_generator.png');
       await file.writeAsBytes(pngBytes);
 
+      final RenderBox? box = context.findRenderObject() as RenderBox?;
       await Share.shareXFiles(
         [XFile(file.path)],
         text: '${AuthService.name} (${AuthService.employeeId}) Shared a Lunchify QR Dated: ${DateFormat('dd MMM yyyy').format(DateTime.now())}',
+        sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
       );
     } catch (e) {
       if (mounted) {
