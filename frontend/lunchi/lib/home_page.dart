@@ -354,18 +354,16 @@ class _WelcomeCard extends StatelessWidget {
                         text: "Let's Feast, ",
                         style: TextStyle(
                           fontSize: 22,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                           color: kPrimaryBlue,
-                          fontFamily: 'FKGrotesk',
                         ),
                       ),
                       TextSpan(
-                        text: employeeName.split(' ').first,
+                        text: '${employeeName.split(' ').first} \n',
                         style: const TextStyle(
-                          fontSize: 22,
+                          fontSize: 26,
                           fontWeight: FontWeight.w800,
-                          color: kAccentBlue,
-                          fontFamily: 'FKGrotesk',
+                          color: kNavy,
                         ),
                       ),
                     ],

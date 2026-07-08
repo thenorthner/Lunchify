@@ -175,19 +175,17 @@ class _IntroPageState extends State<IntroPage>
                       ],
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Text elements
-                  const Text(
-                    "LUNCHIFY",
-                    style: TextStyle(
-                      fontSize: 42,
-                      fontWeight: FontWeight.w900,
-                      color: Color(0xFF1E3A8A), // Dark blue
-                      letterSpacing: 2,
+                    const SizedBox(height: 32),
+                    const Text(
+                      "LUNCHIFY",
+                      style: TextStyle(
+                        fontFamily: 'PlayfairDisplay',
+                        fontSize: 42,
+                        fontWeight: FontWeight.w800,
+                        color: kNavy,
+                        letterSpacing: 3,
+                      ),
                     ),
-                  ),
                   
                   const SizedBox(height: 8),
                   
