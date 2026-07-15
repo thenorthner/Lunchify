@@ -7,7 +7,7 @@ export default function MenuPage() {
   const date = new Date().toISOString().split("T")[0];
 
   const saveMenu = async () => {
-    await fetch("http://localhost:3001/api/menu/update", {
+    await fetch("/api/menu/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

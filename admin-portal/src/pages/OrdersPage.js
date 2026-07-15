@@ -9,7 +9,7 @@ export default function OrdersPage() {
   }, []);
 
   const loadOrders = async () => {
-    const res = await fetch("http://localhost:3001/api/orders");
+    const res = await fetch("/api/orders");
     const data = await res.json();
     setOrders(data);
   };

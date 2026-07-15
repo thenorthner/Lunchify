@@ -162,7 +162,7 @@ class _SnackOrderPageState extends State<SnackOrderPage> {
                 Text(
                   'Total: ₹$totalAmount',
                   style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold),
+                      fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
                   onPressed: placeOrder,

@@ -236,7 +236,7 @@ class _AdminScanHistoryPageState extends State<AdminScanHistoryPage> {
                                       children: [
                                         Text(
                                           log['employee_name'] ?? 'Unknown Employee',
-                                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: kNavy),
+                                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: kNavy),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -257,7 +257,7 @@ class _AdminScanHistoryPageState extends State<AdminScanHistoryPage> {
                                         ),
                                         child: Text(
                                           log['type']?.toString().toUpperCase() ?? 'LUNCH',
-                                          style: const TextStyle(color: Colors.green, fontSize: 10, fontWeight: FontWeight.bold),
+                                          style: const TextStyle(color: Colors.green, fontSize: 12, fontWeight: FontWeight.bold),
                                         ),
                                       ),
                                       const SizedBox(height: 8),

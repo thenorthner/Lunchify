@@ -1,10 +1,13 @@
 import 'package:flutter/foundation.dart';
 
 class AppConfig {
-  static const String apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://172.16.18.60:3001',
-  );
+  static String _resolveApiBaseUrl() {
+    const fromEnv = String.fromEnvironment('API_BASE_URL');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    return 'http://192.168.137.35:3001';
+  }
+
+  static String apiBaseUrl = _resolveApiBaseUrl();
 
   // ---------- AUTH ----------
   static String get login => '$apiBaseUrl/api/auth/login';

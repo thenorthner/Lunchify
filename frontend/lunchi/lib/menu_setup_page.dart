@@ -103,7 +103,7 @@ class _MenuSetupPageState extends State<MenuSetupPage> {
               child: ListView(
                 children: [
                   const Text("🍱 Add Food Items",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -137,7 +137,7 @@ class _MenuSetupPageState extends State<MenuSetupPage> {
 
                   const SizedBox(height: 30),
                   const Text("🍓 Add Fruit Items",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Row(
                     children: [

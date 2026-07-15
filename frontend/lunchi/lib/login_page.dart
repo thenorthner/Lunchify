@@ -299,7 +299,15 @@ class _LoginPageState extends State<LoginPage>
     } on HttpException catch (e) {
       _showError("HttpException: $e");
     } catch (e) {
-      _showError("Error: $e");
+      final message = e.toString();
+      if (message.contains('Failed to fetch') || message.contains('ClientException')) {
+        _showError(
+          "Cannot reach server at ${AppConfig.apiBaseUrl}. "
+          "Make sure the backend is running (cd express-backend && npm start).",
+        );
+      } else {
+        _showError("Error: $e");
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }

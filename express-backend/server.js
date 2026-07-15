@@ -24,7 +24,12 @@ app.use(helmet());
 const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000', 'http://172.16.16.210:3000'];
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+    if (
+      !origin ||
+      allowedOrigins.indexOf(origin) !== -1 ||
+      origin.startsWith('http://localhost:') ||
+      origin.startsWith('http://127.0.0.1:')
+    ) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -36,7 +41,6 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use((req, res, next) => { console.log(`[REQUEST] ${req.method} ${req.url}`); next(); });
-
 const rateLimit = require('express-rate-limit');
 
 /* ===== GLOBAL RATE LIMIT ===== */
@@ -82,6 +86,7 @@ const feedbackRoutes = require('./routes/feedback.routes.js');
 const couponRoutes = require('./routes/coupon.routes.js');
 const itemFeedbackRoutes = require('./routes/item_feedback.routes.js');
 const canteenRoutes = require('./routes/canteen.routes.js');
+const inspectRoutes = require('./routes/inspect.routes.js');
 
 /* ===== USE ROUTES ===== */
 app.use('/api/auth', loginRoutes);
@@ -101,10 +106,21 @@ app.use('/api/coupons', couponRoutes);
 app.use('/api/item-feedbacks', itemFeedbackRoutes);
 app.use('/api/snack-catalog', snackRoutes);
 app.use('/api/canteens', canteenRoutes);
+app.use('/api/inspect', inspectRoutes);
 
 /* ===== HEALTH CHECK ===== */
-app.get('/', (req, res) => {
+app.get('/health', (req, res) => {
   res.send('✅ Lunchify backend running');
+});
+
+/* ===== SERVE ADMIN PORTAL ===== */
+const path = require('path');
+const adminPortalPath = path.join(__dirname, '../admin-portal/build');
+app.use(express.static(adminPortalPath));
+
+// Fallback all other routes to React router
+app.get('/{*splat}', (req, res) => {
+  res.sendFile(path.join(adminPortalPath, 'index.html'));
 });
 
 /* ===== GLOBAL ERROR HANDLER ===== */
@@ -117,10 +133,30 @@ app.use((err, req, res, next) => {
   res.status(status).json({ success: false, message });
 });
 
+/* ===== UDP AUTO-DISCOVERY SERVER ===== */
+const dgram = require('dgram');
+const udpServer = dgram.createSocket('udp4');
+udpServer.on('message', (msg, rinfo) => {
+  if (msg.toString() === 'DISCOVER_LUNCHIFY_SERVER') {
+    udpServer.send(`LUNCHIFY_SERVER:${PORT}`, rinfo.port, rinfo.address);
+  }
+});
+udpServer.bind(4000, '0.0.0.0', () => {
+  console.log('📡 UDP Auto-Discovery listening on port 4000');
+});
+
 /* ===== SERVER ===== */
 const PORT = 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log('🚀 Server running');
   console.log(`👉 Local:   http://localhost:${PORT}`);
-  console.log(`👉 Network: http://172.16.19.193:${PORT}`);
+  const os = require('os');
+  const nets = os.networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) {
+        console.log(`👉 Network: http://${net.address}:${PORT}`);
+      }
+    }
+  }
 });

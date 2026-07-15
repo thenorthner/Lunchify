@@ -472,16 +472,16 @@ class _BuyLunchQrPageState extends State<BuyLunchQrPage>
             const Text(
               'Enjoy your meal!',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF475569)),
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF475569)),
             ),
             const SizedBox(height: 6),
             RichText(
               textAlign: TextAlign.center,
               text: const TextSpan(
-                style: TextStyle(fontSize: 14, color: Color(0xFF64748B), height: 1.5, fontFamily: 'PlusJakartaSans'),
+                style: TextStyle(fontFamily: 'Typewriter', fontSize: 14, color: Color(0xFF64748B), height: 1.5),
                 children: [
                   TextSpan(text: 'Your lunch coupon has been\n'),
-                  TextSpan(text: 'verified and redeemed.', style: TextStyle(color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                  TextSpan(text: 'verified and redeemed.', style: TextStyle(fontFamily: 'Typewriter', color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                 ]
               )
             ),
@@ -828,7 +828,7 @@ class _TopBar extends StatelessWidget {
             child: Image.asset(
               'assets/images/food_tray_bg.png',
               fit: BoxFit.cover,
-              alignment: Alignment.centerRight,
+              alignment: Alignment.bottomRight,
               errorBuilder: (_, __, ___) =>
                   Container(color: const Color(0xFFD0DCF0)),
             ),

@@ -24,10 +24,10 @@ class _IntroPageState extends State<IntroPage>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+    _fadeAnimation = Tween<double>(begin: 1, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
     _floatAnimation = Tween<double>(begin: 0, end: 1).animate(
@@ -95,12 +95,10 @@ class _IntroPageState extends State<IntroPage>
             child: _buildCloud(opacity: 0.4, scale: 1.0),
           ),
 
-          // Main content in FadeTransition
+          // Main content
           SafeArea(
             bottom: false,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
+            child: Column(
                 children: [
                   const SizedBox(height: 60),
                   
@@ -179,7 +177,7 @@ class _IntroPageState extends State<IntroPage>
                     const Text(
                       "LUNCHIFY",
                       style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
+
                         fontSize: 42,
                         fontWeight: FontWeight.w800,
                         color: kNavy,
@@ -234,45 +232,35 @@ class _IntroPageState extends State<IntroPage>
                   
                   const Spacer(),
                 ],
-              ),
             ),
           ),
-          
-          // 3D Food Tray with ShaderMask to blend top edge smoothly
+
+          // 3D food tray splash image at bottom
           Positioned(
             left: 0,
             right: 0,
             bottom: 0,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ShaderMask(
-                shaderCallback: (rect) {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black, Colors.black],
-                    stops: [0.0, 0.25, 1.0], // Fade out the top 25% to blend with background
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
-                child: Image.asset(
+            child: SizedBox(
+              height: 300,
+              child: Image.asset(
+                'assets/images/splashscreen.png',
+                fit: BoxFit.contain,
+                alignment: Alignment.bottomCenter,
+                errorBuilder: (_, __, ___) => Image.asset(
                   'assets/images/food_tray_bg.png',
                   fit: BoxFit.fitWidth,
-                  width: double.infinity,
-                  errorBuilder: (_, __, ___) => const SizedBox(height: 200),
+                  alignment: Alignment.bottomCenter,
                 ),
               ),
             ),
           ),
-          
+
           // Footer Pill & Dots
           Positioned(
             left: 0,
             right: 0,
             bottom: 40,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
+            child: Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
@@ -315,7 +303,6 @@ class _IntroPageState extends State<IntroPage>
                     ),
                   ),
                 ],
-              ),
             ),
           ),
         ],

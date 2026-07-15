@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'app_theme.dart';
 import 'intro_page.dart';
@@ -8,23 +9,36 @@ import 'auth_service.dart';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_jailbreak_detection/flutter_jailbreak_detection.dart';
+import 'network_discovery.dart';
+import 'config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   bool jailbroken = false;
-  try {
-    jailbroken = await FlutterJailbreakDetection.jailbroken;
-    // In strict enterprise apps, block execution if compromised
-    if (jailbroken) {
-      print('WARNING: Device appears to be jailbroken/rooted!');
-      // Commented out to prevent instant crash during development
-      // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+  if (!kIsWeb) {
+    try {
+      jailbroken = await FlutterJailbreakDetection.jailbroken;
+      if (jailbroken) {
+        print('WARNING: Device appears to be jailbroken/rooted!');
+      }
+    } catch (e) {
+      print('Jailbreak detection error: $e');
+      jailbroken = false;
     }
-  } catch (e) {
-    print('Jailbreak detection error: $e');
-    // Don't assume jailbroken on exception during debug
-    jailbroken = false; 
+  }
+
+  if (!kIsWeb) {
+    print('📡 Searching for Lunchify backend server...');
+    String? discoveredUrl = await NetworkDiscovery.discoverServer();
+    if (discoveredUrl != null) {
+      print('✅ Discovered Backend Server at: $discoveredUrl');
+      AppConfig.apiBaseUrl = 'http://$discoveredUrl';
+    } else {
+      print('⚠️ Discovery timed out, using fallback IP: ${AppConfig.apiBaseUrl}');
+    }
+  } else {
+    print('🌐 Web mode — API base URL: ${AppConfig.apiBaseUrl}');
   }
 
   await AuthService.init();
@@ -41,7 +55,7 @@ class LunchifyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        fontFamily: 'Roboto',
+        fontFamily: 'Typewriter',
         scaffoldBackgroundColor: kBgColor,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(

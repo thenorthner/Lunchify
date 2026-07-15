@@ -417,7 +417,7 @@ class _AdminOrdersPageState extends State<AdminOrdersPage> with SingleTickerProv
                 labelColor: const Color(0xFF1A3A8F),
                 unselectedLabelColor: const Color(0xFF8A96A8),
                 indicatorColor: const Color(0xFF1A3A8F),
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 indicatorWeight: 3,
                 tabs: const [

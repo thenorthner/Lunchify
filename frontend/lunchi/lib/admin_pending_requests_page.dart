@@ -270,7 +270,7 @@ class _AdminPendingRequestsPageState extends State<AdminPendingRequestsPage> {
                 padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
                 child: Text(
                   'Fruit Lunch Orders',
-                  style: TextStyle(color: Color(0xFF1A2E6E), fontWeight: FontWeight.w800, fontSize: 20),
+                  style: TextStyle(color: Color(0xFF1A2E6E), fontWeight: FontWeight.w800, fontSize: 22),
                 ),
               ),
             ...fruitRequests.map((o) => _buildCard(o, 'fruit')),
@@ -279,7 +279,7 @@ class _AdminPendingRequestsPageState extends State<AdminPendingRequestsPage> {
                 padding: EdgeInsets.fromLTRB(16, 32, 16, 8),
                 child: Text(
                   'Food Lunch Orders',
-                  style: TextStyle(color: Color(0xFF1A2E6E), fontWeight: FontWeight.w800, fontSize: 20),
+                  style: TextStyle(color: Color(0xFF1A2E6E), fontWeight: FontWeight.w800, fontSize: 22),
                 ),
               ),
               ...foodRequests.map((o) => _buildCard(o, 'food')),

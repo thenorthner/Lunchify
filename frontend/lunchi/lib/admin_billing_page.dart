@@ -140,7 +140,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
               children: [
                 const Text(
                   'Canteen Billing',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 const Text(
@@ -161,7 +161,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Billing Month:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      Text(selectedMonth, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.blue)),
+                      Text(selectedMonth, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue)),
                     ],
                   ),
                 ),
@@ -179,7 +179,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text('Total Coupons Scanned:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      Text('\$totalCouponsScanned', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.green)),
+                      Text('\$totalCouponsScanned', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.green)),
                     ],
                   ),
                 ),
@@ -207,7 +207,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
                       const SizedBox(height: 8),
                       Text(
                         '₹ ${totalAmount.toStringAsFixed(2)}',
-                        style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.deepPurple),
+                        style: const TextStyle(fontSize: 38, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                       ),
                     ],
                   ),
@@ -228,7 +228,7 @@ class _AdminBillingPageState extends State<AdminBillingPage> {
                     ),
                     child: const Text(
                       'Submit Bill to HR',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                   ),
                 ),

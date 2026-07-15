@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import PageHeader from "./PageHeader";
 import { CircularProgress } from "@mui/material";
@@ -43,7 +44,7 @@ const Row = ({ icon: Icon, label, value, mono, status }) => (
   </div>
 );
 
-const ProjectCard = ({ p, onDelete }) => (
+const ProjectCard = ({ p, onDelete, onInspect }) => (
   <div className="atelier" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, borderRadius: '12px' }}>
     {/* Navy header */}
     <div
@@ -149,6 +150,7 @@ const ProjectCard = ({ p, onDelete }) => (
       )}
 
       <button
+        onClick={() => onInspect(p.canteen_id)}
         style={{
           marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
           padding: '10px 16px', borderRadius: '10px', fontSize: '13px', 
@@ -174,6 +176,8 @@ export default function CanteenProjectsPanel({ user = {} }) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ project_name: "", state: "", canteen_name: "", location: "", open_time: "07:00:00", close_time: "22:00:00" });
   const [q, setQ] = useState("");
+
+  const navigate = useNavigate();
 
   const fetchMappings = async () => {
     setLoading(true);
@@ -333,7 +337,7 @@ export default function CanteenProjectsPanel({ user = {} }) {
         </div>
       ) : (
         <div className="projects-grid">
-          {list.map((p) => <ProjectCard key={p.project_id} p={p} onDelete={handleDeleteProject} />)}
+          {list.map((p) => <ProjectCard key={p.project_id} p={p} onDelete={handleDeleteProject} onInspect={(id) => navigate(`/canteen/${id}`)} />)}
         </div>
       )}
 
