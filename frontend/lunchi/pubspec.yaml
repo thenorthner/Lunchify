@@ -84,9 +84,9 @@ flutter:
     - family: Typewriter
       fonts:
         - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter.ttf
-        - asset: assets/fonts/EBGaramond/EBGaramond-Italic-VariableFont_wght.ttf
+        - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter-bold.ttf
           weight: 700
-        - asset: assets/fonts/EBGaramond/EBGaramond-Italic-VariableFont_wght.ttf
+        - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter-bold.ttf
           weight: 800
         - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter-light.ttf
           weight: 300
