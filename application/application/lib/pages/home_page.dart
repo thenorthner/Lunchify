@@ -148,85 +148,179 @@ class _Header extends StatelessWidget {
 }
 
 // ─── Welcome Card ─────────────────────────────────────────────────────────────
-class _WelcomeCard extends StatelessWidget {
+class _WelcomeCard extends StatefulWidget {
   const _WelcomeCard();
 
   @override
+  State<_WelcomeCard> createState() => _WelcomeCardState();
+}
+
+class _WelcomeCardState extends State<_WelcomeCard> {
+  @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final dateStr = '${weekdays[now.weekday - 1]}, ${now.day} ${months[now.month - 1]} ${now.year}';
+    final hourStr = now.hour > 12 ? (now.hour - 12).toString() : (now.hour == 0 ? '12' : now.hour.toString());
+    final ampm = now.hour >= 12 ? 'PM' : 'AM';
+    final minuteStr = now.minute.toString().padLeft(2, '0');
+    final timeStr = '$hourStr:$minuteStr $ampm';
+
+    // Determine greeting based on hour
+    String greeting = 'Good morning,';
+    if (now.hour >= 12 && now.hour < 17) {
+      greeting = 'Good afternoon,';
+    } else if (now.hour >= 17) {
+      greeting = 'Good evening,';
+    }
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
       decoration: BoxDecoration(
-        color: kCardWhite,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: kPrimaryBlue.withOpacity(0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
+            color: kPrimaryBlue.withOpacity(0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Container(
-            width: 58,
-            height: 58,
-            decoration: const BoxDecoration(
-              color: kLightBlue,
-              shape: BoxShape.circle,
-            ),
-            child: Semantics(
-              hidden: true,
-              child: const Icon(Icons.person_outline_rounded, color: kPrimaryBlue, size: 32),
+          // Background Gradient
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFFF8FAFC),
+                    Colors.white,
+                  ],
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 16),
-          Expanded(
+          // Food Illustration
+          Positioned(
+            right: -10,
+            bottom: -10,
+            child: Opacity(
+              opacity: 0.95,
+              child: Image.asset(
+                'assets/images/food_tray_bg.png',
+                width: 170,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+          // App Icon / Top right button
+          Positioned(
+            top: 20,
+            right: 20,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2E8F0),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.restaurant_menu, color: kAccentBlue, size: 24),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  text: const TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Hi, ',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w700,
-                          color: kPrimaryBlue,
-                        ),
-                      ),
-                      TextSpan(
-                        text: 'User',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w800,
-                          color: kAccentBlue,
-                        ),
-                      ),
-                    ],
+                Text(
+                  greeting,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF475569),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 10),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    RichText(
+                      text: const TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Let\'s Feast, ',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                              height: 1.2,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Kshitij',
+                            style: TextStyle(
+                              fontSize: 26,
+                              fontWeight: FontWeight.w800,
+                              color: kAccentBlue,
+                              height: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Icon(Icons.flare, color: Colors.amber, size: 26),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 const Text(
-                  'Welcome to Lunchify!',
+                  'Great food boosts productivity and happiness! 😀',
                   style: TextStyle(
-                    fontSize: 14,
-                    color: kSubtext,
+                    fontSize: 13,
                     fontWeight: FontWeight.w500,
+                    color: Color(0xFF64748B),
                   ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  children: [
+                    const Icon(Icons.calendar_today_outlined, size: 16, color: Color(0xFF64748B)),
+                    const SizedBox(width: 6),
+                    Text(
+                      dateStr,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Container(
+                      width: 1,
+                      height: 12,
+                      color: const Color(0xFFCBD5E1),
+                    ),
+                    const SizedBox(width: 14),
+                    const Icon(Icons.access_time_rounded, size: 16, color: Color(0xFF64748B)),
+                    const SizedBox(width: 6),
+                    Text(
+                      timeStr,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-          Container(
-            width: 64,
-            height: 56,
-            decoration: BoxDecoration(
-              color: kLightBlue,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.dinner_dining, color: kAccentBlue, size: 36),
           ),
         ],
       ),

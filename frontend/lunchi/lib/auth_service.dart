@@ -2,11 +2,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:lunchi/network/http_wrapper.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 import 'network/secure_client.dart';
-
-const storage = FlutterSecureStorage();
 
 class AuthService {
   static String? token;
@@ -24,8 +22,9 @@ class AuthService {
   static String get employeeId => user?['id'] ?? user?['employee_id'] ?? '';
 
   static Future<void> init() async {
-    token = await storage.read(key: 'auth_token');
-    final userJson = await storage.read(key: 'auth_user');
+    final prefs = await SharedPreferences.getInstance();
+    token = prefs.getString('auth_token');
+    final userJson = prefs.getString('auth_user');
     if (userJson != null) {
       try {
         user = Map<String, dynamic>.from(jsonDecode(userJson));
@@ -38,22 +37,26 @@ class AuthService {
   static Future<void> saveSession(String newToken, Map<String, dynamic> newUser) async {
     token = newToken;
     user = newUser;
-    await storage.write(key: 'auth_token', value: newToken);
-    await storage.write(key: 'auth_user', value: jsonEncode(newUser));
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('auth_token', newToken);
+    await prefs.setString('auth_user', jsonEncode(newUser));
   }
 
   static Future<void> clearSession() async {
     token = null;
     user = null;
-    await storage.delete(key: 'auth_token');
-    await storage.delete(key: 'auth_user');
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+    await prefs.remove('auth_user');
   }
 
   static void logout() {
     token = null;
     user = null;
-    storage.delete(key: 'auth_token');
-    storage.delete(key: 'auth_user');
+    SharedPreferences.getInstance().then((prefs) {
+      prefs.remove('auth_token');
+      prefs.remove('auth_user');
+    });
   }
 
   // ✅ SAFE JSON OBJECT DECODER

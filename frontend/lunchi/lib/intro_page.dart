@@ -97,224 +97,134 @@ class _IntroPageState extends State<IntroPage>
 
           // Main content in FadeTransition
           SafeArea(
-            bottom: false,
             child: FadeTransition(
               opacity: _fadeAnimation,
-              child: Column(
-                children: [
-                  const SizedBox(height: 60),
-                  
-                  // Logo with surrounding floating icons
-                  SizedBox(
-                    height: 240,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Floating Custom Icons (Left and Right)
-                        AnimatedBuilder(
-                          animation: _floatAnimation,
-                          builder: (context, child) {
-                            final dy = math.sin(_floatAnimation.value * math.pi * 2) * 8; // 8px float up and down
-                            return Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Positioned(
-                                  left: 20,
-                                  top: 50 + dy,
-                                  child: Image.asset(
-                                    'assets/images/floating_icons_2.png',
-                                    height: 100,
-                                    errorBuilder: (_, __, ___) => const SizedBox(),
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 15,
-                                  top: 10 - dy, // moves opposite
-                                  child: Image.asset(
-                                    'assets/images/floating_icons_1.png',
-                                    height: 180,
-                                    errorBuilder: (_, __, ___) => const SizedBox(),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                        
-                        // Main Logo Circle
-                        ScaleTransition(
-                          scale: _scaleAnimation,
-                          child: Container(
-                            width: 200,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF3B82F6).withOpacity(0.15),
-                                  blurRadius: 40,
-                                  spreadRadius: 10,
-                                ),
-                                BoxShadow(
-                                  color: Colors.white.withOpacity(0.8),
-                                  blurRadius: 20,
-                                  spreadRadius: 5,
-                                ),
-                              ],
-                            ),
-                            padding: const EdgeInsets.all(28),
-                            child: Image.asset(
-                              'assets/images/lunchify_logo.png',
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(Icons.restaurant, size: 60, color: kPrimaryBlue),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                    const SizedBox(height: 32),
-                    const Text(
-                      "LUNCHIFY",
-                      style: TextStyle(
-                        fontFamily: 'PlayfairDisplay',
-                        fontSize: 42,
-                        fontWeight: FontWeight.w800,
-                        color: kNavy,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  // Divider
-                  Row(
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        width: 40,
-                        height: 1.5,
-                        color: const Color(0xFF93C5FD),
+                      // Logo with surrounding floating icons
+                      SizedBox(
+                        height: 180,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            // Floating Custom Icons (Left and Right)
+                            AnimatedBuilder(
+                              animation: _floatAnimation,
+                              builder: (context, child) {
+                                final dy = math.sin(_floatAnimation.value * math.pi * 2) * 8; // 8px float up and down
+                                return Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Positioned(
+                                      left: 20,
+                                      top: 30 + dy,
+                                      child: Image.asset(
+                                        'assets/images/floating_icons_2.png',
+                                        height: 80,
+                                        errorBuilder: (_, __, ___) => const SizedBox(),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      right: 15,
+                                      top: 10 - dy, // moves opposite
+                                      child: Image.asset(
+                                        'assets/images/floating_icons_1.png',
+                                        height: 140,
+                                        errorBuilder: (_, __, ___) => const SizedBox(),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                            
+                            // Main Logo
+                            ScaleTransition(
+                              scale: _scaleAnimation,
+                              child: Image.asset(
+                                'assets/images/lunchify_logo.png',
+                                height: 180,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.restaurant, size: 60, color: Color(0xFF2563EB)),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Icon(Icons.favorite, color: Color(0xFF3B82F6), size: 14),
+                      const SizedBox(height: 24),
+                      const Text(
+                        "LUNCHIFY",
+                        style: TextStyle(
+                          fontSize: 42,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A2E6E), // kNavy
+                          letterSpacing: 3,
+                        ),
                       ),
-                      Container(
-                        width: 40,
-                        height: 1.5,
-                        color: const Color(0xFF93C5FD),
+                      
+                      const SizedBox(height: 8),
+                      
+                      // Divider
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 1.5,
+                            color: const Color(0xFF93C5FD),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Icon(Icons.favorite, color: Color(0xFF3B82F6), size: 14),
+                          ),
+                          Container(
+                            width: 40,
+                            height: 1.5,
+                            color: const Color(0xFF93C5FD),
+                          ),
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 16),
+                      
+                      const Text(
+                        "SJVN Employee Meal Services",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "Smart meals. Happy employees. Stronger together.",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      
+                      const SizedBox(height: 40), // Reduced, consistent spacing
+                      
+                      // 3D Food Tray
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                        child: Image.asset(
+                          'assets/images/splashscreen.png',
+                          fit: BoxFit.contain,
+                          alignment: Alignment.bottomCenter,
+                          errorBuilder: (_, __, ___) => const SizedBox(height: 200),
+                        ),
                       ),
                     ],
                   ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  const Text(
-                    "SJVN Employee Meal Services",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF2563EB),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 8),
-                  
-                  const Text(
-                    "Smart meals. Happy employees. Stronger together.",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                  
-                  const Spacer(),
-                ],
-              ),
-            ),
-          ),
-          
-          // 3D Food Tray with ShaderMask to blend top edge smoothly
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ShaderMask(
-                shaderCallback: (rect) {
-                  return const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Colors.black, Colors.black],
-                    stops: [0.0, 0.25, 1.0], // Fade out the top 25% to blend with background
-                  ).createShader(rect);
-                },
-                blendMode: BlendMode.dstIn,
-                child: Image.asset(
-                  'assets/images/food_tray_bg.png',
-                  fit: BoxFit.fitWidth,
-                  width: double.infinity,
-                  errorBuilder: (_, __, ___) => const SizedBox(height: 200),
                 ),
-              ),
-            ),
-          ),
-          
-          // Footer Pill & Dots
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 40,
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.12),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Shield with lightning bolt
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              const Icon(Icons.shield, color: Color(0xFF2563EB), size: 20),
-                              const Icon(Icons.bolt_rounded, color: Colors.white, size: 14),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          "Powering better meals, every day.",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF475569),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ),
           ),

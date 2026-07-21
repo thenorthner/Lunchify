@@ -267,45 +267,44 @@ class _SignupPageState extends State<SignupPage>
                       child: Column(
                         children: [
 
-                          // -- Lunchify Logo -------------------------------
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: Image.asset(
-                              'assets/images/lunchify_logo.png',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.lunch_dining,
-                                color: _kAccent,
-                                size: 48,
-                              ),
-                            ),
+                          // -- Illustration --------------------------------
+                          Image.asset(
+                            'assets/images/createaccount.png',
+                            height: 120,
+                            fit: BoxFit.contain,
                           ),
 
                           const SizedBox(height: 16),
 
                           // -- Title -------------------------------------
-                          const Text(
-                            'Create Your Account',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: _kNavy,
-                              letterSpacing: -0.3,
+                          RichText(
+                            text: const TextSpan(
+                              style: TextStyle(
+                                fontSize: 25,
+                                fontWeight: FontWeight.w800,
+                                color: _kNavy,
+                                letterSpacing: -0.3,
+                                fontFamily: 'Typewriter',
+                              ),
+                              children: [
+                                TextSpan(text: 'Create Your '),
+                                TextSpan(
+                                  text: 'Account',
+                                  style: TextStyle(color: _kAccent),
+                                ),
+                              ],
                             ),
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
 
                           const Text(
                             'Fill in your details to get started',
                             style: TextStyle(
-                              fontSize: 13.5,
+                              fontSize: 14.5,
                               color: _kSubtext,
+                              fontFamily: 'Typewriter',
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
 
@@ -398,15 +397,37 @@ class _SignupPageState extends State<SignupPage>
 
                           const SizedBox(height: 24),
 
-                          // -- Verify Phone & Continue button ------------
+                          // -- Create Account button ------------
                           _PrimaryButton(
                             loading: _loading,
-                            label: 'Verify Phone & Continue',
+                            label: 'Create Account',
                             icon: Icons.verified_user_rounded,
                             onTap: _handleSignup,
                           ),
 
-                          const SizedBox(height: 18),
+                          const SizedBox(height: 16),
+
+                          // -- Safety note -------------------------------
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(
+                                Icons.verified_user_outlined,
+                                color: _kSubtext,
+                                size: 16,
+                              ),
+                              SizedBox(width: 6),
+                              Text(
+                                'Your data is secure and protected.',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: _kSubtext,
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 24),
 
                           // -- OR divider --------------------------------
                           Row(
@@ -441,56 +462,6 @@ class _SignupPageState extends State<SignupPage>
                                 MaterialPageRoute(builder: (_) => const LoginPage()),
                               );
                             },
-                          ),
-
-                          const SizedBox(height: 20),
-
-                          // -- Safety note -------------------------------
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 13,
-                            ),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF0F5FB),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: _kBorder),
-                            ),
-                            child: Row(
-                              children: const [
-                                Icon(
-                                  Icons.shield_outlined,
-                                  color: _kAccent,
-                                  size: 22,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Your information is safe with us.',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w700,
-                                          color: _kNavy,
-                                        ),
-                                      ),
-                                      SizedBox(height: 2),
-                                      Text(
-                                        'We do not share your details with anyone.',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: _kSubtext,
-                                          height: 1.4,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                         ],
                       ),
@@ -690,27 +661,27 @@ class _InputField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: const TextStyle(
-          color: Color(0xFFB0BFCC),
+          color: Color(0xFF94A3B8), // Lighter hint color
           fontSize: 14.5,
         ),
-        prefixIcon: Icon(icon, color: const Color(0xFF9BB0CC), size: 20),
+        prefixIcon: Icon(icon, color: const Color(0xFF2563EB), size: 20), // Blue icons
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: readOnly ? const Color(0xFFF7FAFD) : _kFill,
+        fillColor: Colors.white, // Always white background
         contentPadding: const EdgeInsets.symmetric(
           vertical: 16,
           horizontal: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _kBorder, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5EDF5), width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: _kBorder, width: 1.5),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5EDF5), width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: _kAccent, width: 1.8),
         ),
       ),
@@ -752,13 +723,11 @@ class _PrimaryButtonState extends State<_PrimaryButton> {
           width: double.infinity,
           height: 54,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1A2E6E), Color(0xFF2563EB)],
-            ),
-            borderRadius: BorderRadius.circular(14),
+            color: const Color(0xFF1D4ED8), // Solid blue instead of gradient
+            borderRadius: BorderRadius.circular(12), // Match input field border radius
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF1A2E6E).withOpacity(0.35),
+                color: const Color(0xFF1D4ED8).withOpacity(0.35),
                 blurRadius: 18,
                 offset: const Offset(0, 6),
               ),

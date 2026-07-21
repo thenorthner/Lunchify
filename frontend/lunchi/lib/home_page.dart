@@ -353,6 +353,7 @@ class _WelcomeCard extends StatelessWidget {
                       const TextSpan(
                         text: "Let's Feast, ",
                         style: TextStyle(
+                          fontFamily: 'Typewriter',
                           fontSize: 22,
                           fontWeight: FontWeight.w600,
                           color: kPrimaryBlue,
@@ -361,6 +362,7 @@ class _WelcomeCard extends StatelessWidget {
                       TextSpan(
                         text: '${employeeName.split(' ').first} \n',
                         style: const TextStyle(
+                          fontFamily: 'Typewriter',
                           fontSize: 26,
                           fontWeight: FontWeight.w800,
                           color: kNavy,
@@ -692,19 +694,19 @@ class _FooterBadge extends StatelessWidget {
                     TextSpan(
                       text: 'Lunchify by ',
                       style: TextStyle(
+                        fontFamily: 'Typewriter',
                         fontSize: 13,
                         color: kSubtext,
                         fontWeight: FontWeight.w500,
-                        fontFamily: 'FKGrotesk',
                       ),
                     ),
                     TextSpan(
                       text: 'SJVN Limited',
                       style: TextStyle(
+                        fontFamily: 'Typewriter',
                         fontSize: 13,
                         color: kAccentBlue,
                         fontWeight: FontWeight.w800,
-                        fontFamily: 'FKGrotesk',
                       ),
                     ),
                   ],

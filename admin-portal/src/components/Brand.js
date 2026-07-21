@@ -23,7 +23,7 @@ export default function Brand({ size = "md", on = "light" }) {
           }}
         >
           SJVN<span style={{ color: "var(--spark)" }}>.</span>
-          <span style={{ fontStyle: "italic", fontWeight: 400, marginLeft: 6, color: "var(--emerald)" }}>
+          <span style={{ fontStyle: "italic", fontWeight: 400, marginLeft: 6, color: ink }}>
             Lunchify
           </span>
         </div>

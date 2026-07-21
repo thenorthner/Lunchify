@@ -44,28 +44,25 @@ flutter:
   uses-material-design: true
 
   assets:
-    - assets/images/8BAE09D1-7DE6-42A7-BD6E-D33305007554.jpeg
-    - assets/images/59E2A272-EC93-46B6-9E2A-23ED771642FD.jpeg
-    - assets/images/B05B1052-49AE-412B-822C-32F833771C6D.jpeg
-    - assets/images/58A3E0E5-B525-4978-9A9E-C2CF92D69F49.jpeg
-    - assets/images/31DB40D3-CC18-4D9E-91A1-66E85584D37D.jpeg
-    - assets/images/95C08E87-A882-4416-84DE-23B0B662DB11.jpeg
-    - assets/images/1CB1CEE7-C785-4583-9A80-318B1A58DE47.jpeg
-    - assets/images/ED5F7C42-0E50-4FEC-A19B-C4602C51FE57.jpeg
-    - assets/images/F5AA3692-4C45-4377-A990-9A981EED30BE.jpeg
-    - assets/images/D2EDA299-4234-4E5D-8207-600A8E7685DA.png
     # Demo branded assets
     - assets/images/lunchify_logo.png
     - assets/images/sjvn_scene.png
     - assets/images/sjvn_bg.png
     - assets/images/food_tray_bg.png
+    - assets/images/splashscreen.png
     - assets/images/floating_icons_1.png
     - assets/images/floating_icons_2.png
     - assets/images/logo.png
     - assets/images/w_logo.png
+    - assets/images/createaccount.png
     - assets/audio/applepay.mp3
 
   fonts:
+    - family: Typewriter
+      fonts:
+        - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter.ttf
+        - asset: assets/fonts/AmericanTypewriter/ufonts.com_american-typewriter-light.ttf
+          weight: 300
     - family: FKGrotesk
       fonts:
         - asset: assets/fonts/FKGrotesk/FKGroteskTrial-Regular.otf

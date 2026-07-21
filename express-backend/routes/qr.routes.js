@@ -319,14 +319,19 @@ router.get('/scanned-history', requireCanteenAdmin, async (req, res) => {
           GROUP BY label 
           UNION ALL
           SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as label, SUM(quantity) as count 
+          FROM food_lunch_orders 
+          WHERE canteen_id = ? AND status = 'delivered'
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as label, SUM(quantity) as count 
           FROM fruit_lunch_orders 
-          WHERE canteen_id = ? 
+          WHERE canteen_id = ?
           GROUP BY label
         ) t
         GROUP BY label
         ORDER BY label DESC 
         LIMIT 30`;
-      params.push(canteenId);
+      params.push(canteenId, canteenId);
     } else if (selectedRange === 'monthly') {
       query = `
         SELECT label, SUM(count) as count FROM (
@@ -336,13 +341,18 @@ router.get('/scanned-history', requireCanteenAdmin, async (req, res) => {
           GROUP BY label 
           UNION ALL
           SELECT DATE_FORMAT(created_at, '%Y-%m') as label, SUM(quantity) as count 
+          FROM food_lunch_orders 
+          WHERE canteen_id = ? AND status = 'delivered'
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y-%m') as label, SUM(quantity) as count 
           FROM fruit_lunch_orders 
-          WHERE canteen_id = ? 
+          WHERE canteen_id = ?
           GROUP BY label
         ) t
         GROUP BY label
         ORDER BY label DESC`;
-      params.push(canteenId);
+      params.push(canteenId, canteenId);
     } else if (selectedRange === 'yearly') {
       query = `
         SELECT label, SUM(count) as count FROM (
@@ -352,13 +362,18 @@ router.get('/scanned-history', requireCanteenAdmin, async (req, res) => {
           GROUP BY label 
           UNION ALL
           SELECT DATE_FORMAT(created_at, '%Y') as label, SUM(quantity) as count 
+          FROM food_lunch_orders 
+          WHERE canteen_id = ? AND status = 'delivered'
+          GROUP BY label 
+          UNION ALL
+          SELECT DATE_FORMAT(created_at, '%Y') as label, SUM(quantity) as count 
           FROM fruit_lunch_orders 
-          WHERE canteen_id = ? 
+          WHERE canteen_id = ?
           GROUP BY label
         ) t
         GROUP BY label
         ORDER BY label DESC`;
-      params.push(canteenId);
+      params.push(canteenId, canteenId);
     } else {
       return res.status(400).json({ error: 'Invalid range parameter. Use daily, monthly, or yearly.' });
     }

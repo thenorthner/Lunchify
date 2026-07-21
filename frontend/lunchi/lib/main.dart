@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'app_theme.dart';
 import 'intro_page.dart';
 import 'login_page.dart';
@@ -13,18 +14,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   bool jailbroken = false;
-  try {
-    jailbroken = await FlutterJailbreakDetection.jailbroken;
-    // In strict enterprise apps, block execution if compromised
-    if (jailbroken) {
-      print('WARNING: Device appears to be jailbroken/rooted!');
-      // Commented out to prevent instant crash during development
-      // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+  if (!kIsWeb) {
+    try {
+      jailbroken = await FlutterJailbreakDetection.jailbroken;
+      // In strict enterprise apps, block execution if compromised
+      if (jailbroken) {
+        print('WARNING: Device appears to be jailbroken/rooted!');
+        // Commented out to prevent instant crash during development
+        // SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      }
+    } catch (e) {
+      print('Jailbreak detection error: $e');
+      // Don't assume jailbroken on exception during debug
+      jailbroken = false; 
     }
-  } catch (e) {
-    print('Jailbreak detection error: $e');
-    // Don't assume jailbroken on exception during debug
-    jailbroken = false; 
   }
 
   await AuthService.init();
@@ -41,7 +44,7 @@ class LunchifyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
 
       theme: ThemeData(
-        fontFamily: 'Roboto',
+        fontFamily: 'Typewriter',
         scaffoldBackgroundColor: kBgColor,
         brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(

@@ -106,7 +106,8 @@ export default function CanteenBillingPanel({ user = {} }) {
         total_coupons_scanned: couponsScanned,
         coupon_price: parseFloat(couponPrice),
         total_amount: totalAmount,
-        place_generated: "Canteen Portal"
+        place_generated: "Canteen Portal",
+        canteen_id: user.canteen_id || 5
       });
 
       if (res.data.success) {

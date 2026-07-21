@@ -19,7 +19,7 @@ exports.requireAuth = async (req, res, next) => {
   }
 
   try {
-    const expectedAudience = (authHeader && authHeader.startsWith("Bearer ")) ? 'lunchify-mobile' : 'lunchify-admin';
+    const expectedAudience = ['lunchify-mobile', 'lunchify-admin'];
 
     const decoded = jwt.verify(token, JWT_SECRET, {
       issuer: 'lunchify-api',

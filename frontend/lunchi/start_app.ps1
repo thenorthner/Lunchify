@@ -22,7 +22,7 @@ if ([string]::IsNullOrWhiteSpace($ip)) {
     Write-Host "Detected PC IP Address: $ip" -ForegroundColor Green
 }
 
-$apiUrl = "http://${ip}:3001"
+$apiUrl = "http://192.168.58.63:3001"
 Write-Host "Backend API URL will be: $apiUrl" -ForegroundColor Green
 Write-Host "Starting Flutter app on connected device..." -ForegroundColor Cyan
 Write-Host "=========================================" -ForegroundColor Cyan

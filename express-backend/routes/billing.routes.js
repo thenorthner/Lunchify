@@ -60,7 +60,7 @@ router.post("/generate-canteen-bill", async (req, res) => {
     const [fruitRows] = await conn.query(
       `SELECT COALESCE(SUM(quantity), 0) AS total_fruit
        FROM fruit_lunch_orders
-       WHERE canteen_id = ? AND status = 'delivered' AND created_at >= ? AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)`,
+       WHERE canteen_id = ? AND created_at >= ? AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)`,
       [targetCanteenId, `${bill_month}-01`, bill_month]
     );
 
@@ -74,12 +74,18 @@ router.post("/generate-canteen-bill", async (req, res) => {
       [targetCanteenId, `${bill_month}-01`, `${bill_month}-01`]
     );
 
+    let price;
     if (rateRows.length === 0) {
-      await conn.rollback();
-      return res.status(400).json({ error: "No approved coupon rate found for this billing period." });
+      if (coupon_price) {
+        price = Number(coupon_price);
+      } else {
+        await conn.rollback();
+        return res.status(400).json({ error: "No approved coupon rate found for this billing period." });
+      }
+    } else {
+      price = Number(rateRows[0].unit_price);
     }
 
-    const price = Number(rateRows[0].unit_price);
     const calculatedTotalAmount = totalCoupons * price;
 
     // Delete existing bill if any to recreate (prevent duplicates for same month & canteen)
@@ -269,7 +275,7 @@ router.get("/fruit-lunch-pdf", async (req, res) => {
     doc.rect(0, 0, 600, 150).fill('#f4f8fc');
     doc.moveTo(0, 150).lineTo(600, 150).strokeColor('#c0d6f2').lineWidth(2).stroke();
     
-    const logoPath = path.resolve(__dirname, '../../admin-portal/public/lunchify_logo.png');
+    const logoPath = path.resolve(__dirname, '../assets/logo.png');
     if (fs.existsSync(logoPath)) {
       doc.image(fs.readFileSync(logoPath), 470, 30, { width: 80 });
     }
@@ -383,7 +389,7 @@ router.get("/:id/pdf", async (req, res) => {
     doc.moveTo(0, 150).lineTo(600, 150).strokeColor('#c0d6f2').lineWidth(2).stroke();
 
     // --- Header Texts ---
-    const logoPath = path.resolve(__dirname, '../../admin-portal/public/lunchify_logo.png');
+    const logoPath = path.resolve(__dirname, '../assets/logo.png');
     if (fs.existsSync(logoPath)) {
       doc.image(fs.readFileSync(logoPath), 470, 30, { width: 80 });
     }
@@ -492,7 +498,7 @@ router.get("/:id/pdf", async (req, res) => {
       FROM food_lunch_orders WHERE canteen_id = ? AND status = 'delivered' AND date LIKE ? GROUP BY DATE(date)
       UNION ALL
       SELECT DATE(date) as date, SUM(quantity) as count, 'fruit' as type
-      FROM fruit_lunch_orders WHERE canteen_id = ? AND status = 'delivered' AND date LIKE ? GROUP BY DATE(date)
+      FROM fruit_lunch_orders WHERE canteen_id = ? AND date LIKE ? GROUP BY DATE(date)
     `, [bill.canteen_id, `${bill.bill_month}%`, bill.canteen_id, `${bill.bill_month}%`, bill.canteen_id, `${bill.bill_month}%`]);
 
     const dailyData = {};

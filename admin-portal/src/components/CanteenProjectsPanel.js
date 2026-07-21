@@ -15,6 +15,7 @@ import ShowChartIcon from '@mui/icons-material/ShowChart';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import QrCodeScannerIcon from '@mui/icons-material/QrCodeScanner';
 
+import CanteenInspector from "./CanteenInspector";
 import "../styles/CanteenProjectsPanel.css";
 
 const Row = ({ icon: Icon, label, value, mono, status }) => (
@@ -43,7 +44,7 @@ const Row = ({ icon: Icon, label, value, mono, status }) => (
   </div>
 );
 
-const ProjectCard = ({ p, onDelete }) => (
+const ProjectCard = ({ p, index, onDelete, onInspect }) => (
   <div className="atelier" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0, borderRadius: '12px' }}>
     {/* Navy header */}
     <div
@@ -82,7 +83,7 @@ const ProjectCard = ({ p, onDelete }) => (
               textTransform: 'uppercase',
             }}
           >
-            Project · {(p.project_id < 10 ? '0' : '') + p.project_id}
+            Project · {(index + 1 < 10 ? '0' : '') + (index + 1)}
           </span>
           {p.project_state && (
             <span className="font-mono-tab" style={{ fontSize: '10px', color: 'var(--on-dark-muted)' }}>
@@ -149,11 +150,13 @@ const ProjectCard = ({ p, onDelete }) => (
       )}
 
       <button
+        onClick={() => onInspect && onInspect(p)}
         style={{
           marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
           padding: '10px 16px', borderRadius: '10px', fontSize: '13px', 
           color: 'var(--ink)', border: '1px solid var(--hairline)', background: 'transparent',
-          cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', fontFamily: 'inherit'
+          cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', fontFamily: 'inherit',
+          width: '100%'
         }}
         onMouseOver={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
         onFocus={(e) => e.currentTarget.style.background = 'var(--paper-2)'}
@@ -174,6 +177,7 @@ export default function CanteenProjectsPanel({ user = {} }) {
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ project_name: "", state: "", canteen_name: "", location: "", open_time: "07:00:00", close_time: "22:00:00" });
   const [q, setQ] = useState("");
+  const [inspecting, setInspecting] = useState(null); // holds the project object being inspected
 
   const fetchMappings = async () => {
     setLoading(true);
@@ -238,6 +242,20 @@ export default function CanteenProjectsPanel({ user = {} }) {
   const list = mappings.filter((p) =>
     !q || p.project_name.toLowerCase().includes(q.toLowerCase()) || (p.project_location || "").toLowerCase().includes(q.toLowerCase())
   );
+
+  if (inspecting) {
+    return (
+      <CanteenInspector
+        canteenId={inspecting.canteen_id}
+        canteenName={inspecting.canteen_name}
+        projectName={inspecting.project_name}
+        projectLocation={inspecting.project_location || inspecting.canteen_location}
+        openTime={inspecting.open_time}
+        closeTime={inspecting.close_time}
+        onBack={() => setInspecting(null)}
+      />
+    );
+  }
 
   return (
     <div className="projects-manager-container fade-in" style={{ fontFamily: '"Geist", "Inter", "Lexend", -apple-system, system-ui, sans-serif' }}>
@@ -333,7 +351,7 @@ export default function CanteenProjectsPanel({ user = {} }) {
         </div>
       ) : (
         <div className="projects-grid">
-          {list.map((p) => <ProjectCard key={p.project_id} p={p} onDelete={handleDeleteProject} />)}
+          {list.map((p, index) => <ProjectCard key={p.project_id} p={p} index={index} onDelete={handleDeleteProject} onInspect={(proj) => setInspecting(proj)} />)}
         </div>
       )}
 

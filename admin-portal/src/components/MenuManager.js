@@ -317,7 +317,7 @@ export default function MenuManager() {
           <CircularProgress style={{ color: "var(--ink)" }} />
         </div>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "24px" }}>
+        <div className="menu-grid">
           <Section icon={RestaurantIcon} no="i." title="Food Menu" kicker="Lunch · Mains">
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
               {foodItems.map((f, i) => (

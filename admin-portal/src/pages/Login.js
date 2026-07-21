@@ -30,6 +30,11 @@ export default function Login() {
 
       if (!res.data.success && !res.data.token) throw new Error();
 
+      localStorage.setItem("adminLoggedIn", "true");
+      localStorage.setItem("adminToken", res.data.token);
+      localStorage.setItem("adminCanteenId", res.data.user?.canteen_id || res.data.user?.id || "");
+      localStorage.setItem("adminRole", res.data.user?.role || "");
+      
       // 🔥 hard redirect — stops refresh loop
       window.location.replace("/dashboard");
     } catch (err) {

@@ -29,6 +29,46 @@ router.get('/', requireHRAdmin, async (req, res) => {
     }
 });
 
+// GET /api/canteens/:id/details
+// Fetch detailed info about a canteen (users, admins, today's menu)
+router.get('/:id/details', async (req, res) => {
+    try {
+        const canteenId = req.params.id;
+        
+        // 1. Canteen Info
+        const [[canteen]] = await db.query('SELECT * FROM canteens WHERE id = ?', [canteenId]);
+        if (!canteen) return res.status(404).json({ message: 'Canteen not found' });
+        
+        // 2. Users in this canteen
+        const [users] = await db.query(
+            'SELECT id, name, phone, department, designation, location, role, is_registered, is_active, created_at FROM users WHERE canteen_id = ? ORDER BY FIELD(role, "it_admin", "hr_admin", "canteen_admin", "scanner", "employee"), name ASC',
+            [canteenId]
+        );
+        
+        // 3. Today's Menu
+        const [[foodMenu]] = await db.query(
+            'SELECT items FROM food_menu WHERE canteen_id = ? AND menu_date = CURDATE()',
+            [canteenId]
+        );
+        const [[fruitMenu]] = await db.query(
+            'SELECT fruits FROM fruit_menu WHERE canteen_id = ? AND menu_date = CURDATE()',
+            [canteenId]
+        );
+        
+        res.json({
+            canteen,
+            users,
+            menu: {
+                food: foodMenu ? foodMenu.items : null,
+                fruit: fruitMenu ? fruitMenu.fruits : null,
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching canteen details:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+});
+
 // DELETE /api/canteens/:id
 // Delete a canteen and map its users to CHQ
 router.delete('/:id', requireITAdmin, async (req, res) => {

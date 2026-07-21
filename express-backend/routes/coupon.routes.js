@@ -174,19 +174,19 @@ router.get('/history/:employeeId', requireAuth, async (req, res) => {
 
     const monthStr = new Date().toLocaleDateString('en-CA').slice(0, 7); // YYYY-MM
     const query = `
-      SELECT 'lunch' as usage_type, quantity as amount, CONCAT(DATE_FORMAT(created_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('Pre-ordered Food: ', name) as description 
+      SELECT 'lunch' as usage_type, quantity as amount, DATE_FORMAT(DATE_ADD(created_at, INTERVAL '5:30' HOUR_MINUTE), '%Y-%m-%dT%T') as used_at, CONCAT('Pre-ordered Food: ', name) as description 
       FROM food_lunch_orders WHERE employee_id = ? AND created_at LIKE ?
       UNION ALL
-      SELECT 'fruit' as usage_type, quantity as amount, CONCAT(DATE_FORMAT(created_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('Pre-ordered Fruit: ', name) as description 
+      SELECT 'fruit' as usage_type, quantity as amount, DATE_FORMAT(DATE_ADD(created_at, INTERVAL '5:30' HOUR_MINUTE), '%Y-%m-%dT%T') as used_at, CONCAT('Pre-ordered Fruit: ', name) as description 
       FROM fruit_lunch_orders WHERE employee_id = ? AND created_at LIKE ?
       UNION ALL
-      SELECT 'sharing' as usage_type, amount, CONCAT(DATE_FORMAT(shared_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('Shared with: ', u.name) as description 
+      SELECT 'sharing' as usage_type, amount, DATE_FORMAT(DATE_ADD(shared_at, INTERVAL '5:30' HOUR_MINUTE), '%Y-%m-%dT%T') as used_at, CONCAT('Shared with: ', u.name) as description 
       FROM coupon_shares c JOIN users u ON c.receiver_id = u.id WHERE sender_id = ? AND shared_at LIKE ?
       UNION ALL
-      SELECT 'received' as usage_type, amount, CONCAT(DATE_FORMAT(shared_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('Received from: ', u.name) as description 
+      SELECT 'received' as usage_type, amount, DATE_FORMAT(DATE_ADD(shared_at, INTERVAL '5:30' HOUR_MINUTE), '%Y-%m-%dT%T') as used_at, CONCAT('Received from: ', u.name) as description 
       FROM coupon_shares c JOIN users u ON c.sender_id = u.id WHERE receiver_id = ? AND shared_at LIKE ?
       UNION ALL
-      SELECT 'lunch' as usage_type, 1 as amount, CONCAT(DATE_FORMAT(qsl.created_at, '%Y-%m-%dT%T'), 'Z') as used_at, CONCAT('QR Scan at Canteen: ', q.type) as description 
+      SELECT 'lunch' as usage_type, 1 as amount, DATE_FORMAT(DATE_ADD(qsl.created_at, INTERVAL '5:30' HOUR_MINUTE), '%Y-%m-%dT%T') as used_at, CONCAT('QR Scan at Canteen: ', q.type) as description 
       FROM qr_scan_logs qsl 
       JOIN qr_codes q ON qsl.qr_id = q.id 
       WHERE q.employee_id = ? AND qsl.created_at LIKE ?

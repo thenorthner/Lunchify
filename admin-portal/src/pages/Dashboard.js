@@ -36,6 +36,10 @@ export default function Dashboard({ user = {} }) {
     try {
       await api.post("/auth/logout");
     } catch(e) {}
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminLoggedIn");
+    localStorage.removeItem("adminRole");
+    localStorage.removeItem("adminCanteenId");
     window.location.href = "/";
   };
 

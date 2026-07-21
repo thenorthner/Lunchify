@@ -440,20 +440,31 @@ router.post('/admin/login', loginLimiter, async (req, res) => {
 
     res.cookie('admin_session', token, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 8 * 60 * 60 * 1000, // 8 hours
     });
 
+    let allowedTabs = [];
+    if (user.role === 'canteen_admin') {
+      allowedTabs = ["menu", "reports", "canteen_billing", "orders", "scan_history"];
+    } else if (user.role === 'hr_admin') {
+      allowedTabs = ["billing", "transfers", "item_feedbacks"];
+    } else if (user.role === 'it_admin') {
+      allowedTabs = ["canteen_projects", "feedbacks", "item_feedbacks", "admin_accounts"];
+    }
+
     res.json({
       success: true,
+      token,
       user: {
         id: user.id,
         name: user.name,
         role: user.role,
         project_id: user.project_id,
         canteen_id: user.canteen_id,
-        canteen_name: user.canteen_name
+        canteen_name: user.canteen_name,
+        allowedTabs
       },
     });
   } catch (err) {

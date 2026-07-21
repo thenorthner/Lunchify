@@ -6,7 +6,7 @@ import BuildingIcon from '@mui/icons-material/Domain';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SyncIcon from '@mui/icons-material/Sync';
 import LocalMallOutlinedIcon from '@mui/icons-material/LocalMallOutlined';
-import AppleIcon from '@mui/icons-material/Apple';
+import SpaIcon from '@mui/icons-material/Spa';
 import LocalCafeOutlinedIcon from '@mui/icons-material/LocalCafeOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
@@ -16,7 +16,7 @@ import "../styles/OrdersManager.css";
 
 const SUBTABS = [
   { k: "food",   label: "Food Lunch",       icon: LocalMallOutlinedIcon },
-  { k: "fruit",  label: "Fruit Lunch",      icon: AppleIcon },
+  { k: "fruit",  label: "Fruit Lunch",      icon: SpaIcon },
   { k: "snacks", label: "Morning · Evening", icon: LocalCafeOutlinedIcon },
 ];
 
@@ -186,41 +186,6 @@ export default function OrdersManager({ user = {} }) {
           })}
         </div>
 
-        {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-          {[
-            { label: "Pending", value: counts.pending, tone: "amber" },
-            { label: "Accepted", value: counts.accepted, tone: "emerald" },
-            { label: "Delivered", value: counts.delivered, tone: "ink" },
-          ].map((s, i) => (
-            <div key={i} className="atelier" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px' }}>
-              <div>
-                <div className="eyebrow">{s.label}</div>
-                <div className="font-display tnum" style={{ fontSize: '36px', fontWeight: 400, marginTop: '4px' }}>{s.value}</div>
-              </div>
-              <div
-                style={{
-                  height: '48px',
-                  width: '48px',
-                  borderRadius: '50%',
-                  display: 'grid',
-                  placeItems: 'center',
-                  background:
-                    s.tone === "emerald" ? "var(--emerald-soft)" :
-                    s.tone === "amber"   ? "#fbeacb" :
-                                           "var(--navy-2)",
-                  color:
-                    s.tone === "emerald" ? "var(--emerald)" :
-                    s.tone === "amber"   ? "#8a6018" :
-                                           "var(--on-dark-accent)",
-                  border: '1px solid var(--hairline)',
-                }}
-              >
-                <LocalMallOutlinedIcon style={{ fontSize: 16 }} />
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* Table */}
         <div className="atelier" style={{ overflow: 'hidden' }}>
