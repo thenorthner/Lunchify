@@ -166,10 +166,12 @@ CREATE TABLE `menu` (
 
 CREATE TABLE `monthly_bills` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `employee_id` varchar(50) NOT NULL,
+  `employee_id` varchar(50) DEFAULT NULL,
+  `canteen_id` int(11) DEFAULT NULL,
   `project_id` int(11) NOT NULL,
   `bill_month` varchar(7) NOT NULL,
   `total_coupons_used` int(11) NOT NULL DEFAULT 0,
+  `coupon_price` decimal(10,2) NOT NULL DEFAULT 0.00,
   `total_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
   `status` enum('draft','submitted','approved','rejected') DEFAULT 'submitted',
   `generated_at` timestamp NOT NULL DEFAULT current_timestamp(),

@@ -276,17 +276,17 @@ class _OTPVerificationPageState extends State<OTPVerificationPage> {
                           children: [
                             const Text(
                               'Secure. Simple. Smart.',
-                              style: TextStyle(color: _C.dark, fontWeight: FontWeight.w800, fontSize: 14),
+                              style: TextStyle(color: _C.dark, fontWeight: FontWeight.w800, fontSize: 16),
                             ),
                             const SizedBox(height: 2),
                             RichText(
                               text: TextSpan(
-                                style: TextStyle(color: _C.grey.withOpacity(0.95), fontSize: 12.5),
+                                style: TextStyle(fontFamily: 'Typewriter', color: _C.grey.withOpacity(0.95), fontSize: 12.5),
                                 children: const [
                                   TextSpan(text: 'Lunchify by '),
                                   TextSpan(
                                     text: 'SJVN',
-                                    style: TextStyle(color: _C.primary, fontWeight: FontWeight.w800),
+                                    style: TextStyle(fontFamily: 'Typewriter', color: _C.primary, fontWeight: FontWeight.w800),
                                   ),
                                 ],
                               ),
@@ -477,7 +477,7 @@ class _OtpBox extends StatelessWidget {
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
-        style: const TextStyle(color: _C.dark, fontSize: 22, fontWeight: FontWeight.w800),
+        style: const TextStyle(color: _C.dark, fontSize: 24, fontWeight: FontWeight.w800),
         decoration: InputDecoration(
           counterText: '',
           contentPadding: EdgeInsets.zero,

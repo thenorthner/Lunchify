@@ -223,7 +223,7 @@ class _TodayMenuPageState extends State<TodayMenuPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Edit $title", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kNavy)),
+              Text("Edit $title", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: kNavy)),
               const SizedBox(height: 10),
 
               if (!fromSnacks)
@@ -678,7 +678,7 @@ class _AnimatedMenuCardState extends State<_AnimatedMenuCard>
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(widget.category.todayLabel, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: kNavy)),
+                                        Text(widget.category.todayLabel, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: kNavy)),
                                         Text(widget.todayItemsStr, style: const TextStyle(fontSize: 12, color: kSubtext)),
                                       ],
                                     ),

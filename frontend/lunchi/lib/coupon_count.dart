@@ -97,15 +97,15 @@ class _CouponStatusPageState extends State<CouponStatusPage> {
                                       TextSpan(
                                         text: 'Hello, $name ',
                                         style: const TextStyle(
+                                          fontFamily: 'Typewriter',
                                           fontSize: 24,
                                           fontWeight: FontWeight.w800,
                                           color: kNavy,
-                                          fontFamily: 'FKGrotesk',
                                         ),
                                       ),
                                       const TextSpan(
                                         text: '👋',
-                                        style: TextStyle(fontSize: 22),
+                                        style: TextStyle(fontSize: 22, fontFamily: 'Typewriter'),
                                       ),
                                     ],
                                   ),
@@ -128,7 +128,7 @@ class _CouponStatusPageState extends State<CouponStatusPage> {
                                       child: _CouponCard(
                                         icon: Icons.remove_circle_outline_rounded,
                                         count: couponsUsed.toString(),
-                                        label: 'Coupons Used',
+                                        label: 'Used & Shared',
                                         description: 'Click to view coupon usage history.',
                                         onTap: () {
                                           Navigator.push(

@@ -286,19 +286,19 @@ class _WelcomeCard extends StatelessWidget {
                       const TextSpan(
                         text: 'Hi, ',
                         style: TextStyle(
+                          fontFamily: 'Typewriter',
                           fontSize: 22,
                           fontWeight: FontWeight.w700,
                           color: _kNavy,
-                          fontFamily: 'FKGrotesk',
                         ),
                       ),
                       TextSpan(
                         text: adminName,
                         style: const TextStyle(
+                          fontFamily: 'Typewriter',
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           color: _kAccent,
-                          fontFamily: 'FKGrotesk',
                         ),
                       ),
                     ],

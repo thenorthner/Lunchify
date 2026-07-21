@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import PageHeader from "./PageHeader";
 import { CircularProgress } from "@mui/material";
@@ -178,6 +179,8 @@ export default function CanteenProjectsPanel({ user = {} }) {
   const [formData, setFormData] = useState({ project_name: "", state: "", canteen_name: "", location: "", open_time: "07:00:00", close_time: "22:00:00" });
   const [q, setQ] = useState("");
   const [inspecting, setInspecting] = useState(null); // holds the project object being inspected
+
+  const navigate = useNavigate();
 
   const fetchMappings = async () => {
     setLoading(true);

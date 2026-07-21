@@ -24,10 +24,10 @@ class _IntroPageState extends State<IntroPage>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+    _fadeAnimation = Tween<double>(begin: 1, end: 1).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeIn),
     );
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
     _floatAnimation = Tween<double>(begin: 0, end: 1).animate(
@@ -95,7 +95,7 @@ class _IntroPageState extends State<IntroPage>
             child: _buildCloud(opacity: 0.4, scale: 1.0),
           ),
 
-          // Main content in FadeTransition
+          // Main content
           SafeArea(
             child: FadeTransition(
               opacity: _fadeAnimation,

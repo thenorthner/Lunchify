@@ -47,6 +47,7 @@ class TopBar extends StatelessWidget {
               child: Image.asset(
                 backgroundImage,
                 fit: BoxFit.cover,
+                alignment: Alignment.bottomRight,
                 errorBuilder: (_, __, ___) => Container(
                   color: kLightBlue,
                 ),

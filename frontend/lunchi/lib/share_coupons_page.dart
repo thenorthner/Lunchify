@@ -6,6 +6,7 @@ import 'auth_service.dart';
 import 'widgets/top_bar.dart';
 import 'widgets/self_share_dialog.dart';
 import 'widgets/confirm_share_dialog.dart';
+import 'widgets/success_share_dialog.dart';
 
 class ShareCouponsPage extends StatefulWidget {
   const ShareCouponsPage({Key? key}) : super(key: key);
@@ -91,12 +92,15 @@ class _ShareCouponsPageState extends State<ShareCouponsPage> {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        _showSnackBar(
-          data['message'] ?? "Coupons shared successfully!",
-          Colors.green,
-        );
         _recipientController.clear();
         _amountController.clear();
+        if (mounted) {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => const SuccessShareDialog(),
+          );
+        }
       } else {
         _showSnackBar(
           data['message'] ?? "Failed to share coupons.",

@@ -4,6 +4,8 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import api from "./services/api";
 
+import CanteenInspectPage from "./pages/CanteenInspectPage";
+
 function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,6 +54,10 @@ function App() {
         <Route
           path="/dashboard"
           element={valid ? <Dashboard user={session.user} /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/canteen/:id"
+          element={valid ? <CanteenInspectPage user={session.user} /> : <Navigate to="/" replace />}
         />
       </Routes>
     </BrowserRouter>

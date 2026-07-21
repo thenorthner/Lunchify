@@ -114,8 +114,10 @@ class _SignupPageState extends State<SignupPage>
               icon: Icons.shield,
               onPressed: () {
                 Navigator.pop(context); // Close dialog
-                // Optional: navigate to login, but they are already on a screen with a login button, or pop to login.
-                // Assuming they might want to just close the dialog.
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginPage()),
+                );
               },
             ),
           );
@@ -183,8 +185,24 @@ class _SignupPageState extends State<SignupPage>
       return;
     }
 
-    if (password.length < 6) {
-      _show("Password must be at least 6 characters long");
+    if (password.length < 8) {
+      _show("Password must be at least 8 characters long");
+      return;
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(password)) {
+      _show("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!RegExp(r'[a-z]').hasMatch(password)) {
+      _show("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!RegExp(r'[0-9]').hasMatch(password)) {
+      _show("Password must contain at least one digit");
+      return;
+    }
+    if (!RegExp(r'[!@#\$%\^&\*()\_\+\-=\[\]{};' "'" r':"\\|,.<>\/?]').hasMatch(password)) {
+      _show("Password must contain at least one special character");
       return;
     }
 

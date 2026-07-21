@@ -246,7 +246,7 @@ class _UpdateFullMenuPageState extends State<UpdateFullMenuPage> with SingleTick
               labelColor: _kNavy,
               unselectedLabelColor: _kSubtext,
               indicatorColor: _kAccent,
-              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
               tabs: const [
                 Tab(text: "Specific Date"),
                 Tab(text: "Weekly Template"),
@@ -408,7 +408,7 @@ class _MenuSection extends StatelessWidget {
           Row(
             children: [
               Icon(icon, color: _kAccent, size: 24), const SizedBox(width: 12),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kNavy)),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _kNavy)),
             ],
           ),
           if (items.isNotEmpty) ...[
@@ -449,7 +449,7 @@ class _SnackSection extends StatelessWidget {
           Row(
             children: [
               Icon(iconData, color: _kAccent, size: 24), const SizedBox(width: 12),
-              Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _kNavy)),
+              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: _kNavy)),
             ],
           ),
           const SizedBox(height: 10),

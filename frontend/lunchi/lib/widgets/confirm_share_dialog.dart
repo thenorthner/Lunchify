@@ -135,16 +135,17 @@ class ConfirmShareDialog extends StatelessWidget {
                     textAlign: TextAlign.center,
                     text: TextSpan(
                       style: const TextStyle(
+                        fontFamily: 'Typewriter',
                         fontSize: 15,
                         color: Color(0xFF475569),
                         height: 1.5,
-                        fontFamily: 'Inter', // Assuming default font
                       ),
                       children: [
                         const TextSpan(text: "Really wanna give shiny coupons\nto "),
                         TextSpan(
                           text: recipientName,
                           style: const TextStyle(
+                            fontFamily: 'Typewriter',
                             color: Color(0xFF2563EB),
                             fontWeight: FontWeight.w600,
                           ),
@@ -199,7 +200,7 @@ class ConfirmShareDialog extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        flex: 1,
+                        flex: 3,
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context, false),
                           style: OutlinedButton.styleFrom(
@@ -221,7 +222,7 @@ class ConfirmShareDialog extends StatelessWidget {
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        flex: 1,
+                        flex: 4,
                         child: Container(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
@@ -241,19 +242,22 @@ class ConfirmShareDialog extends StatelessWidget {
                           child: ElevatedButton(
                             onPressed: () => Navigator.pop(context, true),
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 2),
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
-                              "Bless The Homie ✨",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                "Bless The Homie ✨",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                               ),
                             ),
                           ),

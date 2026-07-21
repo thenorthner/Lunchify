@@ -1,4 +1,4 @@
-const BASE = "http://localhost:3000/api/menu";
+const BASE = "/api/menu";
 
 /* FOOD */
 export const addFoodMenu = (data) =>

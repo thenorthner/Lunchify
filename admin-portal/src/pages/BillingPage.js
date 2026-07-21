@@ -17,7 +17,7 @@ export default function BillingPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/billing/range?from=${from}&to=${to}`
+        `/api/billing/range?from=${from}&to=${to}`
       );
 
       const data = await res.json();
